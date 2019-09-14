@@ -1,0 +1,166 @@
+#canvas {
+  position: fixed;
+}
+
+h1, h2 {
+  font-family: Lato;
+}
+
+.inline {
+  display: inline;
+}
+
+.flexhoriz {
+  display: flex;
+  flex-direction: row;
+  flex-flow: wrap;
+  border-style: solid;
+  margin: 5px 0px 0px 0px;
+  padding: 1px;
+}
+
+.flexvert {
+  display: flex;
+  flex-direction: column;
+  border-style: solid;
+  border-width: 1px;
+  margin: 1px;
+  padding: 5px;
+}
+
+.border1 {
+  border-style: solid;
+  border-width: 1px;
+  padding: 0px 3px 2px 3px;
+}
+
+.calculations {
+  display: flex;
+  flex-direction: column;
+  /* border-style: solid;
+  border-width: 1px; */
+  margin: 2px;
+  padding: 5px;
+}
+
+.gridhoriz2 {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-gap: 5px;
+  margin: 4px 0px 0px 5px;
+}
+
+.scroll {
+  overflow-y: scroll;
+}
+
+.inputlbl {
+  text-align: right;
+}
+
+.col {
+  flex: 1;
+}
+
+.title {
+  text-align: center;
+  color: cyan;
+  background-color: teal;
+  font-weight: bold;
+  margin: 0px 0px 5px 0px;
+}
+
+.calctitle {
+  text-align: center;
+  color: cyan;
+  background-color: teal;
+  text-decoration-line: underline;
+  margin: 0px 0px 0px 0px;
+}
+
+.description {
+  text-align: center;
+  color: rgb(178, 224, 218);
+  background-color: teal;
+  text-decoration-line: none;
+  font-size: 0.8em;
+  font-weight: normal;
+  margin: 0px 2px 5px 2px;
+}
+
+.deletebutton {
+  color: lightblue;
+  background-color: transparent;
+  margin: 0px 0px 5px 5px;
+  border-width: 1px;
+}
+
+.labelfield {
+  margin: 0px 0px 2px 0px;
+}
+
+.negatelabel {
+  border-style: solid;
+  border-width: 1px;
+  margin: 0px 2px 0px 2px;
+  padding: 0px 2px 0px 0px;
+  font-weight: bolder;
+}
+
+.maincheck {
+  border-style: solid;
+  border-width: 2px;
+  /* margin: 0px 2px 0px 2px;
+  padding: 0px 2px 0px 0px; */
+}
+
+.nameinput {
+  width: 80px;
+}
+
+.number {
+  width: 50px;
+}
+
+.textvalue {
+  width: 50px;
+}
+
+.range {
+  width: 80px;
+}
+
+
+  #container {
+    display: inline;
+  }
+
+  .expandbutton {
+    font-size: 10px;
+    padding: 0px 0px 0px 0px;
+    vertical-align: middle;
+  }
+
+  .background {
+    display: none;
+    position: fixed;
+    z-index: 2;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  .dialog {
+    display: none;
+    z-index: 1;
+    overflow: auto;
+    background-color: rgb(255, 255, 255);
+    border-style: solid;
+    border: 2px;
+    border-width: 2;
+    border-color: rgb(23, 83, 122);
+    padding: 10px;
+  }

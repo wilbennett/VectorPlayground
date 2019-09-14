@@ -1,0 +1,25 @@
+<style>
+  :host {
+    display: inline-block;
+  }
+
+  :host([hidden]) {
+    display: none;
+  }
+
+  .inline {
+    display: inline;
+  }
+
+  .expandbtn {
+    font-size: 10px;
+    padding: 0px 0px 0px 0px;
+    vertical-align: middle;
+  }
+</style>
+<div class="inline">
+	<filtered-select id="value"></filtered-select>
+  <filtered-select id="transform"></filtered-select>
+  <filtered-select id="modifier"></filtered-select>
+  <input id="expandbtn" class="expandbtn" type="button" value=">>"/>
+</div>

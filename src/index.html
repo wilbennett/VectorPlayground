@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Vector Playground</title>
+
+  <link rel="stylesheet" href="./style.css">
+  <script src="./start.ts"></script>
+</head>
+
+<body>
+
+  <div id="main">
+    <div id="test">
+    </div>
+    <input id="reset" type="button" value="Reset" />
+    <label>Scale: <input id="tickscale" class="range" type="range" min="10" max="100" step="1" value="20" /></label>
+    <label>Angle: <input id="tickangle" class="range" type="range" min="0" max="360" step="1" value="0" /></label>
+    <input id="gridcolor" type="color" value="#555555" />
+    <input id="gridbackground" type="color" value="#aaaaaa" />
+    <label>Pause: <input id="pause" type="checkbox" /></label>
+    <label>Debug Log: <input id="debuglog" type="checkbox" /></label>
+    <label>Debug Detail: <input id="debugdetail" class="maincheck" type="checkbox" /></label>
+    <label>Debug Events: <input id="debugevents" class="maincheck" type="checkbox" /></label>
+    <label>Debug Vectors: <input id="debugvectors" class="maincheck" type="checkbox" /></label>
+    <label>Debug Texts: <input id="debugtexts" class="maincheck" type="checkbox" /></label>
+  </div>
+  <div class="flexhoriz">
+    <div>
+      <canvas id="backcanvas" />
+    </div>
+
+    <div id="operationscontainer">
+      <div class="gridhoriz2">
+        <div>
+          <div class="title">
+            <span>Operations</span>
+          </div>
+          <filtered-select id="operations" size="5"></filtered-select>
+          <div>
+            <input id="operationadd" type="button" value="Add Calculation" />
+          </div>
+        </div>
+        <div id="calculationscontainer" class="scroll">
+          <div class="title">
+            <span>Calculations</span>
+          </div>
+          <div id="calculations" class="calculations">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gridhoriz2 border1">
+      <div>
+        <div class="title">
+          <span>Vectors</span>
+        </div>
+        <filtered-select id="vectors" size="9"></filtered-select>
+        <div>
+          <input id="vectorname" class="nameinput" type="text" />
+          <div><input id="vectoradd" type="button" value="Add" /></div>
+          <div><input id="vectordelete" type="button" value="Delete" /></div>
+        </div>
+      </div>
+      <div>
+        <div class="title">
+          <span>Properties</span>
+        </div>
+        <div class="gridhoriz2">
+          <label class="inputlbl">X:</label>
+          <value-select id="vectorx" type="number"></value-select>
+
+          <label class="inputlbl">Y:</label>
+          <value-select id="vectory" type="number"></value-select>
+
+          <label class="inputlbl">W:</label>
+          <value-select id="vectorw" type="number"></value-select>
+
+          <label class="inputlbl">Value:</label>
+          <value-select id="vectorvalue"></value-select>
+
+          <label class="inputlbl">Angle:</label>
+          <value-select id="vectorangle" type="range" min="0" max="360" step="1"></value-select>
+
+          <label class="inputlbl">Mag:</label>
+          <value-select id="vectormag" type="range" min="0" max="100" step="1"></value-select>
+
+          <label class="inputlbl">Color:</label>
+          <value-select id="vectorcolor" type="color"></value-select>
+
+          <label class="inputlbl">Width:</label>
+          <value-select id="vectorwidth" type="range" min="1" max="20" step="1"></value-select>
+
+          <label class="inputlbl">Opacity:</label>
+          <value-select id="vectoropacity" type="range" min="0.0" max="1" step="0.1"></value-select>
+
+          <label class="inputlbl">Origin:</label>
+          <value-select id="vectororigin"></value-select>
+
+          <label class="inputlbl">End:</label>
+          <value-select id="vectorend"></value-select>
+
+          <label for="vectorrotate" class="inputlbl">Rotate:</label>
+          <div class="inline">
+            <input id="vectorrotate" name="vectorrotate" type="checkbox" />
+            <value-select id="vectorrotstep" type="number" min="-90" max="90" step="0.1"></value-select>
+          </div>
+
+          <label for="vectorvisible" class="inputlbl">Visible:</label>
+          <input id="vectorvisible" name="vectorvisible" type="checkbox" />
+
+        </div>
+      </div>
+    </div>
+
+    <div class="gridhoriz2 border1">
+      <div>
+        <div class="title">
+          <span>Texts</span>
+        </div>
+        <filtered-select id="texts" size="9"></filtered-select>
+        <div>
+          <input id="textname" class="nameinput" type="text" />
+          <div><input id="textadd" type="button" value="Add" /></div>
+          <div><input id="textdelete" type="button" value="Delete" /></div>
+        </div>
+      </div>
+      <div>
+        <div class="title">
+          <span>Properties</span>
+        </div>
+        <div class="gridhoriz2">
+          <label class="inputlbl">Text:</label>
+          <value-select id="textvalue"></value-select>
+
+          <label for="textround" class="inputlbl">Round:</label>
+          <div class="inline">
+            <input id="textround" name="textround" type="checkbox">&nbsp;&nbsp;</input>
+            <input id="textroundto" class="number" type="number" min="0" max="20" step="1" />
+          </div>
+
+          <label class="inputlbl">Size:</label>
+          <value-select id="textsize" type="number"></value-select>
+
+          <label class="inputlbl">Angle:</label>
+          <value-select id="textangle" type="range" min="0" max="360" step="1"></value-select>
+
+          <label class="inputlbl">Color:</label>
+          <value-select id="textcolor" type="color" min="0" max="360" step="1"></value-select>
+
+          <label class="inputlbl">Opacity:</label>
+          <value-select id="textopacity" type="range" min="0.0" max="1" step="0.1"></value-select>
+
+          <label class="inputlbl">Position:</label>
+          <value-select id="textposition"></value-select>
+
+          <label class="inputlbl">Align:</label>
+          <select id="textalign">
+            <option>start</option>
+            <option>center</option>
+            <option>left</option>
+            <option>right</option>
+            <option>end</option>
+          </select>
+
+          <label for="textshow" class="inputlbl">Visible:</label>
+          <input id="textshow" name="textshow" type="checkbox">
+        </div>
+      </div>
+    </div>
+    <canvas id="canvas" />
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,112 @@
+<style>
+	:host {
+		display: inline-block;
+	}
+
+	:host([hidden]) {
+		display: none;
+	}
+
+	.inline {
+		display: inline;
+	}
+
+	.background {
+		display: none;
+		position: fixed;
+		z-index: 1;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
+		overflow: auto;
+		background-color: rgba(0, 0, 0, 0.4);
+	}
+
+	.dialog {
+		display: block;
+		position: fixed;
+		overflow: auto;
+		background-color: rgb(255, 255, 255);
+		border-style: solid;
+		border-width: 2px;
+		border-color: rgb(23, 83, 122);
+		padding: 10px;
+	}
+
+	.dialogcontent {
+		text-align: center;
+	}
+
+	.modebtn {
+		font-size: 10px;
+		padding: 0px 0px 0px 0px;
+		vertical-align: middle;
+	}
+
+	.selectmode {
+		width: 100%;
+	}
+
+	.selectmode:focus {
+		outline: none;
+	}
+
+	.editbtngrp {
+		display: flex;
+		justify-content: center;
+		margin: 10px 0px 0px 0px;
+	}
+
+	.editbtn {
+		width: 60px;
+		/* margin: 0px 0px 0px 8px; */
+	}
+
+	.cancelbtn {
+		margin: 0px 0px 0px 8px;
+	}
+
+	#constant,
+	#text,
+	#property,
+	#calculation {
+		display: none;
+	}
+
+	.output {
+		width: 80px;
+	}
+
+	.output[type="number"], .output[type="text"], .output[type="color"] {
+		width: 50px;
+	}
+
+  .expandbtn {
+    font-size: 10px;
+    padding: 0px 0px 0px 0px;
+    vertical-align: middle;
+  }
+</style>
+<div>
+	<input id="output" class="output"/>
+  <transform-value id="text"></transform-value>
+  <transform-value id="constant"></transform-value>
+  <transform-value id="textobject"></transform-value>
+  <transform-value id="vector"></transform-value>
+  <transform-value id="calculation"></transform-value>
+  <transform-value id="transform"></transform-value>
+  <input id="expandbtn" class="expandbtn" type="button" value=">>"/>
+  <input id="modebtn" class="modebtn" type="button" value="**"/>
+  <div id="background" class="background">
+    <div id="dialog" class="dialog">
+      <div class="dialogcontent">
+        <select id="selectmode" class="selectmode"></select>
+      </div>
+      <div class="editbtngrp">
+        <input id="okbtn" class="okbtn editbtn" type="button" value="Ok"/>
+        <input id="cancelbtn" class="cancelbtn editbtn" type="button" value="Cancel"/>
+      </div>
+    </div>
+  </div>
+</div>

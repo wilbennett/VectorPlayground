@@ -1,0 +1,17 @@
+{
+  "name": "vector-playground",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "@webcomponents/custom-elements": "^1.2.4",
+    "reflect-metadata": "0.1.13"
+  },
+  "devDependencies": {
+    "typescript": "^3.5.2"
+  },
+  "comment": "/* browserslist allows async/await and promises to work with parcel without using babel. */",
+  "comment-": "/* https://github.com/parcel-bundler/parcel/issues/871 */",
+  "browserslist": [
+    "since 2017-06"
+  ]
+}
