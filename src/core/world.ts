@@ -6,6 +6,8 @@ import {
   DrawObject,
   FilteredList,
   IFilteredList,
+  ListEventArgs,
+  ListSelectedItemChangedArgs,
   TextObject,
   UpdatableObject,
   VectorObject,
@@ -231,11 +233,15 @@ function removeObjects(...objs: BaseObject[]) {
 // @ts-ignore - unused param.
 function handleObjectChanged(e: ChangeArgs) { changed = true; }
 
-function handleSelectedVectorChanged() {
+function handleSelectedVectorChanged(e: ListEventArgs) {
+  if (!(e instanceof ListSelectedItemChangedArgs)) return;
+
   console.log("******** SelectedVectorChanged");
 }
 
-function handleSelectedTextObjectChanged() {
+function handleSelectedTextObjectChanged(e: ListEventArgs) {
+  if (!(e instanceof ListSelectedItemChangedArgs)) return;
+
   console.log("******** SelectedTextObjectChanged");
 }
 
@@ -323,8 +329,8 @@ function initializeEventHandlers() {
   ui.elDebugVectors.addEventListener("input", () => me.debugVectors = ui.elDebugVectors.checked);
   ui.elDebugTexts.addEventListener("input", () => me.debugTexts = ui.elDebugTexts.checked);
 
-  vectors.onSelectedItemChanged(handleSelectedVectorChanged);
-  textObjects.onSelectedItemChanged(handleSelectedTextObjectChanged);
+  vectors.onListChanged(handleSelectedVectorChanged);
+  textObjects.onListChanged(handleSelectedTextObjectChanged);
   console.log(`world: added event listeners`);
 }
 

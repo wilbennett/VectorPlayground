@@ -6,6 +6,7 @@ import {
   IDisposable,
   IFilteredList,
   ListClearedArgs,
+  ListEventArgs,
   ListItemAddedArgs,
   ListItemChangedArgs,
   ListItemRemovedArgs,
@@ -30,11 +31,7 @@ elTemplate.innerHTML = template;
 export class FilteredSelectElement extends ComponentBase {
   private _options: HTMLOptionElement[] = [];
   private _listSubscriptions: IDisposable[] = [];
-  private _handleListClearedBound = this.handleListCleared.bind(this);
-  private _handleListItemAddedBound = this.handleListItemAdded.bind(this);
-  private _handleListItemRemovedBound = this.handleListItemRemoved.bind(this);
-  private _handleListItemChangedBound = this.handleListItemChanged.bind(this);
-  private _handleListSelectedItemChangedBound = this.handleListSelectedItemChanged.bind(this);
+  private _handleListChangedBound = this.handleListChanged.bind(this);
 
   constructor() {
     super();
@@ -175,18 +172,20 @@ export class FilteredSelectElement extends ComponentBase {
     this.selectedIndex = e.newIndex;
   }
 
+  protected handleListChanged(e: ListEventArgs) {
+    if (e instanceof ListClearedArgs) return this.handleListCleared(e);
+    if (e instanceof ListItemAddedArgs) return this.handleListItemAdded(e);
+    if (e instanceof ListItemRemovedArgs) return this.handleListItemRemoved(e);
+    if (e instanceof ListItemChangedArgs) return this.handleListItemChanged(e);
+    if (e instanceof ListSelectedItemChangedArgs) return this.handleListSelectedItemChanged(e);
+  }
+
   protected subscribeToList() {
     this.disposeListSubscriptions();
 
     if (!this._filteredList) return;
 
-    this._listSubscriptions.push(
-      this._filteredList.onCleared(this._handleListClearedBound),
-      this._filteredList.onItemAdded(this._handleListItemAddedBound),
-      this._filteredList.onItemRemoved(this._handleListItemRemovedBound),
-      this._filteredList.onItemChanged(this._handleListItemChangedBound),
-      this._filteredList.onSelectedItemChanged(this._handleListSelectedItemChangedBound)
-    );
+    this._listSubscriptions.push(this._filteredList.onListChanged(this._handleListChangedBound));
   }
 
   protected disposeListSubscriptions() {

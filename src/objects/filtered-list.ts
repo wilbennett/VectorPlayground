@@ -3,10 +3,20 @@ import { CaptionMode, Category, ICaptioned, IDisposable, SelectFilter } from '..
 import { EventArgs, StringChangeArgs } from '../event-args';
 import { Listener, TypedEvent } from '../events';
 
+export enum ListChangeKind {
+  cleared,
+  itemAdded,
+  itemRemoved,
+  itemChanged,
+  selectionChanged
+}
+
 export class ListEventArgs extends EventArgs {
+  get listChangeKind() { return ListChangeKind.cleared; }
 }
 
 export class ListClearedArgs extends ListEventArgs {
+  get listChangeKind() { return ListChangeKind.cleared; }
   setValues() { this.sender = undefined; }
 }
 
@@ -28,9 +38,17 @@ export class ListItemArgs extends ListEventArgs {
   }
 }
 
-export class ListItemAddedArgs extends ListItemArgs { }
-export class ListItemRemovedArgs extends ListItemArgs { }
-export class ListItemChangedArgs extends ListItemArgs { }
+export class ListItemAddedArgs extends ListItemArgs {
+  get listChangeKind() { return ListChangeKind.itemAdded; }
+}
+
+export class ListItemRemovedArgs extends ListItemArgs {
+  get listChangeKind() { return ListChangeKind.itemRemoved; }
+}
+
+export class ListItemChangedArgs extends ListItemArgs {
+  get listChangeKind() { return ListChangeKind.itemChanged; }
+}
 
 export class ListSelectedItemChangedArgs extends ListEventArgs {
 
@@ -43,6 +61,7 @@ export class ListSelectedItemChangedArgs extends ListEventArgs {
 
   oldIndex: number;
   newIndex: number;
+  get listChangeKind() { return ListChangeKind.selectionChanged; }
 
   setValues(oldIndex: number, newIndex: number) {
     this.oldIndex = oldIndex;
@@ -63,24 +82,12 @@ export interface IFilteredList {
   add(obj: BaseObject): boolean;
   remove(obj: BaseObject): boolean;
 
-  onCleared(listener: Listener<ListClearedArgs>): IDisposable;
-  offCleared(listener: Listener<ListClearedArgs>): void;
-  onItemAdded(listener: Listener<ListItemAddedArgs>): IDisposable;
-  offItemAdded(listener: Listener<ListItemAddedArgs>): void;
-  onItemRemoved(listener: Listener<ListItemRemovedArgs>): IDisposable;
-  offItemRemoved(listener: Listener<ListItemRemovedArgs>): void;
-  onItemChanged(listener: Listener<ListItemChangedArgs>): IDisposable;
-  offItemChanged(listener: Listener<ListItemChangedArgs>): void;
-  onSelectedItemChanged(listener: Listener<ListSelectedItemChangedArgs>): IDisposable;
-  offSelectedItemChanged(listener: Listener<ListSelectedItemChangedArgs>): void;
+  onListChanged(listener: Listener<ListEventArgs>): IDisposable;
+  offListChanged(listener: Listener<ListEventArgs>): void;
 }
 
 export class FilteredList<T extends BaseObject> extends BaseObject implements IFilteredList {
-  private _clearedEmitter = new TypedEvent<ListClearedArgs>(this);
-  private _addedEmitter = new TypedEvent<ListItemAddedArgs>(this);
-  private _removedEmitter = new TypedEvent<ListItemRemovedArgs>(this);
-  private _changedEmitter = new TypedEvent<ListItemChangedArgs>(this);
-  private _selectedEmitter = new TypedEvent<ListSelectedItemChangedArgs>(this);
+  private _emitter = new TypedEvent<ListEventArgs>(this);
   private _handleCaptionChangedBound = this.handleCaptionChanged.bind(this);
 
   constructor(public readonly filter: SelectFilter) {
@@ -100,7 +107,7 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
 
     this._selectedArgs.setValues(this._selectedIndex, value);
     this._selectedIndex = value;
-    this._selectedEmitter.emit(this._selectedArgs);
+    this.emit(this._selectedArgs);
   }
 
   indexOf(obj: ICaptioned) { return this.items.indexOf(obj as T); }
@@ -113,7 +120,7 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
 
     this.items.splice(0, this.items.length);
     this._clearedArgs.setValues();
-    this._clearedEmitter.emit(this._clearedArgs);
+    this.emit(this._clearedArgs);
   }
 
   get(index: number) { return this.items[index]; }
@@ -125,7 +132,7 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
     this._addedArgs.setValues(this.items.length, obj);
     obj.onCaptionChanged(this._handleCaptionChangedBound);
     this.items.push(obj);
-    this._addedEmitter.emit(this._addedArgs);
+    this.emit(this._addedArgs);
     return true;
   }
 
@@ -138,24 +145,18 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
     this.items.splice(index, 1);
     obj.offCaptionChanged(this._handleCaptionChangedBound);
     this._removedArgs.setValues(index, obj);
-    this._removedEmitter.emit(this._removedArgs);
+    this.emit(this._removedArgs);
     return true;
   }
 
-  onCleared(listener: Listener<ListClearedArgs>) { return this._clearedEmitter.on(listener); }
-  offCleared(listener: Listener<ListClearedArgs>) { this._clearedEmitter.off(listener); }
-  onItemAdded(listener: Listener<ListItemAddedArgs>) { return this._addedEmitter.on(listener); }
-  offItemAdded(listener: Listener<ListItemAddedArgs>) { this._addedEmitter.off(listener); }
-  onItemRemoved(listener: Listener<ListItemRemovedArgs>) { return this._removedEmitter.on(listener); }
-  offItemRemoved(listener: Listener<ListItemRemovedArgs>) { this._removedEmitter.off(listener); }
-  onItemChanged(listener: Listener<ListItemChangedArgs>) { return this._changedEmitter.on(listener); }
-  offItemChanged(listener: Listener<ListItemChangedArgs>) { this._changedEmitter.off(listener); }
-  onSelectedItemChanged(listener: Listener<ListSelectedItemChangedArgs>) { return this._selectedEmitter.on(listener); }
-  offSelectedItemChanged(listener: Listener<ListSelectedItemChangedArgs>) { this._selectedEmitter.off(listener); }
+  onListChanged(listener: Listener<ListEventArgs>) { return this._emitter.on(listener); }
+  offListChanged(listener: Listener<ListEventArgs>) { this._emitter.off(listener); }
 
   protected disposeCore() {
     this.clear();
   }
+
+  private emit(args: ListEventArgs) { this._emitter.emit(args); }
 
   private _changedArgs = new ListItemChangedArgs();
   private handleCaptionChanged(e: StringChangeArgs) {
@@ -165,6 +166,6 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
     if (index < 0) return;
 
     this._changedArgs.setValues(index, obj);
-    this._changedEmitter.emit(this._changedArgs);
+    this.emit(this._changedArgs);
   }
 }
