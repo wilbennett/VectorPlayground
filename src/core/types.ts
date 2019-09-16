@@ -2,6 +2,10 @@ export type Tristate<T> = T | undefined | null;
 export type Constructor<T> = new (...args: any[]) => T;
 export type SelectFilter = (x: any) => boolean;
 
+export interface IDisposable {
+	dispose(): void;
+}
+
 export enum DisplayType {
 	text = "text",
 	number = "number",
@@ -57,8 +61,10 @@ export enum TransformKind {
 export interface ICaptioned {
 	name: string;
 	caption?: string;
+	title?: string;
 }
 
-export interface IDisposable {
-	dispose(): void;
+export enum CaptionMode {
+	caption,
+	title
 }

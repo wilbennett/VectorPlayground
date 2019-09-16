@@ -1,5 +1,5 @@
 import { BaseObject } from '.';
-import { Category, ICaptioned, IDisposable, SelectFilter } from '../core';
+import { CaptionMode, Category, ICaptioned, IDisposable, SelectFilter } from '../core';
 import { EventArgs, StringChangeArgs } from '../event-args';
 import { Listener, TypedEvent } from '../events';
 
@@ -32,9 +32,30 @@ export class ListItemAddedArgs extends ListItemArgs { }
 export class ListItemRemovedArgs extends ListItemArgs { }
 export class ListItemChangedArgs extends ListItemArgs { }
 
+export class ListSelectedItemChangedArgs extends ListEventArgs {
+
+  constructor(oldIndex?: number, newIndex?: number) {
+    super();
+
+    this.oldIndex = oldIndex || -1;
+    this.newIndex = newIndex || -1;
+  }
+
+  oldIndex: number;
+  newIndex: number;
+
+  setValues(oldIndex: number, newIndex: number) {
+    this.oldIndex = oldIndex;
+    this.newIndex = newIndex;
+    this.sender = undefined;
+  }
+}
+
 export interface IFilteredList {
   readonly length: number;
   readonly items: ICaptioned[];
+  readonly selectedIndex: number;
+  readonly captionMode: CaptionMode;
 
   clear(): void;
   get(index: number): ICaptioned;
@@ -50,6 +71,8 @@ export interface IFilteredList {
   offItemRemoved(listener: Listener<ListItemRemovedArgs>): void;
   onItemChanged(listener: Listener<ListItemChangedArgs>): IDisposable;
   offItemChanged(listener: Listener<ListItemChangedArgs>): void;
+  onSelectedItemChanged(listener: Listener<ListSelectedItemChangedArgs>): IDisposable;
+  offSelectedItemChanged(listener: Listener<ListSelectedItemChangedArgs>): void;
 }
 
 export class FilteredList<T extends BaseObject> extends BaseObject implements IFilteredList {
@@ -57,22 +80,32 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
   private _addedEmitter = new TypedEvent<ListItemAddedArgs>(this);
   private _removedEmitter = new TypedEvent<ListItemRemovedArgs>(this);
   private _changedEmitter = new TypedEvent<ListItemChangedArgs>(this);
-  private _clearedArgs = new ListClearedArgs();
-  private _addedArgs = new ListItemAddedArgs();
-  private _removedArgs = new ListItemRemovedArgs();
-  private _changedArgs = new ListItemChangedArgs();
+  private _selectedEmitter = new TypedEvent<ListSelectedItemChangedArgs>(this);
   private _handleCaptionChangedBound = this.handleCaptionChanged.bind(this);
 
   constructor(public readonly filter: SelectFilter) {
     super("filteredList", Category.utils);
   }
 
+  captionMode: CaptionMode = CaptionMode.caption;
   readonly items: T[] = [];
   get length() { return this.items.length; }
   *[Symbol.iterator]() { yield* this.items; }
 
+  private _selectedArgs = new ListSelectedItemChangedArgs();
+  private _selectedIndex = -1;
+  get selectedIndex() { return this._selectedIndex; }
+  set selectedIndex(value) {
+    if (value === this._selectedIndex) return;
+
+    this._selectedArgs.setValues(this._selectedIndex, value);
+    this._selectedIndex = value;
+    this._selectedEmitter.emit(this._selectedArgs);
+  }
+
   indexOf(obj: ICaptioned) { return this.items.indexOf(obj as T); }
 
+  private _clearedArgs = new ListClearedArgs();
   clear() {
     for (const obj of this.items) {
       obj.offCaptionChanged(this._handleCaptionChangedBound);
@@ -85,6 +118,7 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
 
   get(index: number) { return this.items[index]; }
 
+  private _addedArgs = new ListItemAddedArgs();
   add(obj: T) {
     if (!this.filter(obj)) return false;
 
@@ -95,6 +129,7 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
     return true;
   }
 
+  private _removedArgs = new ListItemRemovedArgs();
   remove(obj: T) {
     const index = this.items.indexOf(obj);
 
@@ -115,11 +150,14 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
   offItemRemoved(listener: Listener<ListItemRemovedArgs>) { this._removedEmitter.off(listener); }
   onItemChanged(listener: Listener<ListItemChangedArgs>) { return this._changedEmitter.on(listener); }
   offItemChanged(listener: Listener<ListItemChangedArgs>) { this._changedEmitter.off(listener); }
+  onSelectedItemChanged(listener: Listener<ListSelectedItemChangedArgs>) { return this._selectedEmitter.on(listener); }
+  offSelectedItemChanged(listener: Listener<ListSelectedItemChangedArgs>) { this._selectedEmitter.off(listener); }
 
   protected disposeCore() {
     this.clear();
   }
 
+  private _changedArgs = new ListItemChangedArgs();
   private handleCaptionChanged(e: StringChangeArgs) {
     const obj = e.sender;
     const index = this.items.indexOf(obj);

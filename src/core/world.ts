@@ -52,6 +52,7 @@ class World implements IWorld {
 
   initialize() {
     initializeLists();
+    initializeEventHandlers();
 
     ui.elOperations.filteredList = <IFilteredList>operations;
     ui.elVectors.filteredList = <IFilteredList>vectors;
@@ -144,6 +145,9 @@ console.log(`finished setting world: `);
 /*********************************************************************************************/
 /* List handling
 /*********************************************************************************************/
+// let selectedOperation: Operation;
+// let selectedVector: VectorObject;
+// let selectedTextObject: TextObject;
 let filteredLists: FilteredList<BaseObject>[];
 let objects: FilteredList<BaseObject>;
 let updatables: FilteredList<BaseObject>;
@@ -182,9 +186,18 @@ function initializeLists() {
     ...categoryLists.values());
 }
 
+function checkSelection(...lists: FilteredList<BaseObject>[]) {
+  for (const list of lists) {
+    if (list.length === 1 && list.selectedIndex < 0)
+      list.selectedIndex = 0;
+  }
+}
+
 function addObjectToLists(obj: BaseObject, lists: FilteredList<BaseObject>[], hookChange: boolean = true) {
   hookChange && obj.onChanged(handleObjectChanged, e => e.sender === obj);
   lists.forEach(list => list.add(obj));
+
+  checkSelection(operations, vectors, textObjects);
 }
 
 function removeObjectFromLists(obj: BaseObject, lists: FilteredList<BaseObject>[]) {
@@ -217,6 +230,14 @@ function removeObjects(...objs: BaseObject[]) {
 
 // @ts-ignore - unused param.
 function handleObjectChanged(e: ChangeArgs) { changed = true; }
+
+function handleSelectedVectorChanged() {
+  console.log("******** SelectedVectorChanged");
+}
+
+function handleSelectedTextObjectChanged() {
+  console.log("******** SelectedTextObjectChanged");
+}
 
 function update() {
   updatables.items.forEach(obj => (<UpdatableObject>obj).update());
@@ -285,21 +306,27 @@ function forceUpdate() {
   update();
 }
 
-window.addEventListener("resize", forceUpdate);
-ui.elReset.addEventListener("click", handleReset);
-ui.elTickScale.addEventListener("input", forceUpdate);
-ui.elTickAngle.addEventListener("input", forceUpdate);
+function initializeEventHandlers() {
+  window.addEventListener("resize", forceUpdate);
+  ui.elReset.addEventListener("click", handleReset);
+  ui.elTickScale.addEventListener("input", forceUpdate);
+  ui.elTickAngle.addEventListener("input", forceUpdate);
 
-ui.elDebugLog.checked = me.debugLogActive;
-ui.elDebugDetail.checked = me.debugDetail;
-ui.elDebugEvents.checked = me.debugEvents;
-ui.elDebugVectors.checked = me.debugVectors;
-ui.elDebugTexts.checked = me.debugTexts;
-ui.elDebugLog.addEventListener("input", () => me.debugLogActive = ui.elDebugLog.checked);
-ui.elDebugDetail.addEventListener("input", () => me.debugDetail = ui.elDebugDetail.checked);
-ui.elDebugEvents.addEventListener("input", () => me.debugEvents = ui.elDebugEvents.checked);
-ui.elDebugVectors.addEventListener("input", () => me.debugVectors = ui.elDebugVectors.checked);
-ui.elDebugTexts.addEventListener("input", () => me.debugTexts = ui.elDebugTexts.checked);
+  ui.elDebugLog.checked = me.debugLogActive;
+  ui.elDebugDetail.checked = me.debugDetail;
+  ui.elDebugEvents.checked = me.debugEvents;
+  ui.elDebugVectors.checked = me.debugVectors;
+  ui.elDebugTexts.checked = me.debugTexts;
+  ui.elDebugLog.addEventListener("input", () => me.debugLogActive = ui.elDebugLog.checked);
+  ui.elDebugDetail.addEventListener("input", () => me.debugDetail = ui.elDebugDetail.checked);
+  ui.elDebugEvents.addEventListener("input", () => me.debugEvents = ui.elDebugEvents.checked);
+  ui.elDebugVectors.addEventListener("input", () => me.debugVectors = ui.elDebugVectors.checked);
+  ui.elDebugTexts.addEventListener("input", () => me.debugTexts = ui.elDebugTexts.checked);
+
+  vectors.onSelectedItemChanged(handleSelectedVectorChanged);
+  textObjects.onSelectedItemChanged(handleSelectedTextObjectChanged);
+  console.log(`world: added event listeners`);
+}
 
 /*********************************************************************************************/
 /* Utils
@@ -342,6 +369,7 @@ function createVectorObject(name: string, v: Vec, hidden: boolean = false, origi
 /* Initialize
 /*********************************************************************************************/
 function reset() {
+  console.log(`world: reset`);
   calculations.items.forEach(obj => obj.dispose());
   vectors.items.forEach(obj => obj.dispose());
   textObjects.items.forEach(obj => obj.dispose());

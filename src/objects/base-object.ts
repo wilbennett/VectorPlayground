@@ -17,12 +17,15 @@ export class BaseObject implements IDisposable, ICaptioned {
   private get disposables() { return this._disposables || (this._disposables = []); }
 
   constructor(name: string, public readonly category: Category) {
+    this._captionArgs = new StringChangeArgs();
+    this._captionArgs.kind = EventKind.caption;
+
     if (category === Category.value) {
       this.name = name;
-      this.caption = name;
+      this._caption = name;
     } else if (name === "__empty__") {
       this.name = name;
-      this.caption = name;
+      this._caption = name;
       this.isGlobal = false;
       this.isLocal = false;
     } else {
@@ -30,8 +33,7 @@ export class BaseObject implements IDisposable, ICaptioned {
       this._caption = world.getUniqueName(category, this.name);
     }
 
-    this._captionArgs = new StringChangeArgs();
-    this._captionArgs.kind = EventKind.caption;
+    this._title = this.name[0].toUpperCase() + this.name.substr(1);
   }
 
   static empty = new BaseObject("__empty__", Category.misc);
@@ -61,6 +63,16 @@ export class BaseObject implements IDisposable, ICaptioned {
 
     this._captionArgs.setValues(this._caption, value);
     this._caption = value ? world.getUniqueCaption(this.category, value) : undefined;
+    this.emitChange(this._captionArgs);
+  }
+
+  protected _title?: string;
+  get title() { return this._title; }
+  set title(value) {
+    if (this._title === this._title) return;
+
+    this._captionArgs.setValues(this._caption, value);
+    this._title = value;
     this.emitChange(this._captionArgs);
   }
 

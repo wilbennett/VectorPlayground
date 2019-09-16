@@ -1,5 +1,6 @@
 import { ComponentBase } from '..';
 import {
+  CaptionMode,
   FilteredType,
   ICaptioned,
   IDisposable,
@@ -8,6 +9,7 @@ import {
   ListItemAddedArgs,
   ListItemChangedArgs,
   ListItemRemovedArgs,
+  ListSelectedItemChangedArgs,
   ValueType,
 } from '../../core';
 import {
@@ -32,6 +34,7 @@ export class FilteredSelectElement extends ComponentBase {
   private _handleListItemAddedBound = this.handleListItemAdded.bind(this);
   private _handleListItemRemovedBound = this.handleListItemRemoved.bind(this);
   private _handleListItemChangedBound = this.handleListItemChanged.bind(this);
+  private _handleListSelectedItemChangedBound = this.handleListSelectedItemChanged.bind(this);
 
   constructor() {
     super();
@@ -112,7 +115,12 @@ export class FilteredSelectElement extends ComponentBase {
     return option;
   }
 
-  protected createOption(obj: ICaptioned) { return this.createOptionCore(obj.name, obj.caption); }
+  protected createOption(obj: ICaptioned) {
+    if (this.filteredList.captionMode === CaptionMode.caption)
+      return this.createOptionCore(obj.name, obj.caption);
+
+    return this.createOptionCore(obj.name, obj.title);
+  }
 
   protected addEmptyFirstItem() {
     let first = <HTMLOptionElement>this._elValue.firstChild;
@@ -161,6 +169,12 @@ export class FilteredSelectElement extends ComponentBase {
     this._options[e.index].text = e.item.caption || e.item.name;
   }
 
+  protected handleListSelectedItemChanged(e: ListSelectedItemChangedArgs) {
+    if (this.selectedIndex === e.newIndex) return;
+
+    this.selectedIndex = e.newIndex;
+  }
+
   protected subscribeToList() {
     this.disposeListSubscriptions();
 
@@ -170,7 +184,8 @@ export class FilteredSelectElement extends ComponentBase {
       this._filteredList.onCleared(this._handleListClearedBound),
       this._filteredList.onItemAdded(this._handleListItemAddedBound),
       this._filteredList.onItemRemoved(this._handleListItemRemovedBound),
-      this._filteredList.onItemChanged(this._handleListItemChangedBound)
+      this._filteredList.onItemChanged(this._handleListItemChangedBound),
+      this._filteredList.onSelectedItemChanged(this._handleListSelectedItemChangedBound)
     );
   }
 

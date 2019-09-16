@@ -1,5 +1,6 @@
 import { promisedWorld } from './core';
 
+
 export * from "./core/world";
 
 console.log("start init start*");
