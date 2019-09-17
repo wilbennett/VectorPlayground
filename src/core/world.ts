@@ -152,8 +152,8 @@ console.log(`finished setting world: `);
 // let selectedOperation: Tristate<Operation>;
 let selectedVector: Tristate<VectorObject>;
 let selectedTextObject: Tristate<TextObject>;
-let selectedVectorProps: Tristate<FilteredList<BaseObject>>;
-let selectedTextObjectProps: Tristate<FilteredList<BaseObject>>;
+let selectedVectorProps: HTMLElement[];
+let selectedTextObjectProps: HTMLElement[];
 
 let filteredLists: FilteredList<BaseObject>[];
 let objects: FilteredList<BaseObject>;
@@ -164,7 +164,7 @@ let calculations: FilteredList<BaseObject>;
 let vectors: FilteredList<BaseObject>;
 let textObjects: FilteredList<BaseObject>;
 let categoryLists: Map<Category, FilteredList<BaseObject>>;
-let propertyLists: Map<BaseObject, FilteredList<BaseObject>>;
+let propertyLists: Map<BaseObject, HTMLElement[]>;
 
 function initializeLists() {
   filteredLists = [];
@@ -175,7 +175,7 @@ function initializeLists() {
     .forEach((v: Category) =>
       categoryLists.set(v, new FilteredList<BaseObject>((o: BaseObject) => o.category == v && o.isLocal)));
 
-  propertyLists = new Map<BaseObject, FilteredList<BaseObject>>();
+  propertyLists = new Map<BaseObject, HTMLElement[]>();
 
   objects = new FilteredList<BaseObject>(() => true);
   updatables = new FilteredList<BaseObject>((obj: BaseObject) => obj instanceof UpdatableObject);
@@ -251,16 +251,11 @@ function handleSelectedVectorChanged(e: ListEventArgs) {
 
   // D.setIsDLog(true);
   selectedVector = selected;
-  selectedVectorProps = propertyLists.get(selectedVector);
+  selectedVectorProps = getObjectProps(selectedVector);
+  clearElementChildren(ui.elVectorProps);
+  addElementChildren(ui.elVectorProps, ...selectedVectorProps);
 
-  if (!selectedVectorProps) {
-    selectedVectorProps = createPropertyList(selectedVector);
-    addFilteredLists(selectedVectorProps);
-    propertyLists.set(selectedVector, selectedVectorProps);
-  }
-
-  selectedVectorProps.captionMode = CaptionMode.title;
-  ui.elVectorProps.filteredList = selectedVectorProps!;
+  // ui.elVectorProps.filteredList = selectedVectorProps!;
   // D.setIsDLog(false);
 }
 
@@ -273,20 +268,62 @@ function handleSelectedTextObjectChanged(e: ListEventArgs) {
   if (selected === selectedTextObject) return;
 
   selectedTextObject = selected;
-  selectedTextObjectProps = propertyLists.get(selectedTextObject);
+  selectedTextObjectProps = getObjectProps(selectedTextObject);
+  clearElementChildren(ui.elTextProps);
+  addElementChildren(ui.elTextProps, ...selectedTextObjectProps);
+}
 
-  if (!selectedTextObjectProps) {
-    selectedTextObjectProps = createPropertyList(selectedTextObject);
-    addFilteredLists(selectedTextObjectProps);
-    propertyLists.set(selectedTextObject, selectedTextObjectProps);
+function getObjectProps(obj: BaseObject) {
+  let props = propertyLists.get(obj);
+
+  if (!props) {
+    const propsList = createPropertyList(obj);
+    propsList.captionMode = CaptionMode.title;
+    addFilteredLists(propsList);
+    props = createPropertiesElements(propsList);
+    propertyLists.set(obj, props);
   }
 
-  selectedTextObjectProps.captionMode = CaptionMode.title;
-  ui.elTextProps.filteredList = selectedTextObjectProps!;
+  return props;
+}
+
+function clearElementChildren(element: HTMLElement) {
+  let child: Element | null;
+
+  while (child = element.lastElementChild) {
+    element.removeChild(child);
+  }
+}
+
+function addElementChildren(element: HTMLElement, ...children: Element[]) {
+  children.forEach(child => element.appendChild(child));
 }
 
 function createPropertyList(obj: BaseObject) {
-  const result = new FilteredList<BaseObject>(o => o instanceof ValueBase && o.owner === obj && o.isGlobal);
+  return new FilteredList<BaseObject>(o => o instanceof ValueBase && o.owner === obj && o.isGlobal);
+}
+
+function addPropertyElements(elements: HTMLElement[], property: ValueBase<any>, useTitle: boolean = false) {
+  const label = document.createElement("label");
+  const select = document.createElement("value-select");
+
+  label.className = "inputlbl";
+  label.innerText = useTitle ? `${property.title}:` : `${property.caption}:`;
+
+  elements.push(label, select);
+}
+
+function createPropertiesElements(properties: FilteredList<BaseObject>) {
+  const result: HTMLElement[] = [];
+  const useTitle = properties.captionMode === CaptionMode.title;
+
+  properties.items.forEach(item => {
+    const value = checkType(ValueBase, <ValueBase<BaseObject>>item);
+
+    if (value)
+      addPropertyElements(result, value, useTitle);
+  });
+
   return result;
 }
 

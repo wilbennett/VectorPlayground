@@ -26,7 +26,8 @@ export const elOperationsContainer = getDivElement("operationscontainer");
 export const elCalculationsContainer = getDivElement("calculationscontainer");
 
 export const elVectors = getFilteredSelect("vectors");
-export const elVectorProps = getFilteredSelect("vectorprops");
+export const elVectorProps = getDivElement("vectorprops");
+// export const elVectorProps = getFilteredSelect("vectorprops");
 // export const elVectorX = getValueSelect("vectorx");
 // export const elVectorY = getValueSelect("vectory");
 // export const elVectorW = getValueSelect("vectorw");
@@ -46,7 +47,8 @@ export const elVectorAdd = getInputElement("vectoradd");
 export const elVectorDelete = getInputElement("vectordelete");
 
 export const elTexts = getFilteredSelect("texts");
-export const elTextProps = getFilteredSelect("textprops");
+export const elTextProps = getDivElement("textprops");
+// export const elTextProps = getFilteredSelect("textprops");
 // export const elTextValue = getValueSelect("textvalue");
 // export const elTextRound = getInputElement("textround");
 // export const elTextRoundTo = getInputElement("textroundto");
@@ -190,10 +192,10 @@ function updateCanvasSize() {
   elCalculationsContainer.style.maxHeight = size - 5 + "px";
   elOperations.size = Math.max(+elOperationsContainer.clientHeight / 20, 5);
 
-  elVectorProps.size = elOperations.size;
+  // elVectorProps.size = elOperations.size;
   elVectorProps.style.maxHeight = size - 5 + "px";
 
-  elTextProps.size = elOperations.size;
+  // elTextProps.size = elOperations.size;
   elTextProps.style.maxHeight = size - 5 + "px";
 
   // elVectorMag.max = new Vec(size / tickScale, size / tickScale).magnitude / 2;
