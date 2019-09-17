@@ -1,3 +1,4 @@
+export * from "./object-types";
 export * from "./base-object";
 export * from "./filtered-list";
 export * from "./updatable-object";

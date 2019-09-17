@@ -13,6 +13,7 @@ import {
   ListSelectedItemChangedArgs,
   ValueType,
 } from '../../core';
+import * as D from '../../decorators/dlog';
 import {
   autoAttribute,
   boolAttribute,
@@ -26,7 +27,10 @@ import template from './template.html';
 const elTemplate = document.createElement('template');
 elTemplate.innerHTML = template;
 
-// @D.dlogged()
+@D.dlogged({
+  logAllProps: true,
+  logAllMethods: true,
+})
 @component("filtered-select")
 export class FilteredSelectElement extends ComponentBase {
   private _options: HTMLOptionElement[] = [];
@@ -103,12 +107,14 @@ export class FilteredSelectElement extends ComponentBase {
     if (!this._filteredList) return;
 
     this._options.push(...this._filteredList.items.map(this.createOption, this));
+    this._options.forEach(option => this._elValue.appendChild(option));
   }
 
   protected createOptionCore(value: string, caption?: string) {
     const option = document.createElement("option");
     option.text = caption || value;
     option.value = value;
+    D.dlogDetail(`Created option: `, option);
     return option;
   }
 

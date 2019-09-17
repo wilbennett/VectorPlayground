@@ -1,10 +1,9 @@
-import { FilteredSelectElement, ValueSelectElement } from '../components';
-import { Vec } from '../core';
+import { FilteredSelectElement } from '../components';
 import { UiUtils, Utils } from '../utils';
 
 console.log("ui init start");
 const { ONE_DEGREE } = Utils;
-const { getElement, getSelectElement, getInputElement, getDivElement, getCanvasElement } = UiUtils;
+const { getElement, getInputElement, getDivElement, getCanvasElement } = UiUtils;
 
 export const elPause = getInputElement("pause");
 export const backCanvas = getCanvasElement("backcanvas");
@@ -27,35 +26,37 @@ export const elOperationsContainer = getDivElement("operationscontainer");
 export const elCalculationsContainer = getDivElement("calculationscontainer");
 
 export const elVectors = getFilteredSelect("vectors");
-export const elVectorX = getValueSelect("vectorx");
-export const elVectorY = getValueSelect("vectory");
-export const elVectorW = getValueSelect("vectorw");
-export const elVectorValue = getValueSelect("vectorvalue");
-export const elVectorAngle = getValueSelect("vectorangle");
-export const elVectorMag = getValueSelect("vectormag");
-export const elVectorColor = getValueSelect("vectorcolor");
-export const elVectorWidth = getValueSelect("vectorwidth");
-export const elVectorOpacity = getValueSelect("vectoropacity");
-export const elVectorOrigin = getValueSelect("vectororigin");
-export const elVectorEnd = getValueSelect("vectorend");
-export const elVectorRotate = getInputElement("vectorrotate");
-export const elVectorRotStep = getValueSelect("vectorrotstep");
-export const elVectorVisible = getInputElement("vectorvisible");
+export const elVectorProps = getFilteredSelect("vectorprops");
+// export const elVectorX = getValueSelect("vectorx");
+// export const elVectorY = getValueSelect("vectory");
+// export const elVectorW = getValueSelect("vectorw");
+// export const elVectorValue = getValueSelect("vectorvalue");
+// export const elVectorAngle = getValueSelect("vectorangle");
+// export const elVectorMag = getValueSelect("vectormag");
+// export const elVectorColor = getValueSelect("vectorcolor");
+// export const elVectorWidth = getValueSelect("vectorwidth");
+// export const elVectorOpacity = getValueSelect("vectoropacity");
+// export const elVectorOrigin = getValueSelect("vectororigin");
+// export const elVectorEnd = getValueSelect("vectorend");
+// export const elVectorRotate = getInputElement("vectorrotate");
+// export const elVectorRotStep = getValueSelect("vectorrotstep");
+// export const elVectorVisible = getInputElement("vectorvisible");
 export const elVectorName = getInputElement("vectorname");
 export const elVectorAdd = getInputElement("vectoradd");
 export const elVectorDelete = getInputElement("vectordelete");
 
 export const elTexts = getFilteredSelect("texts");
-export const elTextValue = getValueSelect("textvalue");
-export const elTextRound = getInputElement("textround");
-export const elTextRoundTo = getInputElement("textroundto");
-export const elTextSize = getValueSelect("textsize");
-export const elTextAngle = getValueSelect("textangle");
-export const elTextColor = getValueSelect("textcolor");
-export const elTextOpacity = getValueSelect("textopacity");
-export const elTextPosition = getValueSelect("textposition");
-export const elTextAlign = getSelectElement("textalign");
-export const elTextShow = getInputElement("textshow");
+export const elTextProps = getFilteredSelect("textprops");
+// export const elTextValue = getValueSelect("textvalue");
+// export const elTextRound = getInputElement("textround");
+// export const elTextRoundTo = getInputElement("textroundto");
+// export const elTextSize = getValueSelect("textsize");
+// export const elTextAngle = getValueSelect("textangle");
+// export const elTextColor = getValueSelect("textcolor");
+// export const elTextOpacity = getValueSelect("textopacity");
+// export const elTextPosition = getValueSelect("textposition");
+// export const elTextAlign = getSelectElement("textalign");
+// export const elTextShow = getInputElement("textshow");
 export const elTextName = getInputElement("textname");
 export const elTextAdd = getInputElement("textadd");
 export const elTextDelete = getInputElement("textdelete");
@@ -68,7 +69,7 @@ export const elOperationAdd = getDivElement("operationadd");
 /* Utils
 /*********************************************************************************************/
 function getFilteredSelect(id: string) { return getElement<FilteredSelectElement>(id); }
-function getValueSelect(id: string) { return getElement<ValueSelectElement>(id); }
+// function getValueSelect(id: string) { return getElement<ValueSelectElement>(id); }
 
 export function line(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number) {
   ctx.moveTo(x1, y1);
@@ -189,7 +190,13 @@ function updateCanvasSize() {
   elCalculationsContainer.style.maxHeight = size - 5 + "px";
   elOperations.size = Math.max(+elOperationsContainer.clientHeight / 20, 5);
 
-  elVectorMag.max = new Vec(size / tickScale, size / tickScale).magnitude / 2;
+  elVectorProps.size = elOperations.size;
+  elVectorProps.style.maxHeight = size - 5 + "px";
+
+  elTextProps.size = elOperations.size;
+  elTextProps.style.maxHeight = size - 5 + "px";
+
+  // elVectorMag.max = new Vec(size / tickScale, size / tickScale).magnitude / 2;
   drawGrid();
 }
 

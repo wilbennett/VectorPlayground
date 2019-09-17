@@ -1,4 +1,4 @@
-import { Category, IWorld, setWorld, Vec } from '.';
+import { Category, IWorld, setWorld, Tristate, Vec } from '.';
 import * as D from '../decorators/dlog';
 import { ChangeArgs } from '../event-args';
 import {
@@ -10,13 +10,15 @@ import {
   ListSelectedItemChangedArgs,
   TextObject,
   UpdatableObject,
+  ValueBase,
   VectorObject,
 } from '../objects';
 import * as ui from '../ui';
 import { Utils } from '../utils';
+import { CaptionMode } from './types';
 
 console.log("world init start");
-const { TWO_PI, ONE_DEGREE } = Utils;
+const { TWO_PI, ONE_DEGREE, checkType } = Utils;
 
 // ComponentBase; FilteredSelectElement; TransformValueElement; ValueSelectElement;
 // let skippedRenderCount = 0;
@@ -24,7 +26,7 @@ const { TWO_PI, ONE_DEGREE } = Utils;
 let DEBUG_EVENTS = false;
 let DEBUG_VECTORS = false;
 let DEBUG_TEXTS = false;
-// D.setDLogActive(true);
+D.setDLogActive(true);
 D.setDetailMode(true);
 
 // @D.dlogged({ methodSetLogIf: () => true, logAllMethods: true })
@@ -147,9 +149,12 @@ console.log(`finished setting world: `);
 /*********************************************************************************************/
 /* List handling
 /*********************************************************************************************/
-// let selectedOperation: Operation;
-// let selectedVector: VectorObject;
-// let selectedTextObject: TextObject;
+// let selectedOperation: Tristate<Operation>;
+let selectedVector: Tristate<VectorObject>;
+let selectedTextObject: Tristate<TextObject>;
+let selectedVectorProps: Tristate<FilteredList<BaseObject>>;
+let selectedTextObjectProps: Tristate<FilteredList<BaseObject>>;
+
 let filteredLists: FilteredList<BaseObject>[];
 let objects: FilteredList<BaseObject>;
 let updatables: FilteredList<BaseObject>;
@@ -159,6 +164,7 @@ let calculations: FilteredList<BaseObject>;
 let vectors: FilteredList<BaseObject>;
 let textObjects: FilteredList<BaseObject>;
 let categoryLists: Map<Category, FilteredList<BaseObject>>;
+let propertyLists: Map<BaseObject, FilteredList<BaseObject>>;
 
 function initializeLists() {
   filteredLists = [];
@@ -168,6 +174,8 @@ function initializeLists() {
   Object.values(Category)
     .forEach((v: Category) =>
       categoryLists.set(v, new FilteredList<BaseObject>((o: BaseObject) => o.category == v && o.isLocal)));
+
+  propertyLists = new Map<BaseObject, FilteredList<BaseObject>>();
 
   objects = new FilteredList<BaseObject>(() => true);
   updatables = new FilteredList<BaseObject>((obj: BaseObject) => obj instanceof UpdatableObject);
@@ -235,14 +243,51 @@ function handleObjectChanged(e: ChangeArgs) { changed = true; }
 
 function handleSelectedVectorChanged(e: ListEventArgs) {
   if (!(e instanceof ListSelectedItemChangedArgs)) return;
-
   console.log("******** SelectedVectorChanged");
+
+  const selected = <VectorObject>checkType(VectorObject, vectors.value);
+
+  if (selected === selectedVector) return;
+
+  // D.setIsDLog(true);
+  selectedVector = selected;
+  selectedVectorProps = propertyLists.get(selectedVector);
+
+  if (!selectedVectorProps) {
+    selectedVectorProps = createPropertyList(selectedVector);
+    addFilteredLists(selectedVectorProps);
+    propertyLists.set(selectedVector, selectedVectorProps);
+  }
+
+  selectedVectorProps.captionMode = CaptionMode.title;
+  ui.elVectorProps.filteredList = selectedVectorProps!;
+  // D.setIsDLog(false);
 }
 
 function handleSelectedTextObjectChanged(e: ListEventArgs) {
   if (!(e instanceof ListSelectedItemChangedArgs)) return;
-
   console.log("******** SelectedTextObjectChanged");
+
+  const selected = <TextObject>checkType(TextObject, textObjects.value);
+
+  if (selected === selectedTextObject) return;
+
+  selectedTextObject = selected;
+  selectedTextObjectProps = propertyLists.get(selectedTextObject);
+
+  if (!selectedTextObjectProps) {
+    selectedTextObjectProps = createPropertyList(selectedTextObject);
+    addFilteredLists(selectedTextObjectProps);
+    propertyLists.set(selectedTextObject, selectedTextObjectProps);
+  }
+
+  selectedTextObjectProps.captionMode = CaptionMode.title;
+  ui.elTextProps.filteredList = selectedTextObjectProps!;
+}
+
+function createPropertyList(obj: BaseObject) {
+  const result = new FilteredList<BaseObject>(o => o instanceof ValueBase && o.owner === obj && o.isGlobal);
+  return result;
 }
 
 function update() {

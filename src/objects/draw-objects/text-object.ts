@@ -25,16 +25,16 @@ export class TextObject extends DrawObject {
     this.text.alwaysShowText = true;
 
     this.addChildren(
+      this.text,
       this.round,
       this.roundTo,
-      this.align,
-      this.visible,
-      this.text,
       this.size,
-      this.angle,
       this.color,
+      this.angle,
       this.opacity,
-      this.position);
+      this.position,
+      this.align,
+      this.visible);
   }
 
   readonly round: BoolValue;

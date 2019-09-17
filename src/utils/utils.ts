@@ -41,8 +41,16 @@ export class Utils {
     return value !== undefined && value !== null ? value : defaultValue;
   }
 
-  static checkType<T extends Function>(constructor: T, obj?: object) {
-    return obj instanceof constructor ? obj as T : undefined;
+  static checkType<T>(constructor: Function, obj?: T) {
+    if (!obj) return undefined;
+
+    return obj instanceof constructor ? obj : undefined;
+  }
+
+  static capitalizeUnder(text: Tristate<string>) {
+    return text
+      ? text[0].toUpperCase() + text.substr(1).replace(/_\w/g, s => " " + s[1].toUpperCase())
+      : "";
   }
 
   static getCaller(callstack: string, ...ignore: string[]) {

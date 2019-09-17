@@ -1,5 +1,5 @@
-import { BaseObject } from '.';
-import { CaptionMode, Category, ICaptioned, IDisposable, SelectFilter } from '../core';
+import { BaseObject, ObjectFilter } from '.';
+import { CaptionMode, Category, ICaptioned, IDisposable } from '../core';
 import { EventArgs, StringChangeArgs } from '../event-args';
 import { Listener, TypedEvent } from '../events';
 
@@ -52,20 +52,26 @@ export class ListItemChangedArgs extends ListItemArgs {
 
 export class ListSelectedItemChangedArgs extends ListEventArgs {
 
-  constructor(oldIndex?: number, newIndex?: number) {
+  constructor(oldIndex?: number, newIndex?: number, oldItem?: ICaptioned, newItem?: ICaptioned) {
     super();
 
     this.oldIndex = oldIndex || -1;
     this.newIndex = newIndex || -1;
+    this.oldItem = oldItem || BaseObject.empty;
+    this.newItem = newItem || BaseObject.empty;
   }
 
   oldIndex: number;
   newIndex: number;
+  oldItem: ICaptioned;
+  newItem: ICaptioned;
   get listChangeKind() { return ListChangeKind.selectionChanged; }
 
-  setValues(oldIndex: number, newIndex: number) {
+  setValues(oldIndex: number, newIndex: number, oldItem: ICaptioned, newItem: ICaptioned) {
     this.oldIndex = oldIndex;
     this.newIndex = newIndex;
+    this.oldItem = oldItem;
+    this.newItem = newItem;
     this.sender = undefined;
   }
 }
@@ -90,7 +96,7 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
   private _emitter = new TypedEvent<ListEventArgs>(this);
   private _handleCaptionChangedBound = this.handleCaptionChanged.bind(this);
 
-  constructor(public readonly filter: SelectFilter) {
+  constructor(public readonly filter: ObjectFilter) {
     super("filteredList", Category.utils);
   }
 
@@ -105,10 +111,12 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
   set selectedIndex(value) {
     if (value === this._selectedIndex) return;
 
-    this._selectedArgs.setValues(this._selectedIndex, value);
+    this._selectedArgs.setValues(this._selectedIndex, value, this.get(this._selectedIndex), this.get(value));
     this._selectedIndex = value;
     this.emit(this._selectedArgs);
   }
+
+  get value() { return this._selectedIndex >= 0 ? this.items[this._selectedIndex] : BaseObject.empty; }
 
   indexOf(obj: ICaptioned) { return this.items.indexOf(obj as T); }
 
@@ -123,7 +131,7 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
     this.emit(this._clearedArgs);
   }
 
-  get(index: number) { return this.items[index]; }
+  get(index: number) { return index >= 0 && index < this.items.length ? this.items[index] : BaseObject.empty; }
 
   private _addedArgs = new ListItemAddedArgs();
   add(obj: T) {

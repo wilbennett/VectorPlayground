@@ -25,7 +25,7 @@ const { ONE_DEGREE, ONE_RADIAN, toNumber, toString } = Utils;
 //   methodSetLogIf: self => self.name === "result",
 //   methodState: self => self.name,
 // })
-@D.dlogged()
+// @D.dlogged()
 export class VectorObject extends DrawObject {
   private _drawOrigin: CalcSettings<Vec>;
   private _drawEnd: CalcSettings<Vec>;
@@ -65,32 +65,39 @@ export class VectorObject extends DrawObject {
     this.angle = new NumberValue("angle", vector.angle * ONE_RADIAN, -360, 360, 1);
     this.mag = new NumberValue("mag", vector.magnitude, 1, 100, 1);
     this.color = new ColorValue("color", "#0000FF");
-    this.lineWidth = new NumberValue("lineWidth", 1, 1, 20, 1);
+    this.lineWidth = new NumberValue("line_width", 1, 1, 20, 1);
     this.rotate = new BoolValue("rotate", false);
     this.opacity = new NumberValue("opacity", 1, 0, 1, 0.1);
-    this.rotateStep = new NumberValue("rotateStep", 0.1, -90, 90, 0.1);
+    this.rotateStep = new NumberValue("rotate_step", 0.1, -90, 90, 0.1);
     this.visible = new BoolValue("visible", true);
 
-    this.drawOrigin = new CalcValue<Vec>("drawOrigin", ValueType.vector, this._drawOrigin);
-    this.drawEnd = new CalcValue<Vec>("drawEnd", ValueType.vector, this._drawEnd);
-    this.labelAngle = new CalcValue<number>("labelAngle", ValueType.number, this._labelAngle);
-    this.labelAngleDegrees = new CalcValue<number>("labelAngleDegrees", ValueType.number, this._labelAngleDegrees);
-    this.labelPosition = new CalcValue<Vec>("labelPosition", ValueType.vector, this._labelPosition);
-    this.dataLabelPosition = new CalcValue<Vec>("dataLabelPosition", ValueType.vector, this._dataLabelPosition);
+    this.drawOrigin = new CalcValue<Vec>("draw_origin", ValueType.vector, this._drawOrigin);
+    this.drawEnd = new CalcValue<Vec>("draw_end", ValueType.vector, this._drawEnd);
+    this.labelAngle = new CalcValue<number>("label_angle", ValueType.number, this._labelAngle);
+    this.labelAngleDegrees = new CalcValue<number>("label_angle_degrees", ValueType.number, this._labelAngleDegrees);
+    this.labelPosition = new CalcValue<Vec>("label_position", ValueType.vector, this._labelPosition);
+    this.dataLabelPosition = new CalcValue<Vec>("data_label_position", ValueType.vector, this._dataLabelPosition);
+
+    this.drawOrigin.isGlobal = false;
+    this.drawEnd.isGlobal = false;
+    this.labelAngle.isGlobal = false;
+    this.labelAngleDegrees.isGlobal = false;
+    this.labelPosition.isGlobal = false;
+    this.dataLabelPosition.isGlobal = false;
 
     this.addChildren(
-      this.value,
-      this.origin,
-      this.end,
       this.x,
       this.y,
       this.w,
+      this.value,
       this.angle,
       this.mag,
       this.color,
       this.lineWidth,
-      this.rotate,
       this.opacity,
+      this.origin,
+      this.end,
+      this.rotate,
       this.rotateStep,
       this.visible,
       this.drawOrigin,

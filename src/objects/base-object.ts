@@ -1,4 +1,4 @@
-import { Category, ICaptioned, IDisposable, IWorld, promisedWorld } from '../core';
+import { Category, ICaptioned, IDisposable, IWorld, promisedWorld, Utils } from '../core';
 import * as D from '../decorators';
 import { ChangeArgs, EventKind, StringChangeArgs } from '../event-args';
 import { EventFilter, Listener, TypedEvent } from '../events';
@@ -33,7 +33,7 @@ export class BaseObject implements IDisposable, ICaptioned {
       this._caption = world.getUniqueName(category, this.name);
     }
 
-    this._title = this.name[0].toUpperCase() + this.name.substr(1);
+    this._title = Utils.capitalizeUnder(this.name);
   }
 
   static empty = new BaseObject("__empty__", Category.misc);

@@ -73,6 +73,7 @@ function hasPropEntry(target: any, name: string, kind: string): boolean {
 export function isDLogActive() { return active; }
 export function setDLogActive(value: boolean) { active = value; }
 export function isDLog() { return isLog; }
+export function setIsDLog(value: boolean) { isLog = value; }
 export function isDetailMode() { return isDLog && detailMode; }
 export function setDetailMode(value: boolean) { detailMode = value; }
 export function setIndent(value: string) { dLogIndent = value; }
