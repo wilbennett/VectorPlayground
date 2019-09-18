@@ -1,11 +1,11 @@
-import { ValueBase, VectorObject } from '..';
+import { Value, VectorObject } from '..';
 import { Vec } from '../../core';
 import { Tristate } from '../../core/types';
 import { Utils } from '../../utils';
 
 const { checkType } = Utils;
 
-export function getVectorObjectFromSource(source?: ValueBase<Vec>) {
+export function getVectorObjectFromSource(source?: Value<Vec>) {
     let obj: Tristate<VectorObject>;
     let vec: Tristate<Vec>;
 

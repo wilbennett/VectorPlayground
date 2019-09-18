@@ -10,7 +10,7 @@ import {
   ListSelectedItemChangedArgs,
   TextObject,
   UpdatableObject,
-  ValueBase,
+  Value,
   VectorObject,
 } from '../objects';
 import * as ui from '../ui';
@@ -300,10 +300,10 @@ function addElementChildren(element: HTMLElement, ...children: Element[]) {
 }
 
 function createPropertyList(obj: BaseObject) {
-  return new FilteredList<BaseObject>(o => o instanceof ValueBase && o.owner === obj && o.isGlobal);
+  return new FilteredList<BaseObject>(o => o instanceof Value && o.owner === obj && o.isGlobal);
 }
 
-function addPropertyElements(elements: HTMLElement[], property: ValueBase<any>, useTitle: boolean = false) {
+function addPropertyElements(elements: HTMLElement[], property: Value<any>, useTitle: boolean = false) {
   const label = document.createElement("label");
   const select = document.createElement("value-select");
 
@@ -318,7 +318,7 @@ function createPropertiesElements(properties: FilteredList<BaseObject>) {
   const useTitle = properties.captionMode === CaptionMode.title;
 
   properties.items.forEach(item => {
-    const value = checkType(ValueBase, <ValueBase<BaseObject>>item);
+    const value = checkType(Value, <Value<BaseObject>>item);
 
     if (value)
       addPropertyElements(result, value, useTitle);

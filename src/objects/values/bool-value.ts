@@ -1,4 +1,4 @@
-import { ValueBase } from '..';
+import { Value } from '..';
 import { ValueType } from '../../core';
 import { Utils } from '../../utils';
 
@@ -6,7 +6,7 @@ const { toString } = Utils;
 
 const falseStrings = ["false"];
 
-export class BoolValue extends ValueBase<boolean> {
+export class BoolValue extends Value<boolean> {
   constructor(name: string, value?: boolean) {
     super(name, ValueType.bool, undefined, value);
   }

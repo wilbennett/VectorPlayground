@@ -1,10 +1,10 @@
-import { ValueBase, VectorObject } from '..';
+import { Value, VectorObject } from '..';
 import { ValueMode, ValueType, Vec } from '../../core';
 import { Utils } from '../../utils';
 
 const { toString, checkType } = Utils;
 
-export class VectorValue extends ValueBase<Vec> {
+export class VectorValue extends Value<Vec> {
   constructor(name: string, value?: Vec) {
     super(name, ValueType.vector, undefined, value);
 
@@ -37,7 +37,7 @@ export class VectorValue extends ValueBase<Vec> {
   // @ts-ignore - unused param.
   protected convertFromString(value?: string) { return undefined; }
 
-  protected setSourceValue(value?: ValueBase<Vec>) {
+  protected setSourceValue(value?: Value<Vec>) {
     super.setSourceValue(value);
     this._vectorObject = undefined;
   }

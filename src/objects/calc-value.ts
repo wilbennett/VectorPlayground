@@ -1,4 +1,4 @@
-import { ValueBase } from '.';
+import { Value } from '.';
 import { Tristate, ValueMode, ValueType } from '../core';
 
 type Getter<T> = () => Tristate<T>;
@@ -17,7 +17,7 @@ export class CalcSettings<T> {
     instance?: CalcValue<T>;
 }
 
-export class CalcValue<T> extends ValueBase<T> {
+export class CalcValue<T> extends Value<T> {
     constructor(
         name: string,
         valueType: ValueType,

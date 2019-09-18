@@ -1,7 +1,7 @@
-import { ValueBase } from '.';
+import { Value } from '.';
 import { Category, ValueMode, ValueType } from '../core';
 
-export class ConstantValue<T> extends ValueBase<T> {
+export class ConstantValue<T> extends Value<T> {
   constructor(name: string, valueType: ValueType, value: T) {
     super(name, valueType, Category.constant);
 
