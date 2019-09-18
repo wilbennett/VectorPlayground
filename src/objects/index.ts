@@ -6,7 +6,7 @@ export * from "./draw-object";
 export * from "./transform-object";
 export * from "./value-types";
 export * from "./value-base";
-export * from "./value";
+// export * from "./value";
 export * from "./constant-value";
 export * from "./calc-value";
 export * from "./transform-value";

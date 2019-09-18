@@ -1,3 +1,4 @@
+/*
 import { ValueBase } from '.';
 import { IDisposable, ValueMode, ValueType } from '../core';
 import { ChangeArgs, ChangeEventArgs, EventKind } from '../event-args';
@@ -52,3 +53,4 @@ export class Value<T> extends ValueBase<T> {
     this.calcValue();
   }
 }
+//*/

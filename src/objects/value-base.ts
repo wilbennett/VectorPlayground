@@ -1,15 +1,19 @@
 import { BaseObject, IValue, TransformObject } from '.';
-import { Category, Tristate, ValueMode, ValueType } from '../core';
+import { Category, Tristate, ValueMode, ValueType, IDisposable } from '../core';
 import * as D from '../decorators';
-import { ChangeEventArgs } from '../event-args';
+import { ChangeEventArgs, EventKind, ChangeArgs } from '../event-args';
 
 @D.dlogged()
 export class ValueBase<T> extends BaseObject implements IValue {
+  private _handleSourceChangedBound = this.handleSourceChanged.bind(this);
+  private _sourceSubscription?: IDisposable;
+
   constructor(
     name: string,
     public readonly valueType: ValueType,
     category?: Category,
-    min?: number,
+    value?: T,
+     min?: number,
     max?: number,
     step?: number) {
     super(name, category || Category.value);
@@ -17,7 +21,9 @@ export class ValueBase<T> extends BaseObject implements IValue {
     if (min !== undefined) this._min = min;
     if (max !== undefined) this._max = max;
     if (step !== undefined) this._step = step;
-  }
+  
+      this._value = value;
+}
 
   protected _propertyName?: string;
   get propertyName() {
@@ -118,6 +124,15 @@ export class ValueBase<T> extends BaseObject implements IValue {
     this.calcValue();
   }
 
+  protected _sourceValue?: ValueBase<T>;
+  get sourceValue() { return this._sourceValue; }
+  set sourceValue(value) {
+    if (value === this._sourceValue) return;
+
+    this.setSourceValue(value);
+    this.calcValue();
+  }
+
   protected _transform?: TransformObject<T>;
   get transform() { return this._transform; }
   set transform(value) {
@@ -152,6 +167,18 @@ export class ValueBase<T> extends BaseObject implements IValue {
     this.calcValue();
   }
 
+  protected setSourceValue(value?: ValueBase<T>) {
+    this._sourceSubscription && this._sourceSubscription.dispose();
+    this._sourceSubscription = undefined;
+    this._sourceValue = value;
+
+    if (!value) return;
+
+    this._sourceSubscription = value.onChanged(
+      this._handleSourceChangedBound,
+      e => e instanceof ChangeEventArgs && e.sender === value && e.kind == EventKind.value);
+  }
+
   protected setValue(value: Tristate<T>) {
     if (value === this._value) {
       const text = this.convertToString(value) || "";
@@ -172,6 +199,12 @@ export class ValueBase<T> extends BaseObject implements IValue {
   }
 
   protected calcValue() {
+    if (this.mode !== ValueMode.text) {
+      if (!this.sourceValue) return;
+
+      this._inputValue = this.sourceValue.value;
+    }
+
     let result = this._inputValue;
 
     if (!this.validateValue(result)) {
@@ -186,5 +219,13 @@ export class ValueBase<T> extends BaseObject implements IValue {
       result = this.modifier.transform(result);
 
     this.setValue(result);
+  }
+
+  protected handleSourceChanged(args: ChangeArgs) {
+    const e = args as ChangeEventArgs<T>;
+
+    if (!(e instanceof ChangeEventArgs)) return;
+
+    this.calcValue();
   }
 }

@@ -12,7 +12,7 @@ export class TextObject extends DrawObject {
     super(name, Category.textObject);
 
     this.round = new BoolValue("round", false);
-    this.roundTo = new NumberValue("roundTo", 2);
+    this.roundTo = new NumberValue("round_to", 2);
     this.align = new StringValue("align", "start");
     this.visible = new BoolValue("visible", true);
     this.text = new TextValue("text", text);

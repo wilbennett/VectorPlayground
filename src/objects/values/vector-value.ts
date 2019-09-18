@@ -1,12 +1,12 @@
-import { Value, ValueBase, VectorObject } from '..';
+import { ValueBase, VectorObject } from '..';
 import { ValueMode, ValueType, Vec } from '../../core';
 import { Utils } from '../../utils';
 
 const { toString, checkType } = Utils;
 
-export class VectorValue extends Value<Vec> {
+export class VectorValue extends ValueBase<Vec> {
   constructor(name: string, value?: Vec) {
-    super(name, ValueType.vector, value);
+    super(name, ValueType.vector, undefined, value);
 
     this._readOnlyText = true;
     this._alwaysShowText = false;

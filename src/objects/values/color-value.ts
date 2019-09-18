@@ -1,9 +1,9 @@
-import { Value } from '..';
+import { ValueBase } from '..';
 import { ValueType } from '../../core';
 
-export class ColorValue extends Value<string> {
+export class ColorValue extends ValueBase<string> {
   constructor(name: string, value?: string) {
-    super(name, ValueType.color, value);
+    super(name, ValueType.color, undefined, value);
   }
 
   protected convertToString(value: string) { return value; }
