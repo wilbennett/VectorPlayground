@@ -1,9 +1,22 @@
 import { BaseObject, IValue, TransformObject } from '.';
-import { Category, Tristate, ValueMode, ValueType, IDisposable } from '../core';
+import { Category, DisplayType, IDisposable, Tristate, ValueMode, ValueType } from '../core';
 import * as D from '../decorators';
-import { ChangeEventArgs, EventKind, ChangeArgs } from '../event-args';
+import { ChangeArgs, ChangeEventArgs, EventKind } from '../event-args';
+import { Utils } from '../utils';
 
-@D.dlogged()
+const { hasValue, isEmpty } = Utils;
+
+@D.dlogged({
+  logAllMethods: true,
+  logAllProps: true,
+  methodState: self => self.propertyName,
+  propState: self => self.propertyName,
+  // methodSetLogIf: () => true,
+  // propSetLogIf: () => true,
+  methodSetLogIf: self => self.propertyName === "u.x",
+  propSetLogIf: self => self.propertyName === "u.x",
+  exclude: ["propertyName"]
+})
 export class Value<T> extends BaseObject implements IValue {
   private _handleSourceChangedBound = this.handleSourceChanged.bind(this);
   private _sourceSubscription?: IDisposable;
@@ -13,7 +26,7 @@ export class Value<T> extends BaseObject implements IValue {
     public readonly valueType: ValueType,
     category?: Category,
     value?: T,
-     min?: number,
+    min?: number,
     max?: number,
     step?: number) {
     super(name, category || Category.value);
@@ -21,9 +34,10 @@ export class Value<T> extends BaseObject implements IValue {
     if (min !== undefined) this._min = min;
     if (max !== undefined) this._max = max;
     if (step !== undefined) this._step = step;
-  
-      this._value = value;
-}
+
+    this._inputValue = value;
+    this._propertyName = undefined;
+  }
 
   protected _propertyName?: string;
   get propertyName() {
@@ -60,7 +74,7 @@ export class Value<T> extends BaseObject implements IValue {
     return <ValueMode>result;
   }
 
-  get allowedTypes() { return this.valueType; }
+  get allowedValueTypes() { return this.valueType; }
 
   private _min?: number;
   get min() { return this._min; }
@@ -92,6 +106,15 @@ export class Value<T> extends BaseObject implements IValue {
     this.calcValue();
   }
 
+  private _displayType = DisplayType.text;
+  get displayType() { return this._displayType; }
+  set displayType(value) {
+    if (this._displayType === value) return;
+
+    this._displayType = value;
+    this.calcValue();
+  }
+
   protected _mode = ValueMode.text;
   get mode() { return this._mode; }
   set mode(value) {
@@ -114,8 +137,12 @@ export class Value<T> extends BaseObject implements IValue {
   protected _valueChangeArgs = new ChangeEventArgs<T>();
   protected _value: Tristate<T>;
   protected _inputValue: Tristate<T>;
-  @D.clog(self => self.propertyName || self.name)
-  get value() { return this._value; }
+  get value() {
+    if (isEmpty(this._value))
+      this.calcValue();
+
+    return this._value;
+  }
   set value(value) {
     if (this.mode !== ValueMode.text) return;
     if (value === this._inputValue) return;
@@ -151,6 +178,62 @@ export class Value<T> extends BaseObject implements IValue {
     this.calcValue();
   }
 
+  assignFrom(source: IValue) {
+    this.mode = source.mode;
+    this.displayType = source.displayType;
+    // this.allowedModes = source.allowedModes;
+    // this.allowedValueTypes = source.allowedValueTypes;
+    this.alwaysShowText = source.alwaysShowText;
+    this.readOnlyText = source.readOnlyText;
+    this.sourceValue = source.sourceValue;
+    this.transform = source.transform;
+    this.modifier = source.modifier;
+    this.text = source.text;
+
+    if (source.min !== undefined)
+      this.min = source.min;
+
+    if (source.max !== undefined)
+      this.max = source.max;
+
+    if (source.step !== undefined)
+      this.step = source.step;
+  }
+
+  assignTo(target: IValue) {
+    // if (this.propertyName === "u.x") {
+    //   console.log(new Error().stack);
+    // }
+    if (isEmpty(this._value))
+      this.calcValue();
+    // else D.logd(`${this.propertyName}: NOT EMPTY: ${this._value}`);
+
+    target.mode = this.mode;
+    target.displayType = this.displayType;
+    target.allowedModes = this.allowedModes;
+    target.allowedValueTypes = this.allowedValueTypes;
+    target.alwaysShowText = this.alwaysShowText;
+    target.readOnlyText = this.readOnlyText;
+    target.sourceValue = this.sourceValue;
+    target.transform = this.transform;
+    target.modifier = this.modifier;
+    target.text = this.text;
+
+    if (this.min !== undefined)
+      target.min = this.min;
+
+    if (this.max !== undefined)
+      target.max = this.max;
+
+    if (this.step !== undefined)
+      target.step = this.step;
+  }
+
+  protected setOwner(owner: BaseObject) {
+    super.setOwner(owner);
+    this._propertyName = undefined;
+  }
+
   protected convertToString(value: Tristate<T>): Tristate<string> { return "" + value; }
   protected convertFromString(value: string): Tristate<T> { return <T><any>value; }
   // @ts-ignore - unused param.
@@ -181,19 +264,23 @@ export class Value<T> extends BaseObject implements IValue {
 
   protected setValue(value: Tristate<T>) {
     if (value === this._value) {
-      const text = this.convertToString(value) || "";
+      // const text = this.convertToString(value) || "";
 
-      if (text !== this._text)
-        this._text = text;
+      // if (text !== this._text)
+      //   this._text = text;
 
       return;
     }
 
     this._valueChangeArgs.setValues(this._value, value);
+    // if (this.propertyName === "u.x") {
+    //   D.logd(`${this.propertyName}.setValue: ${this._value} -> ${value}`);
+    //   // console.log(new Error().stack);
+    // }
     this._value = value;
 
-    if (this.mode !== ValueMode.text)
-      this._text = this.convertToString(value) || "";
+    // if (this.mode !== ValueMode.text)
+    this._text = this.convertToString(value) || "";
 
     this.emitChange(this._valueChangeArgs);
   }

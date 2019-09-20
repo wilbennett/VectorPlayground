@@ -1,9 +1,11 @@
 import { Value } from '..';
-import { ValueType } from '../../core';
+import { DisplayType, ValueType } from '../../core';
 
 export class ColorValue extends Value<string> {
   constructor(name: string, value?: string) {
     super(name, ValueType.color, undefined, value);
+
+    this.displayType = DisplayType.color;
   }
 
   protected convertToString(value: string) { return value; }

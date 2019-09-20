@@ -1,6 +1,6 @@
 import { CalcSettings, CalcValue, DrawObject, TextObject } from '..';
 import { Category, IWorld, logEvent, promisedWorld, ValueMode, Vec } from '../../core';
-import { ValueType } from '../../core/types';
+import { DisplayType, ValueType } from '../../core/types';
 import * as D from '../../decorators';
 import { ChangeArgs } from '../../event-args';
 import { Utils } from '../../utils';
@@ -14,19 +14,21 @@ promisedWorld.then(w => world = w);
 const { ONE_DEGREE, ONE_RADIAN, toNumber, toString } = Utils;
 // const { checkType } = Utils;
 
-// @D.dlogged({
-//   setLogIf: args => args[0] === "result",
-//   logCtor: false,
-//   isDetail: false,
-//   logAllProps: true,
-//   propSetLogIf: self => self.name === "result",
-//   propState: self => self.name,
-//   logAllMethods: true,
-//   methodSetLogIf: self => self.name === "result",
-//   methodState: self => self.name,
-// })
+@D.dlogged({
+  // setLogIf: args => args[0] !== "origin",
+  logCtor: false,
+  isDetail: false,
+  logAllProps: true,
+  // propSetLogIf: () => true,
+  propState: self => self.name,
+  logAllMethods: true,
+  // methodSetLogIf: () => true,
+  methodState: self => self.name,
+})
 // @D.dlogged()
 export class VectorObject extends DrawObject {
+  private _settingValue = false;
+  private _assigningValues = false;
   private _drawOrigin: CalcSettings<Vec>;
   private _drawEnd: CalcSettings<Vec>;
   private _labelAngle: CalcSettings<number>;
@@ -62,7 +64,7 @@ export class VectorObject extends DrawObject {
     this.x = new NumberValue("x", vector.x);
     this.y = new NumberValue("y", vector.y);
     this.w = new NumberValue("w", vector.w);
-    this.angle = new NumberValue("angle", vector.angle * ONE_RADIAN, -360, 360, 1);
+    this.angle = new NumberValue("angle", vector.angle * ONE_RADIAN, 0, 360, 1);
     this.mag = new NumberValue("mag", vector.magnitude, 1, 100, 1);
     this.color = new ColorValue("color", "#0000FF");
     this.lineWidth = new NumberValue("line_width", 1, 1, 20, 1);
@@ -84,6 +86,15 @@ export class VectorObject extends DrawObject {
     this.labelAngleDegrees.isGlobal = false;
     this.labelPosition.isGlobal = false;
     this.dataLabelPosition.isGlobal = false;
+
+    this.angle.displayType = DisplayType.range;
+    this.mag.displayType = DisplayType.range;
+    this.lineWidth.displayType = DisplayType.range;
+    this.opacity.displayType = DisplayType.range;
+    this.rotate.displayType = DisplayType.checkbox;
+    this.visible.displayType = DisplayType.checkbox;
+
+    this.value.mode = ValueMode.text;
 
     this.addChildren(
       this.x,
@@ -144,7 +155,7 @@ export class VectorObject extends DrawObject {
 
     let vector = this.value.value || Vec.emptyDirection;
 
-    if (this.rotate && this !== world.origin) {
+    if (this.rotate.value && this !== world.origin) {
       vector = vector.rotateN((this.rotateStep.value || 0) * ONE_DEGREE);
       this.value.value = vector;
     }
@@ -160,8 +171,10 @@ export class VectorObject extends DrawObject {
       this.color.value || "#000000");
   }
 
+  @D.setDlog() @D.clog(self => self.name)
   private createPolar() {
     if (this.isOrigin) return;
+    if (this._settingValue) return;
 
     const angle = this.angle.value || 0;
     const mag = this.mag.value || 0;
@@ -170,7 +183,14 @@ export class VectorObject extends DrawObject {
 
     if (vector && angle === vector.angle && mag === vector.magnitude) return;
 
-    this.value.value = Vec.fromPolar(angle * ONE_DEGREE, mag, w);
+    this._settingValue = true;
+
+    try {
+      this.value.value = Vec.fromPolar(angle * ONE_DEGREE, mag, w);
+      this.assignVectorValues();
+    } finally {
+      this._settingValue = false;
+    }
   }
 
   private createLabel() {
@@ -191,12 +211,20 @@ export class VectorObject extends DrawObject {
   }
 
   private assignVectorValues() {
-    const vector = this.value.value || Vec.emptyDirection;
-    this.x.value = vector.x;
-    this.y.value = vector.y;
-    this.w.value = vector.w;
-    this.angle.value = vector.angle * ONE_RADIAN;
-    this.mag.value = vector.magnitude;
+    if (this._assigningValues) return;
+
+    this._assigningValues = true;
+
+    try {
+      const vector = this.value.value || Vec.emptyDirection;
+      this.x.value = vector.x;
+      this.y.value = vector.y;
+      this.w.value = vector.w;
+      this.angle.value = vector.angle * ONE_RADIAN;
+      this.mag.value = vector.magnitude;
+    } finally {
+      this._assigningValues = false;
+    }
   }
 
   private getDrawOrigin() {
@@ -274,7 +302,7 @@ export class VectorObject extends DrawObject {
     return result;
   }
 
-  @D.setDlog() @D.clog(self => self.name)
+  @D.clog(self => self.name)
   private getDataLabelPosition() {
     const vector = this.value.value;
 
@@ -296,10 +324,12 @@ export class VectorObject extends DrawObject {
   @D.clog(self => self.name)
   private clearCalcValues() { this._calcSettings.forEach(cs => cs.setValue!.call(cs.instance, undefined)); }
 
-  @D.setDlog() @D.clog(self => self.name) @logEvent
+  @D.clog(self => self.name) @logEvent
   protected onChildChanged(e: ChangeArgs) {
     if (this.isOrigin) return;
     // D.dlog(`sender: ${e.sender && (e.sender.propertyName || e.sender.name)}, ${e.oldValue} => ${e.newValue}`);
+    if (this._settingValue) return;
+    if (this._assigningValues) return;
     if (e.sender instanceof CalcValue) return;
 
     this.clearCalcValues();

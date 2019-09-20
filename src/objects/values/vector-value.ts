@@ -13,7 +13,7 @@ export class VectorValue extends Value<Vec> {
     this.mode = ValueMode.vector;
   }
 
-  get allowedModes() { return ValueMode.vector | ValueMode.calculation; }
+  get allowedModes() { return ValueMode.text | ValueMode.vector | ValueMode.calculation; }
 
   // get sourceValue(): VectorValue | undefined { return <VectorValue>this._sourceValue; }
   // set sourceValue(value) {

@@ -1,8 +1,9 @@
 import { ComponentBase, FilteredSelectElement, TransformValueElement } from '..';
-import { DisplayType, TransformKind, ValueMode, ValueType } from '../../core';
+import { Category, DisplayType, TransformKind, ValueMode, ValueType } from '../../core';
 import { UiUtils } from '../../utils';
 import {
   attribute,
+  autoAttribute,
   boolAttribute,
   child,
   component,
@@ -72,7 +73,8 @@ export class ValueSelectElement extends ComponentBase {
     this._elTransformation.userData = value;
   }
 
-
+  // @ts-ignore - decorator implemented.
+  @autoAttribute(Category.value) category: Category;
   // @ts-ignore - decorator implemented.
   @numberAttribute(ValueMode.text) mode: ValueMode;
   // @ts-ignore - decorator implemented.
@@ -181,6 +183,22 @@ export class ValueSelectElement extends ComponentBase {
     return this.displayType === DisplayType.checkbox && this.mode === ValueMode.text;
   }
 
+  protected _transformElements: TransformValueElement[] = [];
+  protected get transformElements() {
+    if (this._transformElements.length === 0) {
+      this._transformElements.push(
+        this._elTextTransform,
+        this._elConstant,
+        this._elTextObject,
+        this._elVector,
+        this._elCalculation,
+        this._elTransformation
+      );
+    }
+
+    return this._transformElements;
+  }
+
   // @ts-ignore - unused param.
   protected attributeChangedCore(name: string, oldValue: string, newValue: string) {
     switch (name) {
@@ -191,26 +209,19 @@ export class ValueSelectElement extends ComponentBase {
         this._elText.setAttribute(name, newValue);
         break;
 
+      case "category":
+        if (this.isAllConnected)
+          this.transformElements.forEach(e => e.category = this.category);
+        break;
+
       case "value-type":
-        if (this.isAllConnected) {
-          this._elTextTransform.valueType = this.valueType;
-          this._elConstant.valueType = this.valueType;
-          this._elTextObject.valueType = this.valueType;
-          this._elVector.valueType = this.valueType;
-          this._elCalculation.valueType = this.valueType;
-          this._elTransformation.valueType = this.valueType;
-        }
+        if (this.isAllConnected)
+          this.transformElements.forEach(e => e.valueType = this.valueType);
         break;
 
       case "allowed-value-types":
-        if (this.isAllConnected) {
-          this._elTextTransform.allowedValueTypes = this.allowedValueTypes;
-          this._elConstant.allowedValueTypes = this.allowedValueTypes;
-          this._elTextObject.allowedValueTypes = this.allowedValueTypes;
-          this._elVector.allowedValueTypes = this.allowedValueTypes;
-          this._elCalculation.allowedValueTypes = this.allowedValueTypes;
-          this._elTransformation.allowedValueTypes = this.allowedValueTypes;
-        }
+        if (this.isAllConnected)
+          this.transformElements.forEach(e => e.allowedValueTypes = this.allowedValueTypes);
         break;
     }
   }
@@ -241,6 +252,7 @@ export class ValueSelectElement extends ComponentBase {
     hideElement(this._elVector);
     hideElement(this._elCalculation);
     hideElement(this._elTransformation);
+    hideElement(this._elBtnExpand);
   }
 
   protected updateVisibility() {

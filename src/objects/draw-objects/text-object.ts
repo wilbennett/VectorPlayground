@@ -1,5 +1,5 @@
 import { BoolValue, ColorValue, DrawObject, NumberValue, StringValue, TextValue, VectorValue } from '..';
-import { Category, IWorld, promisedWorld, Vec } from '../../core';
+import { Category, DisplayType, IWorld, promisedWorld, Vec } from '../../core';
 import { Utils } from '../../utils';
 
 let world!: IWorld;
@@ -23,6 +23,11 @@ export class TextObject extends DrawObject {
     this.position = new VectorValue("position");
 
     this.text.alwaysShowText = true;
+
+    this.round.displayType = DisplayType.checkbox;
+    this.angle.displayType = DisplayType.range;
+    this.opacity.displayType = DisplayType.range;
+    this.visible.displayType = DisplayType.checkbox;
 
     this.addChildren(
       this.text,

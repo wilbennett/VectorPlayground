@@ -1,5 +1,5 @@
 import { ComponentBase, FilteredSelectElement } from '..';
-import { FilteredType, TransformKind, ValueType } from '../../core';
+import { Category, FilteredType, TransformKind, ValueType } from '../../core';
 import { UiUtils } from '../../utils';
 import {
   autoAttribute,
@@ -48,6 +48,8 @@ export class TransformValueElement extends ComponentBase {
   }
 
   // @ts-ignore - decorator implemented.
+  @autoAttribute(Category.value) category: Category;
+  // @ts-ignore - decorator implemented.
   @numberAttribute(ValueType.string) valueType: ValueType;
   // @ts-ignore - decorator implemented.
   @numberAttribute() allowedValueTypes: ValueType;
@@ -65,21 +67,21 @@ export class TransformValueElement extends ComponentBase {
   // @ts-ignore - decorator implemented.
   sourceValueElement: FilteredSelectElement;
   // @ts-ignore - decorator implemented.
-  sourceValue: string;
+  sourceValue: any;
 
   @wrapElementProperty() @child @hookChange
   private _elTransform: FilteredSelectElement;
   // @ts-ignore - decorator implemented.
   transformElement: FilteredSelectElement;
   // @ts-ignore - decorator implemented.
-  transform: string;
+  transform: any;
 
   @wrapElementProperty() @child @hookChange
   private _elModifier: FilteredSelectElement;
   // @ts-ignore - decorator implemented.
   modifierElement: FilteredSelectElement;
   // @ts-ignore - decorator implemented.
-  modifier: string;
+  modifier: any;
 
   get filteredSelects() { return [this._elSourceValue, this._elTransform, this._elModifier]; }
 
@@ -88,6 +90,12 @@ export class TransformValueElement extends ComponentBase {
     switch (name) {
       case "mode":
         this.hideSourceValue = newValue === TransformKind.transform;
+        break;
+
+      case "category":
+        if (this.isAllConnected) {
+          this.filteredSelects.forEach(s => s.category = this.category);
+        }
         break;
 
       case "value-type":

@@ -1,18 +1,19 @@
-import { BaseObject } from '.';
-import { Category, IDisposable, ValueType } from '../core';
-import { ChangeArgs } from '../event-args';
-import { EventFilter, Listener } from '../events';
+import { Category, DisplayType, ValueMode, ValueType } from '../core';
 
 export interface IValue {
-  readonly name: string;
-  readonly propertyName: string;
-  readonly category: Category;
-  readonly owner?: BaseObject;
-  readonly valueType: ValueType;
-  readonly allowedTypes: ValueType;
+  category: Category;
+  mode: ValueMode;
+  valueType: ValueType;
+  displayType: DisplayType;
+  allowedModes: ValueMode;
+  allowedValueTypes: ValueType;
+  alwaysShowText: boolean;
+  readOnlyText: boolean;
+  min?: number;
+  max?: number;
+  step?: number;
   text: string;
-  value: any;
-
-  onChanged(listener: Listener<ChangeArgs>, filter?: EventFilter): IDisposable;
-  offChanged(listener: Listener<ChangeArgs>): void;
+  sourceValue: any;
+  transform: any;
+  modifier: any;
 }

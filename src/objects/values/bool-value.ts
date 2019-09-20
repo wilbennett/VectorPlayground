@@ -11,9 +11,12 @@ export class BoolValue extends Value<boolean> {
     super(name, ValueType.bool, undefined, value);
   }
 
-  protected convertToString(value?: boolean) { return toString(value) || undefined; }
+  protected convertToString(value?: boolean) {
+    const result = toString(value);
+    return !!result && !falseStrings.find(s => s === result.toLowerCase()) ? "true" : "";
+  }
 
   protected convertFromString(value?: string) {
-    return !!value && !!falseStrings.find(s => s === value.toLowerCase());
+    return !!value && !falseStrings.find(s => s === value.toLowerCase());
   }
 }

@@ -1,6 +1,7 @@
 import { ComponentBase } from '..';
 import {
   CaptionMode,
+  Category,
   FilteredType,
   ICaptioned,
   IDisposable,
@@ -28,8 +29,8 @@ const elTemplate = document.createElement('template');
 elTemplate.innerHTML = template;
 
 @D.dlogged({
-  logAllProps: true,
-  logAllMethods: true,
+  // logAllProps: true,
+  // logAllMethods: true,
 })
 @component("filtered-select")
 export class FilteredSelectElement extends ComponentBase {
@@ -60,6 +61,8 @@ export class FilteredSelectElement extends ComponentBase {
   length: number;
 
   // @ts-ignore - decorator implemented.
+  @autoAttribute(Category.value) category: Category;
+  // @ts-ignore - decorator implemented.
   @autoAttribute() valueType: ValueType;
   // @ts-ignore - decorator implemented.
   @numberAttribute() allowedValueTypes: ValueType;
@@ -81,7 +84,7 @@ export class FilteredSelectElement extends ComponentBase {
     this.subscribeToList();
   }
 
-  get value() { return this.filteredList && this.filteredList.get(this._elValue.selectedIndex); }
+  get value(): any { return this.filteredList && this.filteredList.get(this._elValue.selectedIndex); }
   set value(value) { this._elValue.selectedIndex = this.filteredList ? this._filteredList.indexOf(value) : -1; }
 
   // @ts-ignore - unused param.

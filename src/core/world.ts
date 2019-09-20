@@ -1,4 +1,5 @@
 import { Category, IWorld, setWorld, Tristate, Vec } from '.';
+import { ValueSelectElement } from '../components';
 import * as D from '../decorators/dlog';
 import { ChangeArgs } from '../event-args';
 import {
@@ -23,7 +24,7 @@ const { TWO_PI, ONE_DEGREE, checkType } = Utils;
 // ComponentBase; FilteredSelectElement; TransformValueElement; ValueSelectElement;
 // let skippedRenderCount = 0;
 
-let DEBUG_EVENTS = false;
+let DEBUG_EVENTS = true;
 let DEBUG_VECTORS = false;
 let DEBUG_TEXTS = false;
 D.setDLogActive(true);
@@ -241,6 +242,31 @@ function removeObjects(...objs: BaseObject[]) {
 // @ts-ignore - unused param.
 function handleObjectChanged(e: ChangeArgs) { changed = true; }
 
+function update() {
+  updatables.items.forEach(obj => (<UpdatableObject>obj).update());
+
+  if (changed || forceRender) {
+    // logc`update: changed ${changed}, force ${forceRender}`;
+    // console.log(drawObjects.items);
+    ui.ctx.clearRect(0, 0, ui.canvas.width, ui.canvas.height);
+    ui.setTransform();
+    drawObjects.items.forEach(obj => (<DrawObject>obj).render(ui.ctx));
+    ui.clearTransform();
+  }
+  // else {
+  //   skippedRenderCount++;
+
+  //   // if ((frame % 60) === 0)
+  //   //   console.log("***** skipped render");
+  // }
+
+  changed = false;
+  forceRender = false;
+}
+
+/*********************************************************************************************/
+/* Properties Handling
+/*********************************************************************************************/
 function handleSelectedVectorChanged(e: ListEventArgs) {
   if (!(e instanceof ListSelectedItemChangedArgs)) return;
   console.log("******** SelectedVectorChanged");
@@ -305,12 +331,41 @@ function createPropertyList(obj: BaseObject) {
 
 function addPropertyElements(elements: HTMLElement[], property: Value<any>, useTitle: boolean = false) {
   const label = document.createElement("label");
-  const select = document.createElement("value-select");
+  const select = <ValueSelectElement>document.createElement("value-select");
 
   label.className = "inputlbl";
   label.innerText = useTitle ? `${property.title}:` : `${property.caption}:`;
 
   elements.push(label, select);
+
+  const assignValueToElement = () => {
+    D.setIsDLog(property.propertyName === "u.x");
+    property.assignTo(select);
+    D.setIsDLog(false);
+  }
+
+  const assignElementToValue = (e: Event) => {
+    if (e instanceof CustomEvent && e.detail === "HACK") return;
+
+    D.setIsDLog(property.propertyName === "u.x");
+    property.assignFrom(select);
+    D.setIsDLog(false);
+  }
+
+  const handleConnected = () => {
+    assignValueToElement();
+    select.removeEventListener("connectall", handleConnected);
+    select.addEventListener("input", assignElementToValue);
+    select.addEventListener("change", assignElementToValue);
+    property.onChanged(assignValueToElement, e => e.sender === property);
+    // world.setFilter(select);
+    // registerElement(select);
+  };
+
+  // Web Components does not hook up the shadow DOMS for nested Components
+  // immediately on creation. Wait until connected to access nested
+  // component elements.
+  select.addEventListener("connectall", handleConnected);
 }
 
 function createPropertiesElements(properties: FilteredList<BaseObject>) {
@@ -325,28 +380,6 @@ function createPropertiesElements(properties: FilteredList<BaseObject>) {
   });
 
   return result;
-}
-
-function update() {
-  updatables.items.forEach(obj => (<UpdatableObject>obj).update());
-
-  if (changed || forceRender) {
-    // logc`update: changed ${changed}, force ${forceRender}`;
-    // console.log(drawObjects.items);
-    ui.ctx.clearRect(0, 0, ui.canvas.width, ui.canvas.height);
-    ui.setTransform();
-    drawObjects.items.forEach(obj => (<DrawObject>obj).render(ui.ctx));
-    ui.clearTransform();
-  }
-  // else {
-  //   skippedRenderCount++;
-
-  //   // if ((frame % 60) === 0)
-  //   //   console.log("***** skipped render");
-  // }
-
-  changed = false;
-  forceRender = false;
 }
 
 /*********************************************************************************************/

@@ -93,10 +93,12 @@ export class BaseObject implements IDisposable, ICaptioned {
     BaseObject.changeEmitter.emit(e);
   }
 
+  protected setOwner(owner: BaseObject) { this._owner = owner; }
+
   protected addChildren(...children: BaseObject[]) {
     this._children = this._children || [];
 
-    children.forEach(child => child._owner = this);
+    children.forEach(child => child.setOwner(this));
 
     this._children.push(...children);
     world.addObjects(...children);

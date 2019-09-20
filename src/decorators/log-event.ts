@@ -13,7 +13,7 @@ export function logEvent(constructorOrProto: Object, name: string, descriptor: P
     if (world.debugEvents) {
       const e = args.find(a => a instanceof EventArgs);
       // @ts-ignore - missing property names.
-      D.logd(...css`${EVENT_CSS}${this.propertyName || this.name}: ${e}`);
+      D.logd(...css`${EVENT_CSS}${this.propertyName || this.name} <== ${e}`);
     }
 
     return originalMethod.apply(this, args);
