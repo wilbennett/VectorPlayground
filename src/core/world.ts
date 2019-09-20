@@ -205,7 +205,7 @@ function checkSelection(...lists: FilteredList<BaseObject>[]) {
 }
 
 function addObjectToLists(obj: BaseObject, lists: FilteredList<BaseObject>[], hookChange: boolean = true) {
-  hookChange && obj.onChanged(handleObjectChanged, e => e.sender === obj);
+  hookChange && obj.onChanged(handleObjectChanged);
   lists.forEach(list => list.add(obj));
 
   checkSelection(operations, vectors, textObjects);
@@ -357,7 +357,7 @@ function addPropertyElements(elements: HTMLElement[], property: Value<any>, useT
     select.removeEventListener("connectall", handleConnected);
     select.addEventListener("input", assignElementToValue);
     select.addEventListener("change", assignElementToValue);
-    property.onChanged(assignValueToElement, e => e.sender === property);
+    property.onChanged(assignValueToElement);
     // world.setFilter(select);
     // registerElement(select);
   };

@@ -259,7 +259,7 @@ export class Value<T> extends BaseObject implements IValue {
 
     this._sourceSubscription = value.onChanged(
       this._handleSourceChangedBound,
-      e => e instanceof ChangeEventArgs && e.sender === value && e.kind == EventKind.value);
+      e => e instanceof ChangeEventArgs && e.kind == EventKind.value);
   }
 
   protected setValue(value: Tristate<T>) {

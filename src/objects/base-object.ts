@@ -77,13 +77,13 @@ export class BaseObject implements IDisposable, ICaptioned {
   }
 
   onChanged(listener: Listener<ChangeArgs>, filter?: EventFilter) {
-    return BaseObject.changeEmitter.on(listener, filter);
+    return BaseObject.changeEmitter.on(listener, e => e.sender === this && (!filter || filter(e)));
   }
 
   offChanged(listener: Listener<ChangeArgs>) { BaseObject.changeEmitter.off(listener); }
 
   onCaptionChanged(listener: Listener<ChangeArgs>, filter?: EventFilter) {
-    return BaseObject.changeEmitter.on(listener, filter);
+    return BaseObject.changeEmitter.on(listener, e => e.sender === this && (!filter || filter(e)));
   }
 
   offCaptionChanged(listener: Listener<ChangeArgs>) { BaseObject.changeEmitter.off(listener); }
