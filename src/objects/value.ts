@@ -4,7 +4,7 @@ import * as D from '../decorators';
 import { ChangeArgs, ChangeEventArgs, EventKind } from '../event-args';
 import { Utils } from '../utils';
 
-const { hasValue, isEmpty } = Utils;
+const { isEmpty } = Utils;
 
 @D.dlogged({
   logAllMethods: true,
