@@ -15,12 +15,12 @@ export enum DisplayType {
 }
 
 export enum ValueType {
-	string = 1 >> 0,
-	color = 1 >> 1,
-	number = 1 >> 2,
-	bool = 1 >> 3,
-	vector = 1 >> 4,
-	transform = 1 >> 5,
+	string = 1 << 0,
+	color = 1 << 1,
+	number = 1 << 2,
+	bool = 1 << 3,
+	vector = 1 << 4,
+	transform = 1 << 5,
 }
 
 export enum Category {
@@ -41,12 +41,12 @@ export enum FilteredType {
 }
 
 export enum ValueMode {
-	text = 1 >> 0,
-	constant = 1 >> 1,
-	vector = 1 >> 2,
-	textObject = 1 >> 3,
-	transform = 1 >> 4,
-	calculation = 1 >> 5,
+	text = 1 << 0,
+	constant = 1 << 1,
+	vector = 1 << 2,
+	textObject = 1 << 3,
+	transform = 1 << 4,
+	calculation = 1 << 5,
 }
 
 export enum TransformKind {
