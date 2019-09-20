@@ -1,5 +1,8 @@
 import { Tristate } from '../core';
 
+// @ts-ignore - no definition for stackTraceLimit.
+Error.stackTraceLimit = 15;
+
 export class Utils {
   static readonly CALLER_REGEX: string = String.raw`at (new \S+|\S+)( \[as (\S+)\])?`;
   static readonly TWO_PI = 2 * Math.PI;
@@ -26,8 +29,8 @@ export class Utils {
 
   static isNull(value: any) { return value === null; }
   static isUndefined(value: any) { return value === undefined; }
-  static isEmpty(value: any) { return value === undefined || value === undefined; }
-  static hasValue(value: any) { return value !== undefined && value !== undefined; }
+  static isEmpty(value: any) { return value === undefined || value === null; }
+  static hasValue(value: any) { return value !== undefined && value !== null; }
 
   static defaultUndefined<T>(value?: T, defaultValue?: T) {
     return value !== undefined ? value : defaultValue;
@@ -53,13 +56,15 @@ export class Utils {
       : "";
   }
 
-  static getCaller(callstack: string, ...ignore: string[]) {
+  static getCaller(...ignore: string[]) {
+    const callstack = new Error().stack || "";
     const callerRegex = new RegExp(this.CALLER_REGEX, "mg");
+    callerRegex.exec(callstack);
     callerRegex.exec(callstack);
     var match = callerRegex.exec(callstack);
     let caller = match && (match[3] || match[1]);
 
-    while (match && (!caller || ignore.indexOf(caller) >= 0)) {
+    while (match && (!caller || ignore.findIndex(x => caller!.startsWith(x)) >= 0)) {
       match = callerRegex.exec(callstack);
       caller = match && (match[3] || match[1]) || caller;
     }

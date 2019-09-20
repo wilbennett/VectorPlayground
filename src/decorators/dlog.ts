@@ -2,7 +2,7 @@ import 'reflect-metadata';
 
 import { createMember, createProperty, replaceProperty } from '.';
 import { Constructor } from '../core';
-import { css, CSS_START, NORMAL } from '../utils';
+import { css, CSS_START, NORMAL, Utils } from '../utils';
 
 let dLogIndent = "   ";
 let curLogIndent = "";
@@ -13,8 +13,6 @@ let logGetResult = true;
 let logSetParam = true;
 let logMethodResult = true;
 let maxResultLength = 50;
-
-const CALLER_REGEX: string = String.raw`at (new \S+|\S+)( \[as (\S+)\])?`;
 
 // const RED = CSS_START + "color:red";
 // const GREEN = CSS_START + "color:green";
@@ -113,6 +111,29 @@ function dlogCheckDetail(isDetail: boolean, ...msg: any[]) {
   dlog(...msg);
 }
 
+// function glogCheckDetail(isDetail: boolean, ...msg: any[]) {
+//   if (!active) return false;
+//   if (!isLog) return false;
+//   if (isDetail && !detailMode) return false;
+
+//   console.group(...msg);
+//   return true;
+// }
+
+function gclogCheckDetail(isDetail: boolean, ...msg: any[]) {
+  if (!active) return false;
+  if (!isLog) return false;
+  if (isDetail && !detailMode) return false;
+
+  console.groupCollapsed(...msg);
+  return true;
+}
+
+function gelog(...msg: any[]) {
+  console.log(...msg);
+  console.groupEnd();
+}
+
 interface DLoggedSettings {
   setLogIf?: (args: any[]) => boolean;
   logCtor?: boolean;
@@ -125,6 +146,7 @@ interface DLoggedSettings {
   methodSetLogIf?: (self: any) => boolean;
   propDetail?: boolean;
   methodDetail?: boolean;
+  exclude?: string[];
 }
 
 export function dlogged({
@@ -138,7 +160,8 @@ export function dlogged({
   propSetLogIf,
   methodSetLogIf,
   propDetail = false,
-  methodDetail = false
+  methodDetail = false,
+  exclude = []
 }: DLoggedSettings = {}) {
   return function <T extends Constructor<{}>>(constructor: T) {
     if (logAllMethods || logAllProps) {
@@ -146,6 +169,7 @@ export function dlogged({
 
       for (const name of names) {
         if (name === "constructor") continue;
+        if (exclude.indexOf(name) >= 0) continue;
 
         const desc = Object.getOwnPropertyDescriptor(constructor.prototype, name)!;
 
@@ -190,17 +214,7 @@ export function dlogged({
             isLog = isLog || !!(setLogIf && setLogIf(args));
 
             if (logCtor) {
-              const stack = new Error().stack || "";
-              const callerRegex = new RegExp(CALLER_REGEX, "mg");
-              callerRegex.exec(stack);
-              var match = callerRegex.exec(stack);
-              let caller = match && (match[3] || match[1]);
-
-              while (match && (caller && caller.startsWith("new ") || caller === "eval")) {
-                // console.log(new Error().stack);
-                match = callerRegex.exec(stack);
-                caller = match && (match[3] || match[1]) || caller;
-              }
+              const caller = Utils.getCaller("eval ", "new ", "http:", "Array.");
 
               dlogCheckDetail(isDetail, ...css`${name}.${STATE}ctor${NORMAL} ${CALL}START${NORMAL} <== ${caller}`);
               incLogIndent(isDetail);
@@ -280,6 +294,140 @@ export function setDlog(condition?: (self: any) => boolean) {
   }
 }
 
+function clogMethod(target: Object, key: string, descriptor: PropertyDescriptor, isDetail: boolean, state?: (self: any) => string) {
+  const originalDesc = getProp(target.constructor, key) || descriptor;
+  const name = target.constructor.name;
+
+  const newMethod = function (...args: any[]) {
+    if (!active || !isLog)
+      // @ts-ignore - untyped this.
+      return originalDesc.value.apply(this, args);
+
+    // @ts-ignore - untyped this.
+    const pre = state ? ` (${state(this)})` : "";
+    let res: any;
+    let logged = false;
+
+    try {
+      // const caller = Utils.getCaller(key, "eval ");
+      const caller = Utils.getCaller(key, "eval ", "http:", "Array.", "TypedEvent.");
+
+      logged = gclogCheckDetail(isDetail, ...css`${name}.${CALL}${key}()${NORMAL}${STATE}${pre}${NORMAL} <== ${caller}`);
+      // incLogIndent(isDetail);
+      // @ts-ignore - untyped this.
+      const result = originalDesc.value.apply(this, args);
+
+      if (logMethodResult)
+        res = hasValue(result) ? result.toString().substr(0, maxResultLength) : "";
+
+      return result;
+    } finally {
+      if (logged) {
+        // decLogIndent(isDetail);
+
+        if (logMethodResult)
+          gelog(...css`${name}.${CALL}${key}()${NORMAL} END${STATE}${pre}${NORMAL} => ${RESULT}${res}`);
+        else
+          gelog(...css`${name}.${CALL}${key}()${NORMAL} END${STATE}${pre}${NORMAL}`);
+      }
+    }
+  };
+
+  addProp(target.constructor, key, createMember(newMethod), "clog");
+  return descriptor;
+}
+
+function clogGetter(target: Object, key: string, descriptor: PropertyDescriptor, isDetail: boolean, state?: (self: any) => string) {
+  const originalDesc = getProp(target.constructor, key) || descriptor;
+  const name = target.constructor.name;
+
+  let getter = originalDesc.get && function () {
+    if (!active || !isLog)
+      // @ts-ignore - untyped this.
+      return originalDesc.get!.call(this);
+
+    // @ts-ignore - untyped this.
+    const pre = state ? ` (${state(this)})` : "";
+    let res: any;
+    let logged = false;
+
+    try {
+      const caller = Utils.getCaller(key, "eval ", "http:", "Array.");
+
+      logged = gclogCheckDetail(isDetail, ...css`${name}.${CALL}${key}${NORMAL}.get${STATE}${pre}${NORMAL} <== ${caller}`);
+      // incLogIndent(isDetail);
+      // @ts-ignore - untyped this.
+      const result = originalDesc.get!.call(this);
+
+      if (logGetResult)
+        res = hasValue(result) ? result.toString().substr(0, maxResultLength) : "";
+
+      return result;
+    } finally {
+      if (logged) {
+        // decLogIndent(isDetail);
+
+        if (logGetResult)
+          gelog(...css`${name}.${CALL}${key}${NORMAL}.get END${STATE}${pre}${NORMAL} => ${RESULT}${res}`);
+        else
+          gelog(...css`${name}.${CALL}${key}${NORMAL}.get END${STATE}${pre}${NORMAL}`);
+      }
+    }
+  };
+
+  return getter;
+}
+
+function clogSetter(target: Object, key: string, descriptor: PropertyDescriptor, isDetail: boolean, state?: (self: any) => string) {
+  const originalDesc = getProp(target.constructor, key) || descriptor;
+  const name = target.constructor.name;
+
+  let setter = originalDesc.set && function (value: any) {
+    if (!active || !isLog) {
+      // @ts-ignore - untyped this.
+      originalDesc.set!.call(this, value);
+      return;
+    }
+
+    // @ts-ignore - untyped this.
+    const pre = state ? ` (${state(this)})` : "";
+    let logged = false;
+
+    try {
+      const caller = Utils.getCaller(key, "eval ", "http:", "Array.");
+
+      if (logSetParam) {
+        const par = hasValue(value) ? value.toString().substr(0, maxResultLength) : "";
+        // @ts-ignore - untyped this.
+        let init = this[`_${key}`];
+        init = hasValue(init) ? init.toString().substr(0, maxResultLength) : "";
+
+        logged = gclogCheckDetail(
+          isDetail,
+          ...css`${name}.${CALL}${key}${NORMAL}.set(${RESULT}${par}${NORMAL})${STATE}${pre}${NORMAL} (${RESULT}${init}${NORMAL}) <== ${caller}`);
+      } else
+        logged = gclogCheckDetail(isDetail, ...css`${name}.${CALL}${key}${NORMAL}.set${STATE}${pre}${NORMAL} <== ${caller}`);
+      // incLogIndent(isDetail);
+      // @ts-ignore - untyped this.
+      originalDesc.set!.call(this, value);
+    } finally {
+      if (logged) {
+        // decLogIndent(isDetail);
+
+        if (logSetParam) {
+          // @ts-ignore - untyped this.
+          let res = this[`_${key}`];
+          res = hasValue(res) ? res.toString().substr(0, maxResultLength) : "";
+          gelog(...css`${name}.${CALL}${key}${NORMAL}.set END${STATE}${pre}${NORMAL} ${RESULT}(${res})`);
+        } else
+          gelog(...css`${name}.${CALL}${key}${NORMAL}.set END${STATE}${pre}${NORMAL}`);
+      }
+    }
+  };
+
+  return setter;
+}
+
 export function clog(): any;
 export function clog(isDetail: boolean): any;
 export function clog(state?: (self: any) => string, isDetail?: boolean): any;
@@ -299,141 +447,12 @@ export function clog(param1?: boolean | ((self: any) => string), param2?: boolea
     if (!descriptor) return;
 
     const originalDesc = getProp(target.constructor, key) || descriptor;
-    const name = target.constructor.name;
 
-    if (originalDesc.value) {
-      const newMethod = function (...args: any[]) {
-        if (!active || !isLog)
-          // @ts-ignore - untyped this.
-          return originalDesc.value.apply(this, args);
+    if (originalDesc.value)
+      return clogMethod(target, key, descriptor, isDetail, state);
 
-        // @ts-ignore - untyped this.
-        const pre = state ? ` (${state(this)})` : "";
-        let res: any;
-
-        try {
-          const stack = new Error().stack || "";
-          const callerRegex = new RegExp(CALLER_REGEX, "mg");
-          callerRegex.exec(stack);
-          var match = callerRegex.exec(stack);
-          let caller = match && (match[3] || match[1]);
-
-          while (match && (caller === key || caller === "eval")) {
-            match = callerRegex.exec(stack);
-            caller = match && (match[3] || match[1]) || caller;
-          }
-
-          dlogCheckDetail(isDetail, ...css`${name}.${CALL}${key}${NORMAL} START${STATE}${pre}${NORMAL} <== ${caller}`);
-          incLogIndent(isDetail);
-          // @ts-ignore - untyped this.
-          const result = originalDesc.value.apply(this, args);
-
-          if (logMethodResult)
-            res = hasValue(result) ? result.toString().substr(0, maxResultLength) : "";
-
-          return result;
-        } finally {
-          decLogIndent(isDetail);
-
-          if (logMethodResult)
-            dlogCheckDetail(isDetail, ...css`${name}.${CALL}${key}${NORMAL} END${STATE}${pre}${NORMAL} => ${RESULT}${res}`);
-          else
-            dlogCheckDetail(isDetail, ...css`${name}.${CALL}${key}${NORMAL} END${STATE}${pre}${NORMAL}`);
-        }
-      };
-
-      addProp(target.constructor, key, createMember(newMethod), "clog");
-      return descriptor;
-    }
-
-    let getter = originalDesc.get && function () {
-      if (!active || !isLog)
-        // @ts-ignore - untyped this.
-        return originalDesc.get!.call(this);
-
-      // @ts-ignore - untyped this.
-      const pre = state ? ` (${state(this)})` : "";
-      let res: any;
-
-      try {
-        const stack = new Error().stack || "";
-        const callerRegex = new RegExp(CALLER_REGEX, "mg");
-        callerRegex.exec(stack);
-        var match = callerRegex.exec(stack);
-        let caller = match && (match[3] || match[1]);
-
-        while (match && (caller === key || caller === "eval")) {
-          match = callerRegex.exec(stack);
-          caller = match && (match[3] || match[1]) || caller;
-        }
-
-        dlogCheckDetail(isDetail, ...css`${name}.${CALL}${key}${NORMAL}.get START${STATE}${pre}${NORMAL} <== ${caller}`);
-        incLogIndent(isDetail);
-        // @ts-ignore - untyped this.
-        const result = originalDesc.get!.call(this);
-
-        if (logGetResult)
-          res = hasValue(result) ? result.toString().substr(0, maxResultLength) : "";
-
-        return result;
-      } finally {
-        decLogIndent(isDetail);
-
-        if (logGetResult)
-          dlogCheckDetail(isDetail, ...css`${name}.${CALL}${key}${NORMAL}.get END${STATE}${pre}${NORMAL} => ${RESULT}${res}`);
-        else
-          dlogCheckDetail(isDetail, ...css`${name}.${CALL}${key}${NORMAL}.get END${STATE}${pre}${NORMAL}`);
-      }
-    };
-
-    let setter = originalDesc.set && function (value: any) {
-      if (!active || !isLog) {
-        // @ts-ignore - untyped this.
-        originalDesc.set!.call(this, value);
-        return;
-      }
-
-      // @ts-ignore - untyped this.
-      const pre = state ? ` (${state(this)})` : "";
-
-      try {
-        const stack = new Error().stack || "";
-        const callerRegex = new RegExp(CALLER_REGEX, "mg");
-        callerRegex.exec(stack);
-        var match = callerRegex.exec(stack);
-        let caller = match && (match[3] || match[1]);
-
-        while (match && (caller === key || caller === "eval")) {
-          match = callerRegex.exec(stack);
-          caller = match && (match[3] || match[1]) || caller;
-        }
-
-        if (logSetParam) {
-          const par = hasValue(value) ? value.toString().substr(0, maxResultLength) : "";
-          // @ts-ignore - untyped this.
-          let init = this[`_${key}`];
-          init = hasValue(init) ? init.toString().substr(0, maxResultLength) : "";
-
-          dlogCheckDetail(
-            isDetail,
-            ...css`${name}.${CALL}${key}${NORMAL}.set(${RESULT}${par}${NORMAL}) START${STATE}${pre}${NORMAL} (${RESULT}${init}${NORMAL}) <== ${caller}`);
-        } else
-          dlogCheckDetail(isDetail, ...css`${name}.${CALL}${key}${NORMAL}.set START${STATE}${pre}${NORMAL} <== ${caller}`);
-        incLogIndent(isDetail);
-        // @ts-ignore - untyped this.
-        originalDesc.set!.call(this, value);
-      } finally {
-        decLogIndent(isDetail);
-
-        if (logSetParam) {
-          // @ts-ignore - untyped this.
-          let res = this[`_${key}`];
-          res = hasValue(res) ? res.toString().substr(0, maxResultLength) : "";
-          dlogCheckDetail(isDetail, ...css`${name}.${CALL}${key}${NORMAL}.set END${STATE}${pre}${NORMAL} ${RESULT}(${res})`);
-        } else
-          dlogCheckDetail(isDetail, ...css`${name}.${CALL}${key}${NORMAL}.set END${STATE}${pre}${NORMAL}`);
-      }
-    };
+    let getter = clogGetter(target, key, descriptor, isDetail, state);
+    let setter = clogSetter(target, key, descriptor, isDetail, state);
 
     addProp(target.constructor, key, createProperty(getter, setter), "clog");
     return descriptor;
