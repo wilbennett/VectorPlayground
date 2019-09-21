@@ -1,4 +1,4 @@
-import { Category, ICaptioned, IDisposable, IWorld, promisedWorld, Utils } from '../core';
+import { Category, ICaptioned, IDisposable, IWorld, logEventEmit, promisedWorld, Utils } from '../core';
 import * as D from '../decorators';
 import { ChangeArgs, EventKind, StringChangeArgs } from '../event-args';
 import { EventFilter, Listener, TypedEvent } from '../events';
@@ -9,6 +9,7 @@ promisedWorld.then(w => world = w);
 
 @D.dlogged()
 export class BaseObject implements IDisposable, ICaptioned {
+  protected _changeEmitter = new TypedEvent<ChangeArgs>(this);
   private _handleChildChangedBound = this.handleChildChanged.bind(this);
   private _changeSubscription?: IDisposable;
   private _processingChange = false;
@@ -76,6 +77,25 @@ export class BaseObject implements IDisposable, ICaptioned {
     this.emitChange(this._captionArgs);
   }
 
+  //*
+  onChanged(listener: Listener<ChangeArgs>, filter?: EventFilter) {
+    return this._changeEmitter.on(listener, filter);
+  }
+
+  offChanged(listener: Listener<ChangeArgs>) { this._changeEmitter.off(listener); }
+
+  onCaptionChanged(listener: Listener<ChangeArgs>, filter?: EventFilter) {
+    return this._changeEmitter.on(listener, filter);
+  }
+
+  offCaptionChanged(listener: Listener<ChangeArgs>) { this._changeEmitter.off(listener); }
+
+  @logEventEmit
+  protected emitChange(e: ChangeArgs) {
+    e.sender = e.sender || this;
+    this._changeEmitter.emit(e);
+  }
+  /*/
   onChanged(listener: Listener<ChangeArgs>, filter?: EventFilter) {
     return BaseObject.changeEmitter.on(listener, e => e.sender === this && (!filter || filter(e)));
   }
@@ -88,10 +108,12 @@ export class BaseObject implements IDisposable, ICaptioned {
 
   offCaptionChanged(listener: Listener<ChangeArgs>) { BaseObject.changeEmitter.off(listener); }
 
+  @logEventEmit
   protected emitChange(e: ChangeArgs) {
     e.sender = e.sender || this;
     BaseObject.changeEmitter.emit(e);
   }
+  //*/
 
   protected setOwner(owner: BaseObject) { this._owner = owner; }
 
