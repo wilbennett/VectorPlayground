@@ -98,9 +98,13 @@ export class TextObject extends DrawObject {
       this.color.value);
   }
 
+  protected onChildChanged() {
+    this.clearCalculatedValues();
+  }
+
   private _positionValue?: Vec;
   private get positionValue() {
-    // if (this._positionValue !== undefined) return this._positionValue;
+    if (this._positionValue !== undefined) return this._positionValue;
 
     this._positionValue = this.position.value;
     return this._positionValue;
@@ -121,5 +125,10 @@ export class TextObject extends DrawObject {
     // dlogDetail(`${this.name} get positionValue: calculated ${this._positionValue}`);
     return result;
     //*/
+  }
+
+  private clearCalculatedValues() {
+    this._textValue = undefined;
+    this._positionValue = undefined;
   }
 }
