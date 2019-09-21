@@ -61,12 +61,12 @@ export class TextObject extends DrawObject {
       const num = toNumber(value);
 
       if (!isNaN(num)) {
-        value = num.toFixed(this.roundTo.value || 0);
+        value = num.toFixed(this.roundTo.value);
         this.text.value = value;
       }
     }
 
-    this._textValue = value || "";
+    this._textValue = value;
     return this._textValue;
   }
   set textValue(value) {
@@ -74,14 +74,11 @@ export class TextObject extends DrawObject {
       const num = toNumber(value);
 
       if (!isNaN(num))
-        value = num.toFixed(this.roundTo.value || 0);
+        value = num.toFixed(this.roundTo.value);
     }
 
     this._textValue = value;
     this.text.value = value;
-
-    // if (this.text.mode === ValueSelectMode.value)
-    //   this.clean();
   }
 
   get asNumber() { return toNumber(this.textValue); }
@@ -92,30 +89,30 @@ export class TextObject extends DrawObject {
 
     world.drawText(
       ctx,
-      this.textValue || "",
-      this.positionValue || Vec.emptyPosition,
-      this.align.value || "start",
-      this.angle.value || 0,
-      this.size.value || 12,
-      this.opacity.value || 1,
-      this.color.value || "#000000");
+      this.textValue,
+      this.positionValue,
+      this.align.value,
+      this.angle.value,
+      this.size.value,
+      this.opacity.value,
+      this.color.value);
   }
 
   private _positionValue?: Vec;
   private get positionValue() {
     // if (this._positionValue !== undefined) return this._positionValue;
 
-    this._positionValue = this.position.value || world.origin.value.value || Vec.emptyPosition;
+    this._positionValue = this.position.value;
     return this._positionValue;
 
     /*
     if (!this.position.sourceValue) {
-      this._positionValue = world.origin.value.value || Vec.emptyPosition;
+      this._positionValue = world.origin.value.value;
       // dlogDetail(`${this.name} get positionValue: no settings returning origin ${this._positionValue}`);
       return this._positionValue;
     }
 
-    let result = this.position.value || world.origin.value.value;
+    let result = this.position.value;
     const vector = this.position.vectorObject;
     const transform = this.position.transform && this.position.transform;
     result = !transform || transform.adjustOrigin ? vector.drawOrigin.addN(result) : result;

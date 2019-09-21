@@ -152,15 +152,13 @@ export class VectorObject extends DrawObject {
     if (this.isOrigin) return;
     if (!this.visible.value) return;
 
-    let vector = this.value.value || Vec.emptyDirection;
-
     world.drawVector(
       ctx,
-      vector,
-      this.drawOrigin.value!,
-      this.lineWidth.value || 1,
-      this.opacity.value || 1,
-      this.color.value || "#000000");
+      this.value.value,
+      this.drawOrigin.value,
+      this.lineWidth.value,
+      this.opacity.value,
+      this.color.value);
   }
 
   protected updateCore() {
@@ -168,19 +166,16 @@ export class VectorObject extends DrawObject {
     if (!this.rotate.value) return;
 
     let vector = this.value.value;
-
-    if (!vector) return;
-
-    this.setValue(vector.rotateN((this.rotateStep.value || 0) * ONE_DEGREE));
+    this.setValue(vector.rotateN(this.rotateStep.value * ONE_DEGREE));
   }
 
   @D.setDlog() @D.clog(self => self.name)
   private createPolar() {
     if (this.isOrigin) return;
 
-    const angle = this.angle.value || 0;
-    const mag = this.mag.value || 0;
-    const w = this.w.value || 0;
+    const angle = this.angle.value;
+    const mag = this.mag.value;
+    const w = this.w.value;
     const vector = this.value.value;
 
     if (vector && angle === vector.angle && mag === vector.magnitude) return;
@@ -230,29 +225,30 @@ export class VectorObject extends DrawObject {
     this._assigningValues = true;
 
     try {
-      const vector = this.value.value || Vec.emptyDirection;
+      const vector = this.value.value;
       this.x.value = vector.x;
       this.y.value = vector.y;
       this.w.value = vector.w;
       this.angle.value = vector.angle * ONE_RADIAN;
       this.mag.value = vector.magnitude;
+      this.clearCalcValues();
     } finally {
       this._assigningValues = false;
     }
   }
 
   private getDrawOrigin() {
-    const vector = this.value.value || Vec.emptyDirection;
+    const vector = this.value.value;
 
     if (this.isOrigin) return vector;
-    if (vector.isPoint) return world.origin.value.value || Vec.emptyDirection;
+    if (vector.isPoint) return world.origin.value.value;
 
-    return world.origin.value.value || Vec.emptyDirection;
+    return world.origin.value.value;
     /*
     const endObject = getVectorObjectFromSource(this.end.sourceValue);
 
     if (endObject && endObject !== this) {
-      let endPoint = this.end.value || Vec.emptyDirection;
+      let endPoint = this.end.value;
 
       if (endPoint !== vector) {
         const transform = this.end.transform;
@@ -263,11 +259,11 @@ export class VectorObject extends DrawObject {
       }
     }
 
-    if (!this.origin.sourceValue) return world.origin.value.value || Vec.emptyDirection;
+    if (!this.origin.sourceValue) return world.origin.value.value;
 
     let result = this.origin.value;
 
-    if (!result || result === vector) return world.origin.value.value || Vec.emptyDirection;
+    if (!result || result === vector) return world.origin.value.value;
 
     const origin = getVectorObjectFromSource(this.origin.sourceValue);
     const transform = this.origin.transform;
@@ -277,11 +273,11 @@ export class VectorObject extends DrawObject {
     //*/
   }
 
-  private getDrawEnd() { return this.drawOrigin.value!.addN(this.value.value || Vec.emptyDirection); }
+  private getDrawEnd() { return this.drawOrigin.value.addN(this.value.value); }
 
   @D.clog(self => self.name)
   private getLabelAngleDegrees() {
-    const vector = this.value.value || Vec.emptyDirection;
+    const vector = this.value.value;
 
     if (this.isOrigin) return 0;
     if (!vector) return 0;
@@ -346,13 +342,11 @@ export class VectorObject extends DrawObject {
     if (this._assigningValues) return;
     if (e.sender instanceof CalcValue) return;
 
-    this.clearCalcValues();
-
     if (e.sender === this.angle || e.sender === this.mag)
       return this.createPolar();
 
     if (e.sender === this.x || e.sender === this.y || e.sender === this.w)
-      return this.setValue(this.x.value || 0, this.y.value || 0, this.w.value || 0);
+      return this.setValue(this.x.value, this.y.value, this.w.value);
 
     if (e.sender === this.value)
       this.assignVectorValues();
