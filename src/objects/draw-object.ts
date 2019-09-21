@@ -1,6 +1,6 @@
-import { BaseObject } from ".";
+import { UpdatableObject } from '.';
 
-export class DrawObject extends BaseObject {
+export class DrawObject extends UpdatableObject {
   // @ts-ignore - unused param.
   protected renderCore(ctx: CanvasRenderingContext2D) { }
 

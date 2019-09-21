@@ -89,22 +89,18 @@ export class TextObject extends DrawObject {
   get asNumber() { return toNumber(this.textValue); }
   set asNumber(value) { this.textValue = toString(value) || ""; }
 
-  render(ctx: CanvasRenderingContext2D) {
+  protected renderCore(ctx: CanvasRenderingContext2D) {
     if (!this.visible) return;
 
-    try {
-
-      world.drawText(
-        ctx,
-        this.textValue || "",
-        this.positionValue || Vec.emptyPosition,
-        this.align.value || "start",
-        this.angle.value || 0,
-        this.size.value || 12,
-        this.opacity.value || 1,
-        this.color.value || "#000000");
-    } catch {
-    }
+    world.drawText(
+      ctx,
+      this.textValue || "",
+      this.positionValue || Vec.emptyPosition,
+      this.align.value || "start",
+      this.angle.value || 0,
+      this.size.value || 12,
+      this.opacity.value || 1,
+      this.color.value || "#000000");
   }
 
   private _positionValue?: Vec;

@@ -70,7 +70,7 @@ export class VectorObject extends DrawObject {
     this.lineWidth = new NumberValue("line_width", 1, 1, 20, 1);
     this.rotate = new BoolValue("rotate", false);
     this.opacity = new NumberValue("opacity", 1, 0, 1, 0.1);
-    this.rotateStep = new NumberValue("rotate_step", 0.1, -90, 90, 0.1);
+    this.rotateStep = new NumberValue("rotate_step", 1, -90, 90, 0.1);
     this.visible = new BoolValue("visible", true);
 
     this.drawOrigin = new CalcValue<Vec>("draw_origin", ValueType.vector, this._drawOrigin);
@@ -150,7 +150,7 @@ export class VectorObject extends DrawObject {
   readonly labelPosition: CalcValue<Vec>;
   readonly dataLabelPosition: CalcValue<Vec>;
 
-  render(ctx: CanvasRenderingContext2D) {
+  protected renderCore(ctx: CanvasRenderingContext2D) {
     if (this.isOrigin) return;
 
     let vector = this.value.value || Vec.emptyDirection;
@@ -169,6 +169,25 @@ export class VectorObject extends DrawObject {
       this.lineWidth.value || 1,
       this.opacity.value || 1,
       this.color.value || "#000000");
+  }
+
+  protected updateCore() {
+    if (this.isOrigin) return;
+    if (!this.rotate.value) return;
+
+    let vector = this.value.value;
+
+    if (!vector) return;
+
+    this._settingValue = true;
+
+    try {
+      vector = vector.rotateN((this.rotateStep.value || 0) * ONE_DEGREE);
+      this.value.value = vector;
+      this.assignVectorValues();
+    } finally {
+      this._settingValue = false;
+    }
   }
 
   @D.setDlog() @D.clog(self => self.name)
