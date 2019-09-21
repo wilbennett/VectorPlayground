@@ -155,11 +155,6 @@ export class VectorObject extends DrawObject {
 
     let vector = this.value.value || Vec.emptyDirection;
 
-    if (this.rotate.value && this !== world.origin) {
-      vector = vector.rotateN((this.rotateStep.value || 0) * ONE_DEGREE);
-      this.value.value = vector;
-    }
-
     if (!this.visible) return;
 
     world.drawVector(
@@ -179,21 +174,12 @@ export class VectorObject extends DrawObject {
 
     if (!vector) return;
 
-    this._settingValue = true;
-
-    try {
-      vector = vector.rotateN((this.rotateStep.value || 0) * ONE_DEGREE);
-      this.value.value = vector;
-      this.assignVectorValues();
-    } finally {
-      this._settingValue = false;
-    }
+    this.setValue(vector.rotateN((this.rotateStep.value || 0) * ONE_DEGREE));
   }
 
   @D.setDlog() @D.clog(self => self.name)
   private createPolar() {
     if (this.isOrigin) return;
-    if (this._settingValue) return;
 
     const angle = this.angle.value || 0;
     const mag = this.mag.value || 0;
@@ -202,14 +188,7 @@ export class VectorObject extends DrawObject {
 
     if (vector && angle === vector.angle && mag === vector.magnitude) return;
 
-    this._settingValue = true;
-
-    try {
-      this.value.value = Vec.fromPolar(angle * ONE_DEGREE, mag, w);
-      this.assignVectorValues();
-    } finally {
-      this._settingValue = false;
-    }
+    this.setValue(Vec.fromPolar(angle * ONE_DEGREE, mag, w));
   }
 
   private createLabel() {
@@ -227,6 +206,25 @@ export class VectorObject extends DrawObject {
     label.align.value = "center";
     label.visible.sourceValue = this.visible;
     return label;
+  }
+
+  private setValue(value: Vec): void;
+  private setValue(x: number, y: number, w: number): void;
+  private setValue(param1: Vec | number, y?: number, w?: number): void {
+    if (this._settingValue) return;
+
+    const value = param1 instanceof Vec
+      ? param1
+      : new Vec(param1, y!, w);
+
+    this._settingValue = true;
+
+    try {
+      this.value.value = this.value.value !== value ? value : value.clone();
+      this.assignVectorValues();
+    } finally {
+      this._settingValue = false;
+    }
   }
 
   private assignVectorValues() {
@@ -353,24 +351,11 @@ export class VectorObject extends DrawObject {
 
     this.clearCalcValues();
 
-    if (e.sender === this.angle || e.sender === this.mag) {
-      this.createPolar();
-      return;
-    }
+    if (e.sender === this.angle || e.sender === this.mag)
+      return this.createPolar();
 
-    if (e.sender === this.x || e.sender === this.y || e.sender === this.w) {
-      const vec = this.value.value || Vec.emptyDirection;
-
-      if (e.sender === this.x)
-        this.value.value = vec.withXYW(this.x.value || 0, vec.y, vec.w);
-      else if (e.sender === this.y)
-        this.value.value = vec.withXYW(vec.x, this.y.value || 0, vec.w);
-      else if (e.sender === this.w)
-        this.value.value = vec.withXYW(vec.x, vec.y, this.w.value || 0);
-
-      this.assignVectorValues();
-      return;
-    }
+    if (e.sender === this.x || e.sender === this.y || e.sender === this.w)
+      return this.setValue(this.x.value || 0, this.y.value || 0, this.w.value || 0);
 
     if (e.sender === this.value)
       this.assignVectorValues();

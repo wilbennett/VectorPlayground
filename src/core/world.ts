@@ -24,11 +24,19 @@ const { TWO_PI, ONE_DEGREE, checkType } = Utils;
 // ComponentBase; FilteredSelectElement; TransformValueElement; ValueSelectElement;
 // let skippedRenderCount = 0;
 
+//*
+let DEBUG_EVENTS = false;
+let DEBUG_VECTORS = false;
+let DEBUG_TEXTS = false;
+D.setDLogActive(false);
+D.setDetailMode(false);
+/*/
 let DEBUG_EVENTS = true;
 let DEBUG_VECTORS = false;
 let DEBUG_TEXTS = false;
 D.setDLogActive(true);
 D.setDetailMode(true);
+//*/
 
 // @D.dlogged({ methodSetLogIf: () => true, logAllMethods: true })
 class World implements IWorld {
