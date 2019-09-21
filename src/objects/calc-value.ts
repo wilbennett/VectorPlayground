@@ -21,8 +21,9 @@ export class CalcValue<T> extends Value<T> {
     constructor(
         name: string,
         valueType: ValueType,
+        defaultValue: T,
         protected readonly settings: CalcSettings<T>) {
-        super(name, valueType);
+        super(name, valueType, defaultValue);
 
         settings.instance = this;
         settings.setValue = this.setValue;
@@ -43,7 +44,7 @@ export class CalcValue<T> extends Value<T> {
                 this.setValue(newValue);
         }
 
-        return this._value;
+        return this._value || this._defaultValue;
     }
     // @ts-ignore - unused param.
     set value(value) { }

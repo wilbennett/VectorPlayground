@@ -6,7 +6,7 @@ const { toString, checkType } = Utils;
 
 export class VectorValue extends Value<Vec> {
   constructor(name: string, value?: Vec) {
-    super(name, ValueType.vector, undefined, value);
+    super(name, ValueType.vector, Vec.emptyDirection, undefined, value);
 
     this._readOnlyText = true;
     this._alwaysShowText = false;

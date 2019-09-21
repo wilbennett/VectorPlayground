@@ -24,10 +24,8 @@ export class TextObject extends DrawObject {
 
     this.text.alwaysShowText = true;
 
-    this.round.displayType = DisplayType.checkbox;
     this.angle.displayType = DisplayType.range;
     this.opacity.displayType = DisplayType.range;
-    this.visible.displayType = DisplayType.checkbox;
 
     this.addChildren(
       this.text,
@@ -90,7 +88,7 @@ export class TextObject extends DrawObject {
   set asNumber(value) { this.textValue = toString(value) || ""; }
 
   protected renderCore(ctx: CanvasRenderingContext2D) {
-    if (!this.visible) return;
+    if (!this.visible.value) return;
 
     world.drawText(
       ctx,
@@ -105,7 +103,7 @@ export class TextObject extends DrawObject {
 
   private _positionValue?: Vec;
   private get positionValue() {
-    if (this._positionValue !== undefined) return this._positionValue;
+    // if (this._positionValue !== undefined) return this._positionValue;
 
     this._positionValue = this.position.value || world.origin.value.value || Vec.emptyPosition;
     return this._positionValue;

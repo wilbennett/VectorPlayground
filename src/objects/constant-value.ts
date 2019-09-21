@@ -3,7 +3,7 @@ import { Category, ValueMode, ValueType } from '../core';
 
 export class ConstantValue<T> extends Value<T> {
   constructor(name: string, valueType: ValueType, value: T) {
-    super(name, valueType, Category.constant);
+    super(name, valueType, value, Category.constant);
 
     this._alwaysShowText = false;
     this._readOnlyText = true;

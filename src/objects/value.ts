@@ -24,6 +24,7 @@ export class Value<T> extends BaseObject implements IValue {
   constructor(
     name: string,
     public readonly valueType: ValueType,
+    defaultValue: T,
     category?: Category,
     value?: T,
     min?: number,
@@ -35,8 +36,8 @@ export class Value<T> extends BaseObject implements IValue {
     if (max !== undefined) this._max = max;
     if (step !== undefined) this._step = step;
 
-    this._inputValue = value;
-    this._propertyName = undefined;
+    this._defaultValue = defaultValue;
+    this._inputValue = value || defaultValue;
   }
 
   protected _propertyName?: string;
@@ -75,6 +76,10 @@ export class Value<T> extends BaseObject implements IValue {
   }
 
   get allowedValueTypes() { return this.valueType; }
+
+  protected _defaultValue: T;
+  get defaultValue() { return this._defaultValue; }
+  set defaultValue(value) { this._defaultValue = value; }
 
   private _min?: number;
   get min() { return this._min; }
@@ -141,7 +146,7 @@ export class Value<T> extends BaseObject implements IValue {
     if (isEmpty(this._value))
       this.calcValue();
 
-    return this._value;
+    return this._value || this._defaultValue;
   }
   set value(value) {
     if (this.mode !== ValueMode.text) return;
@@ -263,6 +268,9 @@ export class Value<T> extends BaseObject implements IValue {
   }
 
   protected setValue(value: Tristate<T>) {
+    // if (isEmpty(value))
+    //   value = this._defaultValue;
+
     if (value === this._value) {
       // const text = this.convertToString(value) || "";
 

@@ -3,7 +3,7 @@ import { DisplayType, ValueType } from '../../core';
 
 export class ColorValue extends Value<string> {
   constructor(name: string, value?: string) {
-    super(name, ValueType.color, undefined, value);
+    super(name, ValueType.color, "#000000", undefined, value);
 
     this.displayType = DisplayType.color;
   }

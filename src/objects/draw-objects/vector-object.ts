@@ -1,11 +1,11 @@
-import { CalcSettings, CalcValue, DrawObject, TextObject } from '..';
+import { BoolValue, CalcSettings, CalcValue, ColorValue, DrawObject, NumberValue, TextObject, VectorValue } from '..';
 import { Category, IWorld, logEvent, promisedWorld, ValueMode, Vec } from '../../core';
 import { DisplayType, ValueType } from '../../core/types';
 import * as D from '../../decorators';
 import { ChangeArgs } from '../../event-args';
 import { Utils } from '../../utils';
-import { BoolValue, ColorValue, NumberValue, VectorValue } from '../values';
 
+console.log("VectorObject init start");
 // import { getVectorObjectFromSource } from './utils';
 
 let world!: IWorld;
@@ -73,12 +73,12 @@ export class VectorObject extends DrawObject {
     this.rotateStep = new NumberValue("rotate_step", 1, -90, 90, 0.1);
     this.visible = new BoolValue("visible", true);
 
-    this.drawOrigin = new CalcValue<Vec>("draw_origin", ValueType.vector, this._drawOrigin);
-    this.drawEnd = new CalcValue<Vec>("draw_end", ValueType.vector, this._drawEnd);
-    this.labelAngle = new CalcValue<number>("label_angle", ValueType.number, this._labelAngle);
-    this.labelAngleDegrees = new CalcValue<number>("label_angle_degrees", ValueType.number, this._labelAngleDegrees);
-    this.labelPosition = new CalcValue<Vec>("label_position", ValueType.vector, this._labelPosition);
-    this.dataLabelPosition = new CalcValue<Vec>("data_label_position", ValueType.vector, this._dataLabelPosition);
+    this.drawOrigin = new CalcValue<Vec>("draw_origin", ValueType.vector, Vec.emptyPosition, this._drawOrigin);
+    this.drawEnd = new CalcValue<Vec>("draw_end", ValueType.vector, Vec.emptyPosition, this._drawEnd);
+    this.labelAngle = new CalcValue<number>("label_angle", ValueType.number, 0, this._labelAngle);
+    this.labelAngleDegrees = new CalcValue<number>("label_angle_degrees", ValueType.number, 0, this._labelAngleDegrees);
+    this.labelPosition = new CalcValue<Vec>("label_position", ValueType.vector, Vec.emptyPosition, this._labelPosition);
+    this.dataLabelPosition = new CalcValue<Vec>("data_label_position", ValueType.vector, Vec.emptyPosition, this._dataLabelPosition);
 
     this.drawOrigin.isGlobal = false;
     this.drawEnd.isGlobal = false;
@@ -91,8 +91,6 @@ export class VectorObject extends DrawObject {
     this.mag.displayType = DisplayType.range;
     this.lineWidth.displayType = DisplayType.range;
     this.opacity.displayType = DisplayType.range;
-    this.rotate.displayType = DisplayType.checkbox;
-    this.visible.displayType = DisplayType.checkbox;
 
     this.value.mode = ValueMode.text;
 
@@ -152,10 +150,9 @@ export class VectorObject extends DrawObject {
 
   protected renderCore(ctx: CanvasRenderingContext2D) {
     if (this.isOrigin) return;
+    if (!this.visible.value) return;
 
     let vector = this.value.value || Vec.emptyDirection;
-
-    if (!this.visible) return;
 
     world.drawVector(
       ctx,
@@ -365,3 +362,4 @@ export class VectorObject extends DrawObject {
   // @ts-ignore - unused param.
   private stringToVec(value?: string) { return undefined; }
 }
+console.log("VectorObject init end");
