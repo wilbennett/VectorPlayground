@@ -205,6 +205,7 @@ function checkSelection(...lists: FilteredList<BaseObject>[]) {
 }
 
 function addObjectToLists(obj: BaseObject, lists: FilteredList<BaseObject>[], hookChange: boolean = true) {
+  // hookChange && console.log(`addObjectToLists: hooking change "${obj["propertyName"] || obj.name}"`);
   hookChange && obj.onChanged(handleObjectChanged);
   lists.forEach(list => list.add(obj));
 

@@ -12,10 +12,10 @@ export class ChangeArgs extends EventArgs {
   oldValue: any;
   newValue: any;
 
-  setValues(oldValue: any, newValue: any) {
+  setValues(oldValue: any, newValue: any, sender?: any) {
     this.oldValue = oldValue;
     this.newValue = newValue;
-    this.sender = undefined;
+    this.sender = sender;
   }
 
   toString() { return `${super.toString()}: ${this.oldValue} => ${this.newValue}`; }
@@ -25,8 +25,8 @@ export class ChangeEventArgs<T> extends ChangeArgs {
   oldValue: Tristate<T>;
   newValue: Tristate<T>;
 
-  setValues(oldValue: Tristate<T>, newValue: Tristate<T>) {
-    super.setValues(oldValue, newValue);
+  setValues(oldValue: Tristate<T>, newValue: Tristate<T>, sender?: any) {
+    super.setValues(oldValue, newValue, sender);
   }
 }
 

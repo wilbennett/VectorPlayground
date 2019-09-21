@@ -17,7 +17,7 @@ export class ListEventArgs extends EventArgs {
 
 export class ListClearedArgs extends ListEventArgs {
   get listChangeKind() { return ListChangeKind.cleared; }
-  setValues() { this.sender = undefined; }
+  setValues(sender?: any) { this.sender = sender; }
 }
 
 export class ListItemArgs extends ListEventArgs {
@@ -31,10 +31,10 @@ export class ListItemArgs extends ListEventArgs {
   index: number;
   item: ICaptioned;
 
-  setValues(index: number, item: ICaptioned) {
+  setValues(index: number, item: ICaptioned, sender?: any) {
     this.index = index;
     this.item = item;
-    this.sender = undefined;
+    this.sender = sender;
   }
 }
 
@@ -67,12 +67,12 @@ export class ListSelectedItemChangedArgs extends ListEventArgs {
   newItem: ICaptioned;
   get listChangeKind() { return ListChangeKind.selectionChanged; }
 
-  setValues(oldIndex: number, newIndex: number, oldItem: ICaptioned, newItem: ICaptioned) {
+  setValues(oldIndex: number, newIndex: number, oldItem: ICaptioned, newItem: ICaptioned, sender?: any) {
     this.oldIndex = oldIndex;
     this.newIndex = newIndex;
     this.oldItem = oldItem;
     this.newItem = newItem;
-    this.sender = undefined;
+    this.sender = sender;
   }
 }
 
@@ -111,7 +111,7 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
   set selectedIndex(value) {
     if (value === this._selectedIndex) return;
 
-    this._selectedArgs.setValues(this._selectedIndex, value, this.get(this._selectedIndex), this.get(value));
+    this._selectedArgs.setValues(this._selectedIndex, value, this.get(this._selectedIndex), this.get(value), this);
     this._selectedIndex = value;
     this.emit(this._selectedArgs);
   }
@@ -127,7 +127,7 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
     }
 
     this.items.splice(0, this.items.length);
-    this._clearedArgs.setValues();
+    this._clearedArgs.setValues(this);
     this.emit(this._clearedArgs);
   }
 
@@ -137,7 +137,7 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
   add(obj: T) {
     if (!this.filter(obj)) return false;
 
-    this._addedArgs.setValues(this.items.length, obj);
+    this._addedArgs.setValues(this.items.length, obj, this);
     obj.onCaptionChanged(this._handleCaptionChangedBound);
     this.items.push(obj);
     this.emit(this._addedArgs);
@@ -152,7 +152,7 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
 
     this.items.splice(index, 1);
     obj.offCaptionChanged(this._handleCaptionChangedBound);
-    this._removedArgs.setValues(index, obj);
+    this._removedArgs.setValues(index, obj, this);
     this.emit(this._removedArgs);
     return true;
   }
@@ -173,7 +173,7 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
 
     if (index < 0) return;
 
-    this._changedArgs.setValues(index, obj);
+    this._changedArgs.setValues(index, obj, this);
     this.emit(this._changedArgs);
   }
 }

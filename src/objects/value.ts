@@ -272,7 +272,7 @@ export class Value<T> extends BaseObject implements IValue {
       return;
     }
 
-    this._valueChangeArgs.setValues(this._value, value);
+    this._valueChangeArgs.setValues(this._value, value, this);
     // if (this.propertyName === "u.x") {
     //   D.logd(`${this.propertyName}.setValue: ${this._value} -> ${value}`);
     //   // console.log(new Error().stack);
