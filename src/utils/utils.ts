@@ -56,6 +56,23 @@ export class Utils {
       : "";
   }
 
+  static mergeCombiningChar(text: string, char: string, trailChar?: string) {
+    if (!text) return text;
+
+    if (!trailChar || text.length === 1)
+      return Array.from(text).map(c => c + char).join("");
+
+    let result = Array.from(text);
+    const lastChar = result.pop();
+    result = result.map(c => c + char);
+    result.push(lastChar!, trailChar);
+    return result.join("");
+  }
+
+  static formatVectorName(name: string) {
+    return this.mergeCombiningChar(name.replace("_", " "), "\u0305", "\u0350");
+  }
+
   static getCaller(...ignore: string[]) {
     const callstack = new Error().stack || "";
     const callerRegex = new RegExp(this.CALLER_REGEX, "mg");

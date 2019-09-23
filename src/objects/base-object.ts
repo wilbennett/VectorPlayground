@@ -1,4 +1,4 @@
-import { Category, ICaptioned, IDisposable, IWorld, logEventEmit, promisedWorld, Utils } from '../core';
+import { Category, ICaptioned, IDisposable, IWorld, logEventEmit, promisedWorld, Utils, ValueType } from '../core';
 import * as D from '../decorators';
 import { ChangeArgs, EventKind, StringChangeArgs } from '../event-args';
 import { EventFilter, Listener, TypedEvent } from '../events';
@@ -60,7 +60,7 @@ export class BaseObject implements IDisposable, ICaptioned {
   protected _caption?: string;
   get caption() { return this._caption; }
   set caption(value) {
-    if (this._caption === this._caption) return;
+    if (value === this._caption) return;
 
     this._captionArgs.setValues(this._caption, value);
     this._caption = value ? world.getUniqueCaption(this.category, value) : undefined;
@@ -76,6 +76,9 @@ export class BaseObject implements IDisposable, ICaptioned {
     this._title = value;
     this.emitChange(this._captionArgs);
   }
+
+  protected _valueType = ValueType.string;
+  get valueType() { return this._valueType; }
 
   //*
   onChanged(listener: Listener<ChangeArgs>, filter?: EventFilter) {

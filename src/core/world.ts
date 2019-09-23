@@ -1,5 +1,5 @@
 import { Category, IWorld, setWorld, Tristate, Vec } from '.';
-import { ValueSelectElement } from '../components';
+import { FilteredSelectElement, ValueSelectElement } from '../components';
 import * as D from '../decorators/dlog';
 import { ChangeArgs } from '../event-args';
 import {
@@ -9,6 +9,7 @@ import {
   IFilteredList,
   ListEventArgs,
   ListSelectedItemChangedArgs,
+  ObjectFilter,
   TextObject,
   UpdatableObject,
   Value,
@@ -174,6 +175,7 @@ let vectors: FilteredList<BaseObject>;
 let textObjects: FilteredList<BaseObject>;
 let categoryLists: Map<Category, FilteredList<BaseObject>>;
 let propertyLists: Map<BaseObject, HTMLElement[]>;
+let objectLists: Map<BaseObject, FilteredList<BaseObject>[]>;
 
 function initializeLists() {
   filteredLists = [];
@@ -185,6 +187,7 @@ function initializeLists() {
       categoryLists.set(v, new FilteredList<BaseObject>((o: BaseObject) => o.category == v && o.isLocal)));
 
   propertyLists = new Map<BaseObject, HTMLElement[]>();
+  objectLists = new Map<BaseObject, FilteredList<BaseObject>[]>();
 
   objects = new FilteredList<BaseObject>(() => true);
   updatables = new FilteredList<BaseObject>((obj: BaseObject) => obj instanceof UpdatableObject);
@@ -368,7 +371,7 @@ function addPropertyElements(elements: HTMLElement[], property: Value<any>, useT
     select.addEventListener("change", assignElementToValue);
     property.onChanged(assignValueToElement);
     // world.setFilter(select);
-    // registerElement(select);
+    registerElement(select, property);
   };
 
   // Web Components does not hook up the shadow DOMS for nested Components
@@ -389,6 +392,28 @@ function createPropertiesElements(properties: FilteredList<BaseObject>) {
   });
 
   return result;
+}
+
+/*********************************************************************************************/
+/* Registration/Filtering
+/*********************************************************************************************/
+function createFilterList(e: FilteredSelectElement) {
+  let filter: ObjectFilter;
+  filter = o => o.isLocal && o.category === e.category && ((o.valueType & e.allowedValueTypes) !== 0);
+  const list = new FilteredList<BaseObject>(filter);
+  e.includeEmptyItem = true;
+  e.filteredList = list;
+  return list;
+}
+
+function createFilterLists(...elements: FilteredSelectElement[]) {
+  return elements.map(element => createFilterList(element));
+}
+
+function registerElement(element: ValueSelectElement, property: Value<any>) {
+  const lists = createFilterLists(...element.filteredSelects);
+  addFilteredLists(...lists);
+  objectLists.set(property, lists);
 }
 
 /*********************************************************************************************/
@@ -504,7 +529,7 @@ function reset() {
   vectors.items.forEach(obj => obj.dispose());
   textObjects.items.forEach(obj => obj.dispose());
 
-  origin = createVectorObject("Origin", new Vec(0, 0, 1), true, true);
+  origin = createVectorObject("origin", new Vec(0, 0, 1), true, true);
   me.addObjects(origin);
 
   const u = createVectorObject("u", new Vec(3, 3, 0), false);

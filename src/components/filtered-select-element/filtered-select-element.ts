@@ -84,8 +84,21 @@ export class FilteredSelectElement extends ComponentBase {
     this.subscribeToList();
   }
 
-  get value(): any { return this.filteredList && this.filteredList.get(this._elValue.selectedIndex); }
-  set value(value) { this._elValue.selectedIndex = this.filteredList ? this._filteredList.indexOf(value) : -1; }
+  get value(): any {
+    if (!this.filteredList) return undefined;
+
+    const index = this._elValue.selectedIndex - (this.includeEmptyItem ? 1 : 0);
+    return this.filteredList.get(index);
+  }
+  set value(value) {
+    if (!this.filteredList) return;
+
+    const index = this._filteredList.indexOf(value) + (this.includeEmptyItem ? 1 : 0);
+
+    if (index === this._elValue.selectedIndex) return;
+
+    this._elValue.selectedIndex = index;
+  }
 
   // @ts-ignore - unused param.
   protected attributeChangedCore(name: string, oldValue: string, newValue: string) {

@@ -23,7 +23,7 @@ export class Value<T> extends BaseObject implements IValue {
 
   constructor(
     name: string,
-    public readonly valueType: ValueType,
+    valueType: ValueType,
     defaultValue: T,
     category?: Category,
     value?: T,
@@ -36,8 +36,11 @@ export class Value<T> extends BaseObject implements IValue {
     if (max !== undefined) this._max = max;
     if (step !== undefined) this._step = step;
 
+    this._valueType = valueType;
     this._defaultValue = defaultValue;
     this._inputValue = value || defaultValue;
+
+    this._caption = Utils.capitalizeUnder(this.name);
   }
 
   protected _propertyName?: string;
@@ -234,9 +237,23 @@ export class Value<T> extends BaseObject implements IValue {
       target.step = this.step;
   }
 
+  protected calcOwnerText(owner: BaseObject) {
+    switch (owner.category) {
+      case Category.vectorObject:
+        return `${Utils.formatVectorName(owner.name)}`;
+      default:
+        return `[${owner.name.replace("_", " ")}]`;
+    }
+  }
+
   protected setOwner(owner: BaseObject) {
     super.setOwner(owner);
     this._propertyName = undefined;
+
+    if (this.owner)
+      this._caption = `${this.calcOwnerText(this.owner)} ${Utils.capitalizeUnder(this.name)}`;
+    else
+      this._caption = `${Utils.capitalizeUnder(this.name)}`;
   }
 
   protected convertToString(value: Tristate<T>): Tristate<string> { return "" + value; }

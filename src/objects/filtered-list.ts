@@ -57,17 +57,17 @@ export class ListSelectedItemChangedArgs extends ListEventArgs {
 
     this.oldIndex = oldIndex || -1;
     this.newIndex = newIndex || -1;
-    this.oldItem = oldItem || BaseObject.empty;
-    this.newItem = newItem || BaseObject.empty;
+    this.oldItem = oldItem;
+    this.newItem = newItem;
   }
 
   oldIndex: number;
   newIndex: number;
-  oldItem: ICaptioned;
-  newItem: ICaptioned;
+  oldItem?: ICaptioned;
+  newItem?: ICaptioned;
   get listChangeKind() { return ListChangeKind.selectionChanged; }
 
-  setValues(oldIndex: number, newIndex: number, oldItem: ICaptioned, newItem: ICaptioned, sender?: any) {
+  setValues(oldIndex: number, newIndex: number, oldItem?: ICaptioned, newItem?: ICaptioned, sender?: any) {
     this.oldIndex = oldIndex;
     this.newIndex = newIndex;
     this.oldItem = oldItem;
@@ -83,7 +83,7 @@ export interface IFilteredList {
   readonly captionMode: CaptionMode;
 
   clear(): void;
-  get(index: number): ICaptioned;
+  get(index: number): ICaptioned | undefined;
   indexOf(obj: ICaptioned): number;
   add(obj: BaseObject): boolean;
   remove(obj: BaseObject): boolean;
@@ -111,12 +111,17 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
   set selectedIndex(value) {
     if (value === this._selectedIndex) return;
 
-    this._selectedArgs.setValues(this._selectedIndex, value, this.get(this._selectedIndex), this.get(value), this);
+    this._selectedArgs.setValues(
+      this._selectedIndex,
+      value,
+      this.get(this._selectedIndex),
+      this.get(value),
+      this);
     this._selectedIndex = value;
     this.emit(this._selectedArgs);
   }
 
-  get value() { return this._selectedIndex >= 0 ? this.items[this._selectedIndex] : BaseObject.empty; }
+  get value() { return this._selectedIndex >= 0 ? this.items[this._selectedIndex] : undefined; }
 
   indexOf(obj: ICaptioned) { return this.items.indexOf(obj as T); }
 
@@ -131,7 +136,7 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
     this.emit(this._clearedArgs);
   }
 
-  get(index: number) { return index >= 0 && index < this.items.length ? this.items[index] : BaseObject.empty; }
+  get(index: number) { return index >= 0 && index < this.items.length ? this.items[index] : undefined; }
 
   private _addedArgs = new ListItemAddedArgs();
   add(obj: T) {
