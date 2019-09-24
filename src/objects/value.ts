@@ -1,5 +1,15 @@
 import { BaseObject, IValue, TransformObject } from '.';
-import { Category, DisplayType, IDisposable, Tristate, ValueMode, ValueType } from '../core';
+import {
+  Category,
+  DisplayType,
+  EventFilter,
+  IDisposable,
+  Listener,
+  Tristate,
+  TypedEvent,
+  ValueMode,
+  ValueType,
+} from '../core';
 import * as D from '../decorators';
 import { ChangeArgs, ChangeEventArgs, EventKind } from '../event-args';
 import { Utils } from '../utils';
@@ -18,6 +28,8 @@ const { isEmpty } = Utils;
   exclude: ["propertyName"]
 })
 export class Value<T> extends BaseObject implements IValue {
+  protected _settingsEmitter = new TypedEvent<ChangeArgs>(this);
+  protected _settingsChangeArgs = new ChangeArgs();
   private _handleSourceChangedBound = this.handleSourceChanged.bind(this);
   private _sourceSubscription?: IDisposable;
 
@@ -90,7 +102,9 @@ export class Value<T> extends BaseObject implements IValue {
     if (this._min === value) return;
     if (!this._min && !value) return;
 
+    this._settingsChangeArgs.setValues(this._min, value, this, "min");
     this._min = value;
+    this.emitSettingsChange(this._settingsChangeArgs);
     this.calcValue();
   }
 
@@ -100,7 +114,9 @@ export class Value<T> extends BaseObject implements IValue {
     if (this._max === value) return;
     if (!this._max && !value) return;
 
+    this._settingsChangeArgs.setValues(this._max, value, this, "max");
     this._max = value;
+    this.emitSettingsChange(this._settingsChangeArgs);
     this.calcValue();
   }
 
@@ -110,7 +126,9 @@ export class Value<T> extends BaseObject implements IValue {
     if (this._step === value) return;
     if (!this._step && !value) return;
 
+    this._settingsChangeArgs.setValues(this._step, value, this, "step");
     this._step = value;
+    this.emitSettingsChange(this._settingsChangeArgs);
     this.calcValue();
   }
 
@@ -119,7 +137,9 @@ export class Value<T> extends BaseObject implements IValue {
   set displayType(value) {
     if (this._displayType === value) return;
 
+    this._settingsChangeArgs.setValues(this._displayType, value, this, "displayType");
     this._displayType = value;
+    this.emitSettingsChange(this._settingsChangeArgs);
     this.calcValue();
   }
 
@@ -128,7 +148,9 @@ export class Value<T> extends BaseObject implements IValue {
   set mode(value) {
     if (this._mode === value) return;
 
+    this._settingsChangeArgs.setValues(this._mode, value, this, "mode");
     this.setMode(value);
+    this.emitSettingsChange(this._settingsChangeArgs);
   }
 
   protected _text: string = "";
@@ -164,8 +186,10 @@ export class Value<T> extends BaseObject implements IValue {
   set sourceValue(value) {
     if (value === this._sourceValue) return;
 
+    this._settingsChangeArgs.setValues(this._sourceValue, value, this, "sourceValue");
     this.setSourceValue(value);
     this.calcValue();
+    this.emitSettingsChange(this._settingsChangeArgs);
   }
 
   protected _transform?: TransformObject<T>;
@@ -173,8 +197,10 @@ export class Value<T> extends BaseObject implements IValue {
   set transform(value) {
     if (value === this._transform) return;
 
+    this._settingsChangeArgs.setValues(this._transform, value, this, "transform");
     this._transform = value;
     this.calcValue();
+    this.emitSettingsChange(this._settingsChangeArgs);
   }
 
   protected _modifier?: TransformObject<T>;
@@ -182,8 +208,10 @@ export class Value<T> extends BaseObject implements IValue {
   set modifier(value) {
     if (value === this._modifier) return;
 
+    this._settingsChangeArgs.setValues(this._modifier, value, this, "modifier");
     this._modifier = value;
     this.calcValue();
+    this.emitSettingsChange(this._settingsChangeArgs);
   }
 
   assignFrom(source: IValue) {
@@ -256,6 +284,20 @@ export class Value<T> extends BaseObject implements IValue {
       this._caption = `${Utils.capitalizeUnder(this.name)}`;
   }
 
+  protected emitChange(e: ChangeArgs) {
+    super.emitChange(e);
+  }
+
+  protected emitSettingsChange(e: ChangeArgs) {
+    this._settingsEmitter.emit(e);
+  }
+
+  onSettingsChanged(listener: Listener<ChangeArgs>, filter?: EventFilter) {
+    return this._settingsEmitter.on(listener, filter);
+  }
+
+  offSettingsChanged(listener: Listener<ChangeArgs>) { this._settingsEmitter.off(listener); }
+
   protected convertToString(value: Tristate<T>): Tristate<string> { return "" + value; }
   protected convertFromString(value: string): Tristate<T> { return <T><any>value; }
   // @ts-ignore - unused param.
@@ -305,7 +347,13 @@ export class Value<T> extends BaseObject implements IValue {
     this._value = value;
 
     // if (this.mode !== ValueMode.text)
-    this._text = this.convertToString(value) || "";
+    const text = this.convertToString(value) || "";
+
+    if (text !== this._text) {
+      this._settingsChangeArgs.setValues(this._text, value, this, "text");
+      this._text = text;
+      this.emitSettingsChange(this._settingsChangeArgs);
+    }
 
     this.emitChange(this._valueChangeArgs);
   }

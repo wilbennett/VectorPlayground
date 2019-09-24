@@ -369,7 +369,7 @@ function addPropertyElements(elements: HTMLElement[], property: Value<any>, useT
     select.removeEventListener("connectall", handleConnected);
     select.addEventListener("input", assignElementToValue);
     select.addEventListener("change", assignElementToValue);
-    property.onChanged(assignValueToElement);
+    property.onSettingsChanged(assignValueToElement);
     // world.setFilter(select);
     registerElement(select, property);
   };
