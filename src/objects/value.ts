@@ -13,8 +13,8 @@ const { isEmpty } = Utils;
   propState: self => self.propertyName,
   // methodSetLogIf: () => true,
   // propSetLogIf: () => true,
-  methodSetLogIf: self => self.propertyName === "u.x",
-  propSetLogIf: self => self.propertyName === "u.x",
+  methodSetLogIf: self => self.name === "opacity" || self.name === "angle",
+  propSetLogIf: self => self.name === "opacity",
   exclude: ["propertyName"]
 })
 export class Value<T> extends BaseObject implements IValue {
@@ -68,10 +68,10 @@ export class Value<T> extends BaseObject implements IValue {
 
     const includeIf = (value: ValueMode, condition: boolean) => condition && (result |= value);
 
-    includeIf(ValueMode.text, this.valueType !== ValueType.transform && this.valueType !== ValueType.vector);
+    includeIf(ValueMode.text, true);
     includeIf(ValueMode.constant, true);
-    includeIf(ValueMode.textObject, this.valueType !== ValueType.transform && this.valueType !== ValueType.vector);
-    includeIf(ValueMode.vector, this.valueType === ValueType.vector);
+    includeIf(ValueMode.textObject, true);
+    includeIf(ValueMode.vector, true);
     includeIf(ValueMode.calculation, true);
     includeIf(ValueMode.transform, this.valueType === ValueType.transform);
 

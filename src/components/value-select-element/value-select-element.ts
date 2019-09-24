@@ -310,6 +310,7 @@ export class ValueSelectElement extends ComponentBase {
   private showDialog() {
     this.populateSelectMode();
     showElement(this._elBackground, "block");
+    this._elSelectMode.value = "" + this.mode;
 
     this.centerElement(this._elDialog, this._elBtnMode);
 
