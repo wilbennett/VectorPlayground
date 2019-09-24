@@ -93,20 +93,10 @@ export class TransformValueElement extends ComponentBase {
         break;
 
       case "category":
-        if (this.isAllConnected) {
-          this.filteredSelects.forEach(s => s.category = this.category);
-        }
-        break;
-
       case "value-type":
-        if (this.isAllConnected) {
-          this.filteredSelects.forEach(s => s.valueType = this.valueType);
-        }
-        break;
-
       case "allowed-value-types":
         if (this.isAllConnected) {
-          this.filteredSelects.forEach(s => s.allowedValueTypes = this.allowedValueTypes);
+          this.filteredSelects.forEach(s => s.setAttribute(name, newValue));
         }
         break;
     }

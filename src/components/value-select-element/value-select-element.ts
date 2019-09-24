@@ -210,18 +210,10 @@ export class ValueSelectElement extends ComponentBase {
         break;
 
       case "category":
-        if (this.isAllConnected)
-          this.transformElements.forEach(e => e.category = this.category);
-        break;
-
       case "value-type":
-        if (this.isAllConnected)
-          this.transformElements.forEach(e => e.valueType = this.valueType);
-        break;
-
       case "allowed-value-types":
         if (this.isAllConnected)
-          this.transformElements.forEach(e => e.allowedValueTypes = this.allowedValueTypes);
+          this.transformElements.forEach(e => e.setAttribute(name, newValue));
         break;
     }
   }
