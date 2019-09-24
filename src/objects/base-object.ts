@@ -58,7 +58,7 @@ export class BaseObject implements IDisposable, ICaptioned {
 
   protected _captionArgs: StringChangeArgs;
   protected _caption?: string;
-  get caption() { return this._caption; }
+  get caption() { return this._caption || Utils.capitalizeUnder(this.name); }
   set caption(value) {
     if (value === this._caption) return;
 

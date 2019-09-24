@@ -40,14 +40,15 @@ export class VectorObject extends DrawObject {
   constructor(name: string, vector: Vec, public readonly isOrigin: boolean = false) {
     super(name, Category.vectorObject);
 
-    const c = (caption: string) => `${this.name} ${caption}`;
+    const nameText = Utils.formatVectorName(this.name);
+    const c = (caption: string) => `${nameText} ${caption}`;
 
-    this._drawOrigin = new CalcSettings<Vec>(this.getDrawOrigin, this.vecToString, this.stringToVec, c("origin"));
-    this._drawEnd = new CalcSettings<Vec>(this.getDrawEnd, this.vecToString, this.stringToVec, c("end"));
-    this._labelAngle = new CalcSettings<number>(this.getLabelAngle, toString, toNumber, c("label angle"));
-    this._labelAngleDegrees = new CalcSettings<number>(this.getLabelAngleDegrees, toString, toNumber, c("label angle°"));
-    this._labelPosition = new CalcSettings<Vec>(this.getLabelPosition, this.vecToString, this.stringToVec, c("label position"));
-    this._dataLabelPosition = new CalcSettings<Vec>(this.getDataLabelPosition, this.vecToString, this.stringToVec, c("data position"));
+    this._drawOrigin = new CalcSettings<Vec>(this.getDrawOrigin, this.vecToString, this.stringToVec, c("Draw Origin"));
+    this._drawEnd = new CalcSettings<Vec>(this.getDrawEnd, this.vecToString, this.stringToVec, c("Draw End"));
+    this._labelAngle = new CalcSettings<number>(this.getLabelAngle, toString, toNumber, c("Label Angle"));
+    this._labelAngleDegrees = new CalcSettings<number>(this.getLabelAngleDegrees, toString, toNumber, c("Label Angle°"));
+    this._labelPosition = new CalcSettings<Vec>(this.getLabelPosition, this.vecToString, this.stringToVec, c("Label Position"));
+    this._dataLabelPosition = new CalcSettings<Vec>(this.getDataLabelPosition, this.vecToString, this.stringToVec, c("Data Position"));
 
     this._calcSettings = [
       this._drawOrigin,
@@ -93,6 +94,7 @@ export class VectorObject extends DrawObject {
     this.opacity.displayType = DisplayType.range;
 
     this.value.mode = ValueMode.text;
+    this.value.caption = nameText;
 
     this.addChildren(
       this.x,
@@ -121,10 +123,6 @@ export class VectorObject extends DrawObject {
       this.addChildren(this.label);
       this.setLabelReferences();
     }
-
-    const nameText = Utils.formatVectorName(this.name);
-    this.value.caption = nameText;
-    this.labelAngleDegrees.caption = `${nameText} Label Angle°`;
 
     if (this.isOrigin) {
       this.origin.isLocal = false;

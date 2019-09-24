@@ -54,8 +54,11 @@ export class Value<T> extends BaseObject implements IValue {
     this._defaultValue = defaultValue;
     this._inputValue = value || defaultValue;
 
-    this._caption = Utils.capitalizeUnder(this.name);
+    this._caption = undefined;
   }
+
+  get caption() { return this._caption || this.calcCaption(); }
+  set caption(value) { super.caption = value; }
 
   protected _propertyName?: string;
   get propertyName() {
@@ -298,14 +301,20 @@ export class Value<T> extends BaseObject implements IValue {
     }
   }
 
+  protected calcCaption() {
+    const owner = this.owner;
+
+    return owner
+      ? `${this.calcOwnerText(owner)} ${Utils.capitalizeUnder(this.name)}`
+      : `${Utils.capitalizeUnder(this.name)}`;
+  }
+
   protected setOwner(owner: BaseObject) {
     super.setOwner(owner);
     this._propertyName = undefined;
 
-    if (this.owner)
-      this._caption = `${this.calcOwnerText(this.owner)} ${Utils.capitalizeUnder(this.name)}`;
-    else
-      this._caption = `${Utils.capitalizeUnder(this.name)}`;
+    if (!this._caption)
+      this.caption = this.calcCaption();
   }
 
   protected emitChange(e: ChangeArgs) {
