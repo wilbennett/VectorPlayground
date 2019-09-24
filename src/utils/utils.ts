@@ -1,4 +1,4 @@
-import { Tristate } from '../core';
+import { IDisposable, Tristate } from '../core';
 
 // @ts-ignore - no definition for stackTraceLimit.
 Error.stackTraceLimit = 15;
@@ -72,6 +72,8 @@ export class Utils {
   static formatVectorName(name: string) {
     return this.mergeCombiningChar(name.replace("_", " "), "\u0305", "\u0350");
   }
+
+  static disposable(method: () => void): IDisposable { return { dispose: method }; }
 
   static getCaller(...ignore: string[]) {
     const callstack = new Error().stack || "";

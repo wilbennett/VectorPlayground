@@ -175,7 +175,6 @@ let vectors: FilteredList<BaseObject>;
 let textObjects: FilteredList<BaseObject>;
 let categoryLists: Map<Category, FilteredList<BaseObject>>;
 let propertyLists: Map<BaseObject, HTMLElement[]>;
-let objectLists: Map<BaseObject, FilteredList<BaseObject>[]>;
 
 function initializeLists() {
   filteredLists = [];
@@ -187,7 +186,6 @@ function initializeLists() {
       categoryLists.set(v, new FilteredList<BaseObject>((o: BaseObject) => o.category == v && o.isLocal)));
 
   propertyLists = new Map<BaseObject, HTMLElement[]>();
-  objectLists = new Map<BaseObject, FilteredList<BaseObject>[]>();
 
   objects = new FilteredList<BaseObject>(() => true);
   updatables = new FilteredList<BaseObject>((obj: BaseObject) => obj instanceof UpdatableObject);
@@ -241,9 +239,16 @@ function addFilteredLists(...lists: FilteredList<BaseObject>[]) {
   addObjectsToLists(objects.items, lists, false);
 }
 
+function removeFilteredLists(...lists: FilteredList<BaseObject>[]) {
+  for (const list of lists) {
+    filteredLists.remove(list);
+  }
+}
+
 function addObjects(...objs: BaseObject[]) {
   forceRender = true;
   addObjectsToLists(objs, filteredLists);
+  objs.forEach(obj => obj.addDisposable(Utils.disposable(() => removeObjects(obj))));
 }
 
 function removeObjects(...objs: BaseObject[]) {
@@ -320,6 +325,7 @@ function getObjectProps(obj: BaseObject) {
     addFilteredLists(propsList);
     props = createPropertiesElements(propsList);
     propertyLists.set(obj, props);
+    obj.addDisposable(Utils.disposable(() => propertyLists.delete(obj)));
   }
 
   return props;
@@ -344,6 +350,7 @@ function createPropertyList(obj: BaseObject) {
 function addPropertyElements(elements: HTMLElement[], property: Value<any>, useTitle: boolean = false) {
   const label = document.createElement("label");
   const select = <ValueSelectElement>document.createElement("value-select");
+  property.addDisposable(Utils.disposable(() => document.removeChild(select)));
 
   label.className = "inputlbl";
   label.innerText = useTitle ? `${property.title}:` : `${property.caption}:`;
@@ -366,18 +373,26 @@ function addPropertyElements(elements: HTMLElement[], property: Value<any>, useT
 
   const handleConnected = () => {
     assignValueToElement();
-    select.removeEventListener("connectall", handleConnected);
+    // select.removeEventListener("connectall", handleConnected);
     select.addEventListener("input", assignElementToValue);
     select.addEventListener("change", assignElementToValue);
     property.onSettingsChanged(assignValueToElement);
-    // world.setFilter(select);
     registerElement(select, property);
+  };
+
+  const handleDisonnected = () => {
+    assignValueToElement();
+    // select.removeEventListener("connectall", handleConnected);
+    select.removeEventListener("input", assignElementToValue);
+    select.removeEventListener("change", assignElementToValue);
+    property.offSettingsChanged(assignValueToElement);
   };
 
   // Web Components does not hook up the shadow DOMS for nested Components
   // immediately on creation. Wait until connected to access nested
   // component elements.
   select.addEventListener("connectall", handleConnected);
+  select.addEventListener("disconnect", handleDisonnected);
 }
 
 function createPropertiesElements(properties: FilteredList<BaseObject>) {
@@ -385,7 +400,7 @@ function createPropertiesElements(properties: FilteredList<BaseObject>) {
   const useTitle = properties.captionMode === CaptionMode.title;
 
   properties.items.forEach(item => {
-    const value = checkType(Value, <Value<BaseObject>>item);
+    const value = checkType(Value, <Value<any>>item);
 
     if (value)
       addPropertyElements(result, value, useTitle);
@@ -413,7 +428,7 @@ function createFilterLists(...elements: FilteredSelectElement[]) {
 function registerElement(element: ValueSelectElement, property: Value<any>) {
   const lists = createFilterLists(...element.filteredSelects);
   addFilteredLists(...lists);
-  objectLists.set(property, lists);
+  property.addDisposable(Utils.disposable(() => removeFilteredLists(...lists)));
 }
 
 /*********************************************************************************************/

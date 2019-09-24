@@ -150,12 +150,12 @@ export class BaseObject implements IDisposable, ICaptioned {
     }
   }
 
-  protected addDisposable(disposable: IDisposable) {
+  addDisposable(disposable: IDisposable) {
     this.disposables.push(disposable);
     return disposable;
   }
 
-  protected removeDisposable(disposable: IDisposable) {
+  removeDisposable(disposable: IDisposable) {
     this.disposables.remove(disposable);
     return disposable;
   }
