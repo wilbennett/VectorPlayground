@@ -32,6 +32,8 @@ export class Value<T> extends BaseObject implements IValue {
   protected _settingsChangeArgs = new ChangeArgs();
   private _handleSourceChangedBound = this.handleSourceChanged.bind(this);
   private _sourceSubscription?: IDisposable;
+  protected _isAssigning = false;
+  protected _isEmittingSetting = false;
 
   constructor(
     name: string,
@@ -215,54 +217,76 @@ export class Value<T> extends BaseObject implements IValue {
   }
 
   assignFrom(source: IValue) {
-    this.mode = source.mode;
-    this.displayType = source.displayType;
-    // this.allowedModes = source.allowedModes;
-    // this.allowedValueTypes = source.allowedValueTypes;
-    this.alwaysShowText = source.alwaysShowText;
-    this.readOnlyText = source.readOnlyText;
-    this.sourceValue = source.sourceValue;
-    this.transform = source.transform;
-    this.modifier = source.modifier;
-    this.text = source.text;
+    if (this._isAssigning) return;
 
-    if (source.min !== undefined)
-      this.min = source.min;
+    this._isAssigning = true;
 
-    if (source.max !== undefined)
-      this.max = source.max;
+    try {
+      this.mode = source.mode;
+      this.displayType = source.displayType;
+      // this.allowedModes = source.allowedModes;
+      // this.allowedValueTypes = source.allowedValueTypes;
+      this.alwaysShowText = source.alwaysShowText;
+      this.readOnlyText = source.readOnlyText;
+      this.sourceValue = source.sourceValue;
+      this.transform = source.transform;
+      this.modifier = source.modifier;
+      this.text = source.text;
 
-    if (source.step !== undefined)
-      this.step = source.step;
+      if (source.min !== undefined)
+        this.min = source.min;
+
+      if (source.max !== undefined)
+        this.max = source.max;
+
+      if (source.step !== undefined)
+        this.step = source.step;
+    } finally {
+      this._isAssigning = false;
+    }
+
+    this.emitChange(this._valueChangeArgs);
+    this.emitSettingsChange(this._settingsChangeArgs);
   }
 
   assignTo(target: IValue) {
-    // if (this.propertyName === "u.x") {
-    //   console.log(new Error().stack);
-    // }
-    if (isEmpty(this._value))
-      this.calcValue();
-    // else D.logd(`${this.propertyName}: NOT EMPTY: ${this._value}`);
+    if (this._isAssigning) return;
 
-    target.mode = this.mode;
-    target.displayType = this.displayType;
-    target.allowedModes = this.allowedModes;
-    target.allowedValueTypes = this.allowedValueTypes;
-    target.alwaysShowText = this.alwaysShowText;
-    target.readOnlyText = this.readOnlyText;
-    target.sourceValue = this.sourceValue;
-    target.transform = this.transform;
-    target.modifier = this.modifier;
-    target.text = this.text;
+    this._isAssigning = true;
 
-    if (this.min !== undefined)
-      target.min = this.min;
+    try {
+      // if (this.propertyName === "u.x") {
+      //   console.log(new Error().stack);
+      // }
+      if (isEmpty(this._value))
+        this.calcValue();
+      // else D.logd(`${this.propertyName}: NOT EMPTY: ${this._value}`);
 
-    if (this.max !== undefined)
-      target.max = this.max;
+      target.mode = this.mode;
+      target.displayType = this.displayType;
+      target.allowedModes = this.allowedModes;
+      target.allowedValueTypes = this.allowedValueTypes;
+      target.alwaysShowText = this.alwaysShowText;
+      target.readOnlyText = this.readOnlyText;
+      target.sourceValue = this.sourceValue;
+      target.transform = this.transform;
+      target.modifier = this.modifier;
+      target.text = this.text;
 
-    if (this.step !== undefined)
-      target.step = this.step;
+      if (this.min !== undefined)
+        target.min = this.min;
+
+      if (this.max !== undefined)
+        target.max = this.max;
+
+      if (this.step !== undefined)
+        target.step = this.step;
+    } finally {
+      this._isAssigning = false;
+    }
+
+    this.emitChange(this._valueChangeArgs);
+    this.emitSettingsChange(this._settingsChangeArgs);
   }
 
   protected calcOwnerText(owner: BaseObject) {
@@ -285,11 +309,29 @@ export class Value<T> extends BaseObject implements IValue {
   }
 
   protected emitChange(e: ChangeArgs) {
+    if (this._isAssigning) return;
+    if (!e.sender) return;
+
     super.emitChange(e);
   }
 
-  protected emitSettingsChange(e: ChangeArgs) {
+  protected emitSettingsChangeCore(e: ChangeArgs) {
     this._settingsEmitter.emit(e);
+    e.sender = undefined;
+  }
+
+  protected emitSettingsChange(e: ChangeArgs) {
+    if (this._isAssigning) return;
+    if (this._isEmittingSetting) return;
+    if (!e.sender) return;
+
+    this._isEmittingSetting = true;
+
+    try {
+      this.emitSettingsChangeCore(e);
+    } finally {
+      this._isEmittingSetting = false;
+    }
   }
 
   onSettingsChanged(listener: Listener<ChangeArgs>, filter?: EventFilter) {
