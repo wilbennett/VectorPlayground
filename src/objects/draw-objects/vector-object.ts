@@ -219,6 +219,7 @@ export class VectorObject extends DrawObject {
     this.label.position.mode = ValueMode.vector;
     this.label.position.sourceValue = this.labelPosition;
     this.label.align.value = "center";
+    this.label.visible.mode = ValueMode.vector;
     this.label.visible.sourceValue = this.visible;
   }
 
