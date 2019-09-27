@@ -20,8 +20,6 @@ elTemplate.innerHTML = template;
 
 @component("value-select")
 export class ValueSelectElement extends ComponentBase {
-  @hookEvent("click", "expand")
-  private _elBtnExpand: HTMLElement;
   @hookEvent("click", "showDialog")
   private _elBtnMode: HTMLElement;
   @hookEvent("dblclick", "acceptDialog")
@@ -41,8 +39,7 @@ export class ValueSelectElement extends ComponentBase {
     this.attachShadow({ mode: 'open' });
     this.shadowRoot!.appendChild(elTemplate.content.cloneNode(true));
 
-    this._elText = this.getInputElement("output");
-    this._elTextTransform = this.getElement<TransformValueElement>("text");
+    this._elText = this.getInputElement("text");
     this._elProperty = this.getElement<TransformValueElement>("property");
     this._elConstant = this.getElement<TransformValueElement>("constant");
     this._elTextObject = this.getElement<TransformValueElement>("textobject");
@@ -50,7 +47,6 @@ export class ValueSelectElement extends ComponentBase {
     this._elCalculation = this.getElement<TransformValueElement>("calculation");
     this._elTransformation = this.getElement<TransformValueElement>("transform");
 
-    this._elBtnExpand = this.getElement("expandbtn");
     this._elBtnMode = this.getElement("modebtn");
     this._elSelectMode = this.getSelectElement("selectmode");
     this._elBackground = this.getElement("background");
@@ -65,7 +61,6 @@ export class ValueSelectElement extends ComponentBase {
 
     if (!this.isAllConnected) return;
 
-    this._elTextTransform.userData = value;
     this._elProperty.userData = value;
     this._elConstant.userData = value;
     this._elTextObject.userData = value;
@@ -125,11 +120,6 @@ export class ValueSelectElement extends ComponentBase {
   valueElement: TransformValueElement;
 
   @wrapElementProperty("sourceValue", null) @child @hookChange
-  private _elTextTransform: TransformValueElement;
-  // @ts-ignore - decorator implemented.
-  textTransformElement: TransformValueElement;
-
-  @wrapElementProperty("sourceValue", null) @child @hookChange
   private _elConstant: TransformValueElement;
   // @ts-ignore - decorator implemented.
   constantElement: TransformValueElement;
@@ -158,13 +148,12 @@ export class ValueSelectElement extends ComponentBase {
   @wrapElementProperty("transform", "transform", null)
   @wrapElementProperty("modifier", "modifier", null)
   private get elTransform() {
-    return this.mode === ValueMode.text ? this._elTextTransform
-      : this.mode === ValueMode.property ? this._elProperty
-        : this.mode === ValueMode.constant ? this._elConstant
-          : this.mode === ValueMode.textObject ? this._elTextObject
-            : this.mode === ValueMode.vector ? this._elVector
-              : this.mode === ValueMode.calculation ? this._elCalculation
-                : this._elTransformation;
+    return this.mode === ValueMode.property ? this._elProperty
+      : this.mode === ValueMode.constant ? this._elConstant
+        : this.mode === ValueMode.textObject ? this._elTextObject
+          : this.mode === ValueMode.vector ? this._elVector
+            : this.mode === ValueMode.calculation ? this._elCalculation
+              : this._elTransformation;
   }
 
   get sourceValueElement(): FilteredSelectElement { return this.elTransform.sourceValueElement; }
@@ -177,7 +166,6 @@ export class ValueSelectElement extends ComponentBase {
 
   get filteredSelects() {
     return [
-      ...this._elTextTransform.filteredSelects,
       ...this._elProperty.filteredSelects,
       ...this._elConstant.filteredSelects,
       ...this._elTextObject.filteredSelects,
@@ -195,7 +183,6 @@ export class ValueSelectElement extends ComponentBase {
   protected get transformElements() {
     if (this._transformElements.length === 0) {
       this._transformElements.push(
-        this._elTextTransform,
         this._elProperty,
         this._elConstant,
         this._elTextObject,
@@ -230,7 +217,6 @@ export class ValueSelectElement extends ComponentBase {
   protected allConnected() {
     super.allConnected();
 
-    this._elTextTransform.category = Category.text;
     this._elProperty.category = Category.value;
     this._elConstant.category = Category.constant;
     this._elTextObject.category = Category.textObject;
@@ -238,7 +224,6 @@ export class ValueSelectElement extends ComponentBase {
     this._elCalculation.category = Category.calculation;
     this._elTransformation.category = Category.transform;
 
-    this._elTextTransform.hideSourceValue = true;
     this._elTransformation.hideSourceValue = true;
 
     // HACK: Dynamically created instances don't accept the first value change without this.
@@ -248,14 +233,12 @@ export class ValueSelectElement extends ComponentBase {
   }
 
   protected hideAll() {
-    hideElement(this._elTextTransform);
     hideElement(this._elProperty);
     hideElement(this._elConstant);
     hideElement(this._elTextObject);
     hideElement(this._elVector);
     hideElement(this._elCalculation);
     hideElement(this._elTransformation);
-    hideElement(this._elBtnExpand);
   }
 
   protected updateVisibility() {
@@ -267,10 +250,7 @@ export class ValueSelectElement extends ComponentBase {
     // showElement(this._elText);
 
     switch (this.mode) {
-      case ValueMode.text:
-        displayElement(this._elTextTransform, !!this.elTransform.sourceValue);
-        displayElement(this._elBtnExpand, this.elTransform.style.display === "none");
-        break;
+      case ValueMode.text: break;
       case ValueMode.property: showElement(this._elProperty); break;
       case ValueMode.constant: showElement(this._elConstant); break;
       case ValueMode.textObject: showElement(this._elTextObject); break;
@@ -295,19 +275,12 @@ export class ValueSelectElement extends ComponentBase {
 
     if (!this._isAllConnected) return;
 
-    this._elTextTransform.update();
     this._elProperty.update();
     this._elConstant.update();
     this._elTextObject.update();
     this._elVector.update();
     this._elCalculation.update();
     this._elTransformation.update();
-  }
-
-  // @ts-ignore - decorator implemented.
-  private expand() {
-    showElement(this._elTextTransform);
-    hideElement(this._elBtnExpand);
   }
 
   protected getFilteredElement(id: string) { return this.getElement<FilteredSelectElement>(id); }
