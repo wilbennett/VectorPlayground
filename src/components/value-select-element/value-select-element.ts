@@ -105,12 +105,13 @@ export class ValueSelectElement extends ComponentBase {
       return this._elText.checked ? "true" : "";
 
     if (this.mode === ValueMode.list)
-      return this._elList.value;
+      return this._elList.value ? this._elList.value.name : "";
 
     return this._elText.value;
   }
   set text(value) {
-    if (this._elText.value === value) return;
+    if (this.mode === ValueMode.text && this._elText.value === value) return;
+    if (this.mode === ValueMode.list && this._elList.listItemValue === value) return;
 
     if (this.isCheckbox)
       this._elText.checked = value !== null && value !== undefined && value !== "";
