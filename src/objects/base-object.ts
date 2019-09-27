@@ -133,7 +133,10 @@ export class BaseObject implements IDisposable, ICaptioned {
     world.addObjects(...children);
 
     if (!this._changeSubscription) {
-      this._changeSubscription = BaseObject.onChanged(this._handleChildChangedBound, e => e.sender.owner === this);
+      this._changeSubscription = BaseObject.onChanged(
+        this._handleChildChangedBound,
+        e => e.sender && e.sender.owner === this);
+
       this.disposables.push(this._changeSubscription);
     }
   }

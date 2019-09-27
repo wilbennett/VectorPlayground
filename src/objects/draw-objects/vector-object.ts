@@ -263,33 +263,42 @@ export class VectorObject extends DrawObject {
   }
 
   private getDrawOrigin() {
-    const vector = this.value.value;
+    if (this.isOrigin) return this.value.value;
 
-    if (this.isOrigin) return vector;
-    if (vector.isPoint) return world.origin.value.value;
+    if (this.origin.sourceValue)
+      return this.origin.value;
+
+    if (this.end.sourceValue)
+      return this.end.value.addN(this.value.value.negateN());
 
     return world.origin.value.value;
     /*
+    const vector = this.value.value;
+  
+    if (this.isOrigin) return vector;
+    if (vector.isPoint) return world.origin.value.value;
+  
+    return world.origin.value.value;
     const endObject = getVectorObjectFromSource(this.end.sourceValue);
-
+  
     if (endObject && endObject !== this) {
       let endPoint = this.end.value;
-
+  
       if (endPoint !== vector) {
         const transform = this.end.transform;
         endPoint = !transform || transform.adjustOrigin ? endObject.drawOrigin.value!.addN(endPoint) : endPoint;
-
+  
         const result = endPoint.sub(vector).withW(1);
         return result;
       }
     }
-
+  
     if (!this.origin.sourceValue) return world.origin.value.value;
-
+  
     let result = this.origin.value;
-
+  
     if (!result || result === vector) return world.origin.value.value;
-
+  
     const origin = getVectorObjectFromSource(this.origin.sourceValue);
     const transform = this.origin.transform;
     result = !transform || transform.adjustOrigin ? origin.drawOrigin.value!.addN(result) : result;
@@ -374,7 +383,9 @@ export class VectorObject extends DrawObject {
       return this.setValue(this.x.value, this.y.value, this.w.value);
 
     if (e.sender === this.value)
-      this.assignVectorValues();
+      return this.assignVectorValues();
+
+    this.clearCalcValues();
   }
 
   private vecToString(value?: Vec) { return toString(value); }

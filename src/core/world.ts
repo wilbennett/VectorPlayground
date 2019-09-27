@@ -249,7 +249,9 @@ function removeObjects(...objs: BaseObject[]) {
 }
 
 // @ts-ignore - unused param.
-function handleObjectChanged(e: ChangeArgs) { changed = true; }
+function handleObjectChanged(e: ChangeArgs) {
+  changed = true;
+}
 
 function update() {
   updatables.items.forEach(obj => (<UpdatableObject>obj).update());
