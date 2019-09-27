@@ -1,7 +1,7 @@
-import { Category, DisplayType, ValueMode, ValueType } from '../core';
+import { DisplayType, ValueMode, ValueType } from '../core';
 
 export interface IValue {
-  category: Category;
+  // category: Category;
   mode: ValueMode;
   valueType: ValueType;
   displayType: DisplayType;

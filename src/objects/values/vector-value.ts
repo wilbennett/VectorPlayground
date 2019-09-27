@@ -10,7 +10,7 @@ export class VectorValue extends Value<Vec> {
 
     this._readOnlyText = true;
     this._alwaysShowText = false;
-    this.mode = ValueMode.vector;
+    this.mode = ValueMode.property;
   }
 
   // get allowedModes() { return ValueMode.text | ValueMode.vector | ValueMode.calculation; }

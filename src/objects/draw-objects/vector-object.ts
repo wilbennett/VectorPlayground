@@ -209,19 +209,19 @@ export class VectorObject extends DrawObject {
 
   private setLabelReferences() {
     const label = this.label;
-    
+
     if (!label) return;
 
-    label.angle.mode = ValueMode.vector;
+    label.angle.mode = ValueMode.property;
     label.angle.sourceValue = this.textAngleDegrees;
-    label.color.mode = ValueMode.vector;
+    label.color.mode = ValueMode.property;
     label.color.sourceValue = this.color;
-    label.opacity.mode = ValueMode.vector;
+    label.opacity.mode = ValueMode.property;
     label.opacity.sourceValue = this.opacity;
-    label.position.mode = ValueMode.vector;
+    label.position.mode = ValueMode.property;
     label.position.sourceValue = this.textPosition;
     label.align.value = "center";
-    label.visible.mode = ValueMode.vector;
+    label.visible.mode = ValueMode.property;
     label.visible.sourceValue = this.visible;
   }
 

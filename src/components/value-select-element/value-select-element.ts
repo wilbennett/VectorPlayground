@@ -1,9 +1,8 @@
 import { ComponentBase, FilteredSelectElement, TransformValueElement } from '..';
-import { Category, DisplayType, TransformKind, ValueMode, ValueType } from '../../core';
+import { Category, DisplayType, ValueMode, ValueType } from '../../core';
 import { UiUtils } from '../../utils';
 import {
   attribute,
-  autoAttribute,
   boolAttribute,
   child,
   component,
@@ -44,6 +43,7 @@ export class ValueSelectElement extends ComponentBase {
 
     this._elText = this.getInputElement("output");
     this._elTextTransform = this.getElement<TransformValueElement>("text");
+    this._elProperty = this.getElement<TransformValueElement>("property");
     this._elConstant = this.getElement<TransformValueElement>("constant");
     this._elTextObject = this.getElement<TransformValueElement>("textobject");
     this._elVector = this.getElement<TransformValueElement>("vector");
@@ -66,6 +66,7 @@ export class ValueSelectElement extends ComponentBase {
     if (!this.isAllConnected) return;
 
     this._elTextTransform.userData = value;
+    this._elProperty.userData = value;
     this._elConstant.userData = value;
     this._elTextObject.userData = value;
     this._elVector.userData = value;
@@ -73,8 +74,6 @@ export class ValueSelectElement extends ComponentBase {
     this._elTransformation.userData = value;
   }
 
-  // @ts-ignore - decorator implemented.
-  @autoAttribute(Category.value) category: Category;
   // @ts-ignore - decorator implemented.
   @numberAttribute(ValueMode.text) mode: ValueMode;
   // @ts-ignore - decorator implemented.
@@ -121,6 +120,11 @@ export class ValueSelectElement extends ComponentBase {
   }
 
   @wrapElementProperty("sourceValue", null) @child @hookChange
+  private _elProperty: TransformValueElement;
+  // @ts-ignore - decorator implemented.
+  valueElement: TransformValueElement;
+
+  @wrapElementProperty("sourceValue", null) @child @hookChange
   private _elTextTransform: TransformValueElement;
   // @ts-ignore - decorator implemented.
   textTransformElement: TransformValueElement;
@@ -155,11 +159,12 @@ export class ValueSelectElement extends ComponentBase {
   @wrapElementProperty("modifier", "modifier", null)
   private get elTransform() {
     return this.mode === ValueMode.text ? this._elTextTransform
-      : this.mode === ValueMode.constant ? this._elConstant
-        : this.mode === ValueMode.textObject ? this._elTextObject
-          : this.mode === ValueMode.vector ? this._elVector
-            : this.mode === ValueMode.calculation ? this._elCalculation
-              : this._elTransformation;
+      : this.mode === ValueMode.property ? this._elProperty
+        : this.mode === ValueMode.constant ? this._elConstant
+          : this.mode === ValueMode.textObject ? this._elTextObject
+            : this.mode === ValueMode.vector ? this._elVector
+              : this.mode === ValueMode.calculation ? this._elCalculation
+                : this._elTransformation;
   }
 
   get sourceValueElement(): FilteredSelectElement { return this.elTransform.sourceValueElement; }
@@ -173,6 +178,7 @@ export class ValueSelectElement extends ComponentBase {
   get filteredSelects() {
     return [
       ...this._elTextTransform.filteredSelects,
+      ...this._elProperty.filteredSelects,
       ...this._elConstant.filteredSelects,
       ...this._elTextObject.filteredSelects,
       ...this._elVector.filteredSelects,
@@ -190,6 +196,7 @@ export class ValueSelectElement extends ComponentBase {
     if (this._transformElements.length === 0) {
       this._transformElements.push(
         this._elTextTransform,
+        this._elProperty,
         this._elConstant,
         this._elTextObject,
         this._elVector,
@@ -211,7 +218,6 @@ export class ValueSelectElement extends ComponentBase {
         this._elText.setAttribute(name, newValue);
         break;
 
-      case "category":
       case "value-type":
       case "allow-owner-as-source":
       case "allowed-value-types":
@@ -224,12 +230,13 @@ export class ValueSelectElement extends ComponentBase {
   protected allConnected() {
     super.allConnected();
 
-    this._elTextTransform.kind = TransformKind.text;
-    this._elConstant.kind = TransformKind.constant;
-    this._elTextObject.kind = TransformKind.textObject;
-    this._elVector.kind = TransformKind.vector;
-    this._elCalculation.kind = TransformKind.calculation;
-    this._elTransformation.kind = TransformKind.transform;
+    this._elTextTransform.category = Category.text;
+    this._elProperty.category = Category.value;
+    this._elConstant.category = Category.constant;
+    this._elTextObject.category = Category.textObject;
+    this._elVector.category = Category.vectorObject;
+    this._elCalculation.category = Category.calculation;
+    this._elTransformation.category = Category.transform;
 
     this._elTextTransform.hideSourceValue = true;
     this._elTransformation.hideSourceValue = true;
@@ -242,6 +249,7 @@ export class ValueSelectElement extends ComponentBase {
 
   protected hideAll() {
     hideElement(this._elTextTransform);
+    hideElement(this._elProperty);
     hideElement(this._elConstant);
     hideElement(this._elTextObject);
     hideElement(this._elVector);
@@ -263,6 +271,7 @@ export class ValueSelectElement extends ComponentBase {
         displayElement(this._elTextTransform, !!this.elTransform.sourceValue);
         displayElement(this._elBtnExpand, this.elTransform.style.display === "none");
         break;
+      case ValueMode.property: showElement(this._elProperty); break;
       case ValueMode.constant: showElement(this._elConstant); break;
       case ValueMode.textObject: showElement(this._elTextObject); break;
       case ValueMode.vector: showElement(this._elVector); break;
@@ -275,6 +284,7 @@ export class ValueSelectElement extends ComponentBase {
     const incVisible = (mode: ValueMode) => visibleCount += (mode & this.allowedModes) ? 1 : 0;
 
     incVisible(ValueMode.text);
+    incVisible(ValueMode.property);
     incVisible(ValueMode.constant);
     incVisible(ValueMode.textObject);
     incVisible(ValueMode.vector);
@@ -286,6 +296,7 @@ export class ValueSelectElement extends ComponentBase {
     if (!this._isAllConnected) return;
 
     this._elTextTransform.update();
+    this._elProperty.update();
     this._elConstant.update();
     this._elTextObject.update();
     this._elVector.update();
@@ -343,7 +354,8 @@ export class ValueSelectElement extends ComponentBase {
       list.add(option);
     };
 
-    add(ValueMode.text, "Value");
+    add(ValueMode.text, "Text");
+    add(ValueMode.property, "Property");
     add(ValueMode.constant, "Constant");
     add(ValueMode.textObject, "Text Object");
     add(ValueMode.vector, "Vector");

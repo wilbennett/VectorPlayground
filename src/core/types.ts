@@ -24,6 +24,7 @@ export enum ValueType {
 }
 
 export enum Category {
+	text = "text",
 	value = "value",
 	constant = "constant",
 	vectorObject = "vector_object",
@@ -42,11 +43,12 @@ export enum FilteredType {
 
 export enum ValueMode {
 	text = 1 << 0,
-	constant = 1 << 1,
-	vector = 1 << 2,
-	textObject = 1 << 3,
-	transform = 1 << 4,
-	calculation = 1 << 5,
+	property = 1 << 1,
+	constant = 1 << 2,
+	vector = 1 << 3,
+	textObject = 1 << 4,
+	transform = 1 << 5,
+	calculation = 1 << 6,
 }
 
 export enum TransformKind {
