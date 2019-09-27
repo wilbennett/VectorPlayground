@@ -1,5 +1,5 @@
 import { ComponentBase, FilteredSelectElement } from '..';
-import { Category, TransformKind, ValueType } from '../../core';
+import { Category, ValueType } from '../../core';
 import { UiUtils } from '../../utils';
 import {
   autoAttribute,
@@ -54,8 +54,6 @@ export class TransformValueElement extends ComponentBase {
   // @ts-ignore - decorator implemented.
   @numberAttribute() allowedValueTypes: ValueType;
   // @ts-ignore - decorator implemented.
-  @autoAttribute(TransformKind.constant) kind: TransformKind;
-  // @ts-ignore - decorator implemented.
   @boolAttribute() autoShowTransform: boolean;
   // @ts-ignore - decorator implemented.
   @boolAttribute() hideSourceValue: boolean;
@@ -90,10 +88,6 @@ export class TransformValueElement extends ComponentBase {
   // @ts-ignore - unused param.
   protected attributeChangedCore(name: string, oldValue: string, newValue: string) {
     switch (name) {
-      case "mode":
-        this.hideSourceValue = newValue === TransformKind.transform;
-        break;
-
       case "category":
         if (this.isAllConnected) {
           this._elSourceValue.setAttribute(name, newValue);

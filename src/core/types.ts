@@ -51,15 +51,6 @@ export enum ValueMode {
 	calculation = 1 << 6,
 }
 
-export enum TransformKind {
-	text = "text",
-	constant = "constant",
-	vector = "vector",
-	textObject = "text_object",
-	transform = "transform",
-	calculation = "calculation"
-}
-
 export interface ICaptioned {
 	name: string;
 	caption?: string;
