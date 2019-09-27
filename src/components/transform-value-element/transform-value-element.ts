@@ -1,5 +1,5 @@
 import { ComponentBase, FilteredSelectElement } from '..';
-import { Category, FilteredType, TransformKind, ValueType } from '../../core';
+import { Category, TransformKind, ValueType } from '../../core';
 import { UiUtils } from '../../utils';
 import {
   autoAttribute,
@@ -95,6 +95,11 @@ export class TransformValueElement extends ComponentBase {
         break;
 
       case "category":
+        if (this.isAllConnected) {
+          this._elSourceValue.setAttribute(name, newValue);
+        }
+        break;
+
       case "value-type":
       case "allow-owner-as-source":
       case "allowed-value-types":
@@ -106,9 +111,8 @@ export class TransformValueElement extends ComponentBase {
   }
 
   protected allConnected() {
-    this._elSourceValue.filteredType = FilteredType.value;
-    this._elTransform.filteredType = FilteredType.transform;
-    this._elModifier.filteredType = FilteredType.transform;
+    this._elTransform.category = Category.transform;
+    this._elModifier.category = Category.transform;
   }
 
   protected updateVisibility() {
