@@ -358,7 +358,8 @@ function addPropertyElements(elements: HTMLElement[], property: Value<any>, useT
   elements.push(label, select);
 
   const assignValueToElement = () => {
-    D.setIsDLog(property.propertyName === "u.x");
+    // D.setIsDLog(property.propertyName === "u.x");
+    // D.setIsDLog(property.name === "opacity");
     property.assignTo(select);
     D.setIsDLog(false);
   }
@@ -371,18 +372,29 @@ function addPropertyElements(elements: HTMLElement[], property: Value<any>, useT
     D.setIsDLog(false);
   }
 
+  let registered = false;
+
   const handleConnected = () => {
+    // if (property.propertyName === "u.x" || property.propertyName.startsWith("v"))
+    // if (property.propertyName === "u_label.opacity")
+    //   console.log(`*****Connected ${property.propertyName}`);
+
+    if (!registered) {
+      assignValueToElement();
+      registerElement(select, property);
+      registered = true;
+    }
+
     assignValueToElement();
-    // select.removeEventListener("connectall", handleConnected);
     select.addEventListener("input", assignElementToValue);
     select.addEventListener("change", assignElementToValue);
     property.onSettingsChanged(assignValueToElement);
-    registerElement(select, property);
   };
 
   const handleDisonnected = () => {
-    assignValueToElement();
-    // select.removeEventListener("connectall", handleConnected);
+    // if (property.propertyName === "u.x" || property.propertyName.startsWith("v"))
+    // if (property.propertyName === "u_label.opacity")
+    //   console.log(`*****Disconnected ${property.propertyName}`);
     select.removeEventListener("input", assignElementToValue);
     select.removeEventListener("change", assignElementToValue);
     property.offSettingsChanged(assignValueToElement);
@@ -402,6 +414,7 @@ function createPropertiesElements(properties: FilteredList<BaseObject>) {
   properties.items.forEach(item => {
     const value = checkType(Value, <Value<any>>item);
 
+    // if (value && value.name === "opacity")
     if (value)
       addPropertyElements(result, value, useTitle);
   });
@@ -412,21 +425,24 @@ function createPropertiesElements(properties: FilteredList<BaseObject>) {
 /*********************************************************************************************/
 /* Registration/Filtering
 /*********************************************************************************************/
-function createFilterList(e: FilteredSelectElement) {
-  let filter: ObjectFilter;
-  filter = o => o.isLocal && o.category === e.category && ((o.valueType & e.allowedValueTypes) !== 0);
+function createFilterList(property: Value<any>, e: FilteredSelectElement) {
+  let filter: ObjectFilter = o => o.isLocal
+    && o.category === e.category
+    && ((o.valueType & e.allowedValueTypes) !== 0)
+    && (e.allowOwnerAsSource || o.owner != property.owner);
+
   const list = new FilteredList<BaseObject>(filter);
   e.includeEmptyItem = true;
   e.filteredList = list;
   return list;
 }
 
-function createFilterLists(...elements: FilteredSelectElement[]) {
-  return elements.map(element => createFilterList(element));
+function createFilterLists(property: Value<any>, ...elements: FilteredSelectElement[]) {
+  return elements.map(element => createFilterList(property, element));
 }
 
 function registerElement(element: ValueSelectElement, property: Value<any>) {
-  const lists = createFilterLists(...element.filteredSelects);
+  const lists = createFilterLists(property, ...element.filteredSelects);
   addFilteredLists(...lists);
   property.addDisposable(Utils.disposable(() => removeFilteredLists(...lists)));
 }
@@ -553,10 +569,10 @@ function reset() {
   // u.opacity.asNumber = 0.5;
   // u.rotate = true;
   me.addObjects(u);
-  /*
   const v = createVectorObject("v", new Vec(-4, 1, 0), false);
   // const v = createVectorObject("v", new Vec(1, 0, 0), false, true);
   me.addObjects(v);
+  /*
   const res = createVectorObject("result", new Vec(0, 0, 0), false);
   res.color.text = "#009900";
   res.visible.value = false;
