@@ -1,5 +1,5 @@
 import { BoolValue, ColorValue, DrawObject, NumberValue, StringValue, TextValue, VectorValue } from '..';
-import { Category, DisplayType, IWorld, promisedWorld, Vec } from '../../core';
+import { Category, DisplayType, IWorld, promisedWorld, ValueMode, Vec } from '../../core';
 import { Utils } from '../../utils';
 
 let world!: IWorld;
@@ -13,7 +13,7 @@ export class TextObject extends DrawObject {
 
     this.round = new BoolValue("round", false);
     this.roundTo = new NumberValue("round_to", 2);
-    this.align = new StringValue("align", "start");
+    this.align = new StringValue("align", "center");
     this.visible = new BoolValue("visible", true);
     this.text = new TextValue("text", text);
     this.size = new NumberValue("size", 15);
@@ -26,6 +26,17 @@ export class TextObject extends DrawObject {
 
     this.angle.displayType = DisplayType.range;
     this.opacity.displayType = DisplayType.range;
+
+    this.align.mode = ValueMode.list;
+    this.align.allowedModes = this.align.allowedModes | ValueMode.list;
+
+    this.align.listItems = [
+      ["left", "Left"],
+      ["right", "Right"],
+      ["center", "Center"],
+      ["start", "Start"],
+      ["end", "End"]
+    ];
 
     this.addChildren(
       this.text,

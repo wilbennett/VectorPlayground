@@ -40,6 +40,7 @@ export class ValueSelectElement extends ComponentBase {
     this.shadowRoot!.appendChild(elTemplate.content.cloneNode(true));
 
     this._elText = this.getInputElement("text");
+    this._elList = this.getFilteredElement("list");
     this._elProperty = this.getElement<TransformValueElement>("property");
     this._elConstant = this.getElement<TransformValueElement>("constant");
     this._elTextObject = this.getElement<TransformValueElement>("textobject");
@@ -61,6 +62,7 @@ export class ValueSelectElement extends ComponentBase {
 
     if (!this.isAllConnected) return;
 
+    this._elList.userData = value;
     this._elProperty.userData = value;
     this._elConstant.userData = value;
     this._elTextObject.userData = value;
@@ -99,25 +101,36 @@ export class ValueSelectElement extends ComponentBase {
   // @ts-ignore - decorator implemented.
   textElement: HTMLInputElement;
   get text() {
-    return this.isCheckbox
-      ? (this._elText.checked ? "true" : "")
-      : this._elText.value;
+    if (this.isCheckbox)
+      return this._elText.checked ? "true" : "";
+
+    if (this.mode === ValueMode.list)
+      return this._elList.value;
+
+    return this._elText.value;
   }
   set text(value) {
     if (this._elText.value === value) return;
 
     if (this.isCheckbox)
       this._elText.checked = value !== null && value !== undefined && value !== "";
-    else
+    else {
       this._elText.value = value || "";
+      this._elList.listItemValue = value;
+    }
 
     this.updateVisibility();
   }
 
   @wrapElementProperty("sourceValue", null) @child @hookChange
+  private _elList: FilteredSelectElement;
+  // @ts-ignore - decorator implemented.
+  listElement: FilteredSelectElement;
+
+  @wrapElementProperty("sourceValue", null) @child @hookChange
   private _elProperty: TransformValueElement;
   // @ts-ignore - decorator implemented.
-  valueElement: TransformValueElement;
+  propertyElement: TransformValueElement;
 
   @wrapElementProperty("sourceValue", null) @child @hookChange
   private _elConstant: TransformValueElement;
@@ -166,6 +179,7 @@ export class ValueSelectElement extends ComponentBase {
 
   get filteredSelects() {
     return [
+      this._elList,
       ...this._elProperty.filteredSelects,
       ...this._elConstant.filteredSelects,
       ...this._elTextObject.filteredSelects,
@@ -217,6 +231,7 @@ export class ValueSelectElement extends ComponentBase {
   protected allConnected() {
     super.allConnected();
 
+    this._elList.category = Category.list;
     this._elProperty.category = Category.value;
     this._elConstant.category = Category.constant;
     this._elTextObject.category = Category.textObject;
@@ -233,6 +248,7 @@ export class ValueSelectElement extends ComponentBase {
   }
 
   protected hideAll() {
+    hideElement(this._elList);
     hideElement(this._elProperty);
     hideElement(this._elConstant);
     hideElement(this._elTextObject);
@@ -251,6 +267,7 @@ export class ValueSelectElement extends ComponentBase {
 
     switch (this.mode) {
       case ValueMode.text: break;
+      case ValueMode.list: showElement(this._elList); break;
       case ValueMode.property: showElement(this._elProperty); break;
       case ValueMode.constant: showElement(this._elConstant); break;
       case ValueMode.textObject: showElement(this._elTextObject); break;
@@ -264,6 +281,7 @@ export class ValueSelectElement extends ComponentBase {
     const incVisible = (mode: ValueMode) => visibleCount += (mode & this.allowedModes) ? 1 : 0;
 
     incVisible(ValueMode.text);
+    incVisible(ValueMode.list);
     incVisible(ValueMode.property);
     incVisible(ValueMode.constant);
     incVisible(ValueMode.textObject);
@@ -275,6 +293,7 @@ export class ValueSelectElement extends ComponentBase {
 
     if (!this._isAllConnected) return;
 
+    this._elList.update();
     this._elProperty.update();
     this._elConstant.update();
     this._elTextObject.update();
@@ -328,6 +347,7 @@ export class ValueSelectElement extends ComponentBase {
     };
 
     add(ValueMode.text, "Text");
+    add(ValueMode.list, "List");
     add(ValueMode.property, "Property");
     add(ValueMode.constant, "Constant");
     add(ValueMode.textObject, "Text Object");

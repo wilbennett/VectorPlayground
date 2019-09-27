@@ -112,6 +112,21 @@ export class FilteredSelectElement extends ComponentBase {
     this.selectedIndex = index;
   }
 
+  get listItemValue() {
+    if (!this.filteredList) return undefined;
+
+    const index = this._elValue.selectedIndex - (this.includeEmptyItem ? 1 : 0);
+    const item = this.filteredList.get(index);
+    return item ? item.name : undefined;
+  }
+  set listItemValue(value) {
+    if (!this.filteredList) return;
+
+    const index = this._filteredList.items.findIndex(x => x.name === value);
+    const item = this.filteredList.get(index);
+    this.value = item;
+  }
+
   // @ts-ignore - unused param.
   protected attributeChangedCore(name: string, oldValue: string, newValue: string) {
     switch (name) {

@@ -25,6 +25,7 @@ export enum ValueType {
 
 export enum Category {
 	text = "text",
+	list = "list",
 	value = "value",
 	constant = "constant",
 	vectorObject = "vector_object",
@@ -43,12 +44,13 @@ export enum FilteredType {
 
 export enum ValueMode {
 	text = 1 << 0,
-	property = 1 << 1,
-	constant = 1 << 2,
-	vector = 1 << 3,
-	textObject = 1 << 4,
-	transform = 1 << 5,
-	calculation = 1 << 6,
+	list = 1 << 1,
+	property = 1 << 2,
+	constant = 1 << 3,
+	vector = 1 << 4,
+	textObject = 1 << 5,
+	transform = 1 << 6,
+	calculation = 1 << 7
 }
 
 export interface ICaptioned {

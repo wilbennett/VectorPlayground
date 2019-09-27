@@ -17,7 +17,8 @@ import {
 } from '../objects';
 import * as ui from '../ui';
 import { Utils } from '../utils';
-import { CaptionMode } from './types';
+import { Captioned } from './captioned';
+import { CaptionMode, ICaptioned } from './types';
 
 console.log("world init start");
 const { TWO_PI, ONE_DEGREE, checkType } = Utils;
@@ -165,7 +166,7 @@ let selectedTextObject: Tristate<TextObject>;
 let selectedVectorProps: HTMLDivElement;
 let selectedTextObjectProps: HTMLDivElement;
 
-let filteredLists: FilteredList<BaseObject>[];
+let filteredLists: FilteredList<ICaptioned>[];
 let objects: FilteredList<BaseObject>;
 let updatables: FilteredList<BaseObject>;
 let drawObjects: FilteredList<BaseObject>;
@@ -204,7 +205,7 @@ function checkSelection(...lists: FilteredList<BaseObject>[]) {
   }
 }
 
-function addObjectToLists(obj: BaseObject, lists: FilteredList<BaseObject>[], hookChange: boolean = true) {
+function addObjectToLists(obj: BaseObject, lists: FilteredList<ICaptioned>[], hookChange: boolean = true) {
   // hookChange && console.log(`addObjectToLists: hooking change "${obj["propertyName"] || obj.name}"`);
   hookChange && obj.onChanged(handleObjectChanged);
   lists.forEach(list => list.add(obj));
@@ -212,25 +213,25 @@ function addObjectToLists(obj: BaseObject, lists: FilteredList<BaseObject>[], ho
   checkSelection(operations, vectors, textObjects);
 }
 
-function removeObjectFromLists(obj: BaseObject, lists: FilteredList<BaseObject>[]) {
+function removeObjectFromLists(obj: BaseObject, lists: FilteredList<ICaptioned>[]) {
   obj.offChanged(handleObjectChanged);
   lists.forEach(list => list.remove(obj));
 }
 
-function addObjectsToLists(objs: BaseObject[], lists: FilteredList<BaseObject>[], hookChange: boolean = true) {
+function addObjectsToLists(objs: BaseObject[], lists: FilteredList<ICaptioned>[], hookChange: boolean = true) {
   objs.forEach(obj => addObjectToLists(obj, lists, hookChange));
 }
 
-function removeObjectsFromLists(objs: BaseObject[], lists: FilteredList<BaseObject>[]) {
+function removeObjectsFromLists(objs: BaseObject[], lists: FilteredList<ICaptioned>[]) {
   objs.forEach(obj => removeObjectFromLists(obj, lists));
 }
 
-function addFilteredLists(...lists: FilteredList<BaseObject>[]) {
+function addFilteredLists(...lists: FilteredList<ICaptioned>[]) {
   filteredLists.push(...lists);
   addObjectsToLists(objects.items, lists, false);
 }
 
-function removeFilteredLists(...lists: FilteredList<BaseObject>[]) {
+function removeFilteredLists(...lists: FilteredList<ICaptioned>[]) {
   for (const list of lists) {
     filteredLists.remove(list);
   }
@@ -369,7 +370,10 @@ function addPropertyElements(elements: HTMLElement[], property: Value<any>, useT
     //   console.log(`*****Connected ${property.propertyName}`);
 
     if (!registered) {
-      assignValueToElement();
+      //assignValueToElement();
+      select.mode = property.mode;
+      select.allowedModes = property.allowedModes;
+      select.allowedValueTypes = property.allowedValueTypes;
       registerElement(select, property);
       registered = true;
     }
@@ -418,6 +422,19 @@ function createPropertiesElements(properties: FilteredList<BaseObject>) {
 /* Registration/Filtering
 /*********************************************************************************************/
 function createFilterList(property: Value<any>, e: FilteredSelectElement) {
+  if (e.category === Category.list) {
+    const list = new FilteredList<Captioned>(o => o instanceof Captioned);
+
+    for (const [value, caption] of property.listItems) {
+      const captioned = new Captioned(value, caption);
+      list.add(captioned);
+    }
+
+    e.includeEmptyItem = true;
+    e.filteredList = list;
+    return list;
+  }
+
   let filter: ObjectFilter = o => o.isLocal
     && o.category === e.category
     && ((o.valueType & e.allowedValueTypes) !== 0)

@@ -85,14 +85,14 @@ export interface IFilteredList {
   clear(): void;
   get(index: number): ICaptioned | undefined;
   indexOf(obj: ICaptioned): number;
-  add(obj: BaseObject): boolean;
-  remove(obj: BaseObject): boolean;
+  add(obj: ICaptioned): boolean;
+  remove(obj: ICaptioned): boolean;
 
   onListChanged(listener: Listener<ListEventArgs>): IDisposable;
   offListChanged(listener: Listener<ListEventArgs>): void;
 }
 
-export class FilteredList<T extends BaseObject> extends BaseObject implements IFilteredList {
+export class FilteredList<T extends ICaptioned> extends BaseObject implements IFilteredList {
   private _emitter = new TypedEvent<ListEventArgs>(this);
   private _handleCaptionChangedBound = this.handleCaptionChanged.bind(this);
 
@@ -129,6 +129,8 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
   private _clearedArgs = new ListClearedArgs();
   clear() {
     for (const obj of this.items) {
+      if (!(obj instanceof BaseObject)) continue;
+
       obj.offCaptionChanged(this._handleCaptionChangedBound);
     }
 
@@ -141,10 +143,13 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
 
   private _addedArgs = new ListItemAddedArgs();
   add(obj: T) {
-    if (!this.filter(obj)) return false;
+    if (obj instanceof BaseObject && !this.filter(obj)) return false;
 
     this._addedArgs.setValues(this.items.length, obj, this);
-    obj.onCaptionChanged(this._handleCaptionChangedBound);
+
+    if (obj instanceof BaseObject)
+      obj.onCaptionChanged(this._handleCaptionChangedBound);
+
     this.items.push(obj);
     this.emit(this._addedArgs);
     return true;
@@ -157,7 +162,10 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
     if (index < 0) return false;
 
     this.items.splice(index, 1);
-    obj.offCaptionChanged(this._handleCaptionChangedBound);
+
+    if (obj instanceof BaseObject)
+      obj.offCaptionChanged(this._handleCaptionChangedBound);
+
     this._removedArgs.setValues(index, obj, this);
     this.emit(this._removedArgs);
     return true;

@@ -80,21 +80,27 @@ export class Value<T> extends BaseObject implements IValue {
   // @ts-ignore - unused param.
   set allowTransform(value) { }
 
+  protected _allowedModes?: ValueMode;
   get allowedModes(): ValueMode {
+    if (this._allowedModes !== undefined) return this._allowedModes;
+
     let result = 0;
 
     const includeIf = (value: ValueMode, condition: boolean) => condition && (result |= value);
 
     includeIf(ValueMode.text, true);
-    includeIf(ValueMode.constant, true);
+    includeIf(ValueMode.list, false);
     includeIf(ValueMode.property, true);
+    includeIf(ValueMode.constant, true);
     includeIf(ValueMode.textObject, false);
     includeIf(ValueMode.vector, false);
     includeIf(ValueMode.calculation, false);
     includeIf(ValueMode.transform, this.valueType === ValueType.transform);
 
-    return <ValueMode>result;
+    this._allowedModes = <ValueMode>result;
+    return this._allowedModes;
   }
+  set allowedModes(value) { this._allowedModes = value; }
 
   get allowedValueTypes() { return this.valueType; }
 
@@ -111,6 +117,10 @@ export class Value<T> extends BaseObject implements IValue {
     this._allowOwnerAsSource = value;
     this.emitSettingsChange(this._settingsChangeArgs);
   }
+
+  protected _listItems: [string, string][] = [];
+  get listItems() { return this._listItems; }
+  set listItems(value) { this._listItems = value; }
 
   private _min?: number;
   get min() { return this._min; }
@@ -172,9 +182,9 @@ export class Value<T> extends BaseObject implements IValue {
   protected _text: string = "";
   get text() { return this._text; }
   set text(value) {
-    if (!(this.allowedModes & ValueMode.text)) return;
+    if (!(this.allowedModes & ValueMode.text) && !(this.allowedModes & ValueMode.list)) return;
     if (this.readOnlyText) return;
-    if (this._mode !== ValueMode.text) return;
+    if (this._mode !== ValueMode.text && this._mode !== ValueMode.list) return;
     if (value === this._text) return;
 
     this.setText(value);
@@ -423,7 +433,7 @@ export class Value<T> extends BaseObject implements IValue {
   }
 
   protected calcValue() {
-    if (this.mode !== ValueMode.text) {
+    if (this.mode !== ValueMode.text && this.mode !== ValueMode.list) {
       if (!this.sourceValue) return;
 
       this._inputValue = this.sourceValue.value;

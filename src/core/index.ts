@@ -7,6 +7,7 @@ export * from "./promiseex";
 export * from "../utils";
 export * from "../events";
 export * from "../event-args";
+export * from "./captioned";
 export * from "./iworld";
 export * from "../decorators";
 export * from "../components";
