@@ -61,6 +61,8 @@ export class TransformValueElement extends ComponentBase {
   @boolAttribute() hideSourceValue: boolean;
   // @ts-ignore - decorator implemented.
   @boolAttribute() hideModifier: boolean;
+  // @ts-ignore - decorator implemented.
+  @boolAttribute() allowOwnerAsSource: boolean;
 
   @wrapElementProperty() @child @hookChange
   private _elSourceValue: FilteredSelectElement;
@@ -94,6 +96,7 @@ export class TransformValueElement extends ComponentBase {
 
       case "category":
       case "value-type":
+      case "allow-owner-as-source":
       case "allowed-value-types":
         if (this.isAllConnected) {
           this.filteredSelects.forEach(s => s.setAttribute(name, newValue));

@@ -101,6 +101,16 @@ export class Value<T> extends BaseObject implements IValue {
   get defaultValue() { return this._defaultValue; }
   set defaultValue(value) { this._defaultValue = value; }
 
+  private _allowOwnerAsSource: boolean = false;
+  get allowOwnerAsSource() { return this._allowOwnerAsSource; }
+  set allowOwnerAsSource(value) {
+    if (this._allowOwnerAsSource === value) return;
+
+    this._settingsChangeArgs.setValues(this._allowOwnerAsSource, value, this, "allowOwnerAsSource");
+    this._allowOwnerAsSource = value;
+    this.emitSettingsChange(this._settingsChangeArgs);
+  }
+
   private _min?: number;
   get min() { return this._min; }
   set min(value) {
@@ -231,6 +241,7 @@ export class Value<T> extends BaseObject implements IValue {
       // this.allowedValueTypes = source.allowedValueTypes;
       this.alwaysShowText = source.alwaysShowText;
       this.readOnlyText = source.readOnlyText;
+      this.allowOwnerAsSource = source.allowOwnerAsSource;
       this.sourceValue = source.sourceValue;
       this.transform = source.transform;
       this.modifier = source.modifier;
@@ -271,6 +282,7 @@ export class Value<T> extends BaseObject implements IValue {
       target.allowedValueTypes = this.allowedValueTypes;
       target.alwaysShowText = this.alwaysShowText;
       target.readOnlyText = this.readOnlyText;
+      target.allowOwnerAsSource = this.allowOwnerAsSource;
       target.sourceValue = this.sourceValue;
       target.transform = this.transform;
       target.modifier = this.modifier;

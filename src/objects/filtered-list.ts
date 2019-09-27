@@ -79,7 +79,7 @@ export class ListSelectedItemChangedArgs extends ListEventArgs {
 export interface IFilteredList {
   readonly length: number;
   readonly items: ICaptioned[];
-  readonly selectedIndex: number;
+  selectedIndex: number;
   readonly captionMode: CaptionMode;
 
   clear(): void;
@@ -117,6 +117,7 @@ export class FilteredList<T extends BaseObject> extends BaseObject implements IF
       this.get(this._selectedIndex),
       this.get(value),
       this);
+
     this._selectedIndex = value;
     this.emit(this._selectedArgs);
   }

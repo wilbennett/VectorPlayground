@@ -95,6 +95,8 @@ export class ValueSelectElement extends ComponentBase {
   @boolAttribute() alwaysShowText: boolean;
   // @ts-ignore - decorator implemented.
   @boolAttribute() readOnlyText: boolean;
+  // @ts-ignore - decorator implemented.
+  @boolAttribute() allowOwnerAsSource: boolean;
 
   calculationTransformFilter: (o: any) => boolean = () => true;
 
@@ -211,6 +213,7 @@ export class ValueSelectElement extends ComponentBase {
 
       case "category":
       case "value-type":
+      case "allow-owner-as-source":
       case "allowed-value-types":
         if (this.isAllConnected)
           this.transformElements.forEach(e => e.setAttribute(name, newValue));

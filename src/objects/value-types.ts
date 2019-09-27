@@ -9,6 +9,7 @@ export interface IValue {
   allowedValueTypes: ValueType;
   alwaysShowText: boolean;
   readOnlyText: boolean;
+  allowOwnerAsSource: boolean;
   min?: number;
   max?: number;
   step?: number;

@@ -50,13 +50,10 @@ export class FilteredSelectElement extends ComponentBase {
   }
 
   @hookChange
-  @wrapElementProperty("selectedIndex", "selectedIndex")
   @wrapElementProperty("length", "length")
   private _elValue: HTMLSelectElement;
   // @ts-ignore - decorator implemented.
   valueElement: HTMLSelectElement;
-  // @ts-ignore - decorator implemented.
-  selectedIndex: number;
   // @ts-ignore - decorator implemented.
   length: number;
 
@@ -67,11 +64,26 @@ export class FilteredSelectElement extends ComponentBase {
   // @ts-ignore - decorator implemented.
   @numberAttribute() allowedValueTypes: ValueType;
   // @ts-ignore - decorator implemented.
+  @boolAttribute() allowOwnerAsSource: boolean;
+  // @ts-ignore - decorator implemented.
   @numberAttribute() size: number;
   // @ts-ignore - decorator implemented.
   @autoAttribute() filteredType: FilteredType;
   // @ts-ignore - decorator implemented.
   @boolAttribute() includeEmptyItem: boolean;
+
+  get selectedIndex() { return this._elValue.selectedIndex; }
+  set selectedIndex(value) {
+    this._elValue.selectedIndex = -1;
+    if (value !== this._elValue.selectedIndex)
+      this._elValue.selectedIndex = value;
+
+    if (!this.filteredList) return;
+
+    const index = value - (this.includeEmptyItem ? 1 : 0);
+
+    this.filteredList.selectedIndex = index;
+  }
 
   // @ts-ignore - decorator implemented.
   private _filteredList: IFilteredList;
@@ -97,7 +109,7 @@ export class FilteredSelectElement extends ComponentBase {
 
     if (index === this._elValue.selectedIndex) return;
 
-    this._elValue.selectedIndex = index;
+    this.selectedIndex = index;
   }
 
   // @ts-ignore - unused param.
@@ -115,6 +127,11 @@ export class FilteredSelectElement extends ComponentBase {
 
         break;
     }
+  }
+
+  protected handleChange(e: Event) {
+    this.selectedIndex = this._elValue.selectedIndex;
+    super.handleChange(e);
   }
 
   protected createOptions() {
@@ -189,9 +206,8 @@ export class FilteredSelectElement extends ComponentBase {
   }
 
   protected handleListSelectedItemChanged(e: ListSelectedItemChangedArgs) {
-    if (this.selectedIndex === e.newIndex) return;
-
-    this.selectedIndex = e.newIndex;
+    const newIndex = e.newIndex + (this.includeEmptyItem ? 1 : 0);
+    this.selectedIndex = newIndex;
   }
 
   protected handleListChanged(e: ListEventArgs) {

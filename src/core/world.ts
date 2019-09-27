@@ -162,8 +162,8 @@ console.log(`finished setting world: `);
 // let selectedOperation: Tristate<Operation>;
 let selectedVector: Tristate<VectorObject>;
 let selectedTextObject: Tristate<TextObject>;
-let selectedVectorProps: HTMLElement[];
-let selectedTextObjectProps: HTMLElement[];
+let selectedVectorProps: HTMLDivElement;
+let selectedTextObjectProps: HTMLDivElement;
 
 let filteredLists: FilteredList<BaseObject>[];
 let objects: FilteredList<BaseObject>;
@@ -174,7 +174,7 @@ let calculations: FilteredList<BaseObject>;
 let vectors: FilteredList<BaseObject>;
 let textObjects: FilteredList<BaseObject>;
 let categoryLists: Map<Category, FilteredList<BaseObject>>;
-let propertyLists: Map<BaseObject, HTMLElement[]>;
+let propertyLists: Map<BaseObject, HTMLDivElement>;
 
 function initializeLists() {
   filteredLists = [];
@@ -185,7 +185,7 @@ function initializeLists() {
     .forEach((v: Category) =>
       categoryLists.set(v, new FilteredList<BaseObject>((o: BaseObject) => o.category == v && o.isLocal)));
 
-  propertyLists = new Map<BaseObject, HTMLElement[]>();
+  propertyLists = new Map<BaseObject, HTMLDivElement>();
 
   objects = new FilteredList<BaseObject>(() => true);
   updatables = new FilteredList<BaseObject>((obj: BaseObject) => obj instanceof UpdatableObject);
@@ -296,9 +296,7 @@ function handleSelectedVectorChanged(e: ListEventArgs) {
   selectedVector = selected;
   selectedVectorProps = getObjectProps(selectedVector);
   clearElementChildren(ui.elVectorProps);
-  addElementChildren(ui.elVectorProps, ...selectedVectorProps);
-
-  // ui.elVectorProps.filteredList = selectedVectorProps!;
+  addElementChildren(ui.elVectorProps, selectedVectorProps);
   // D.setIsDLog(false);
 }
 
@@ -313,7 +311,7 @@ function handleSelectedTextObjectChanged(e: ListEventArgs) {
   selectedTextObject = selected;
   selectedTextObjectProps = getObjectProps(selectedTextObject);
   clearElementChildren(ui.elTextProps);
-  addElementChildren(ui.elTextProps, ...selectedTextObjectProps);
+  addElementChildren(ui.elTextProps, selectedTextObjectProps);
 }
 
 function getObjectProps(obj: BaseObject) {
@@ -408,7 +406,9 @@ function addPropertyElements(elements: HTMLElement[], property: Value<any>, useT
 }
 
 function createPropertiesElements(properties: FilteredList<BaseObject>) {
-  const result: HTMLElement[] = [];
+  const result = document.createElement("div");
+  result.className = "gridhoriz2";
+  const elements: HTMLElement[] = [];
   const useTitle = properties.captionMode === CaptionMode.title;
 
   properties.items.forEach(item => {
@@ -416,9 +416,10 @@ function createPropertiesElements(properties: FilteredList<BaseObject>) {
 
     // if (value && value.name === "opacity")
     if (value)
-      addPropertyElements(result, value, useTitle);
+      addPropertyElements(elements, value, useTitle);
   });
 
+  addElementChildren(result, ...elements);
   return result;
 }
 
