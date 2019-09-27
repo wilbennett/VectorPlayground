@@ -55,6 +55,7 @@ export interface ICaptioned {
 	name: string;
 	caption?: string;
 	title?: string;
+	isOwned: boolean;
 }
 
 export enum CaptionMode {

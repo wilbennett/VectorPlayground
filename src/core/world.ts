@@ -180,12 +180,12 @@ function initializeLists() {
   propertyElements = new Map<BaseObject, HTMLDivElement>();
 
   objects = new FilteredList<BaseObject>(() => true);
-  updatables = new FilteredList<BaseObject>((obj: BaseObject) => obj instanceof UpdatableObject);
-  drawObjects = new FilteredList<BaseObject>((obj: BaseObject) => obj instanceof DrawObject);
-  operations = new FilteredList<BaseObject>((obj: BaseObject) => obj.category === Category.operation && obj.isGlobal);
-  calculations = new FilteredList<BaseObject>((obj: BaseObject) => obj.category === Category.calculation && obj.isGlobal);
-  vectors = new FilteredList<BaseObject>((obj: BaseObject) => obj instanceof VectorObject && obj.isGlobal);
-  textObjects = new FilteredList<BaseObject>((obj: BaseObject) => obj instanceof TextObject && obj.isGlobal);
+  updatables = new FilteredList<BaseObject>((o: BaseObject) => o instanceof UpdatableObject);
+  drawObjects = new FilteredList<BaseObject>((o: BaseObject) => o instanceof DrawObject);
+  operations = new FilteredList<BaseObject>((o: BaseObject) => o.category === Category.operation && o.isGlobal);
+  calculations = new FilteredList<BaseObject>((o: BaseObject) => o.category === Category.calculation && o.isGlobal);
+  vectors = new FilteredList<BaseObject>((o: BaseObject) => o instanceof VectorObject && o.isGlobal);
+  textObjects = new FilteredList<BaseObject>((o: BaseObject) => o instanceof TextObject && o.isGlobal);
 
   filteredLists.push(
     objects,

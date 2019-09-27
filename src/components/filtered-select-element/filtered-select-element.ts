@@ -152,10 +152,18 @@ export class FilteredSelectElement extends ComponentBase {
   }
 
   protected createOption(obj: ICaptioned) {
-    if (this.filteredList.captionMode === CaptionMode.caption)
-      return this.createOptionCore(obj.name, obj.caption);
+    let result: HTMLOptionElement;
 
-    return this.createOptionCore(obj.name, obj.title);
+    if (this.filteredList.captionMode === CaptionMode.caption)
+      result = this.createOptionCore(obj.name, obj.caption);
+    else
+      result = this.createOptionCore(obj.name, obj.title);
+
+    if (obj.isOwned) {
+      result.style.color = "gray";
+    }
+
+    return result;
   }
 
   protected addEmptyFirstItem() {
