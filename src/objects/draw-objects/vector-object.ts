@@ -31,10 +31,10 @@ export class VectorObject extends DrawObject {
   private _assigningValues = false;
   private _drawOrigin: CalcSettings<Vec>;
   private _drawEnd: CalcSettings<Vec>;
-  private _labelAngle: CalcSettings<number>;
-  private _labelAngleDegrees: CalcSettings<number>;
-  private _labelPosition: CalcSettings<Vec>;
-  private _dataLabelPosition: CalcSettings<Vec>;
+  private _textAngle: CalcSettings<number>;
+  private _textAngleDegrees: CalcSettings<number>;
+  private _textPosition: CalcSettings<Vec>;
+  private _dataPosition: CalcSettings<Vec>;
   private _calcSettings: CalcSettings<any>[];
 
   constructor(name: string, vector: Vec, public readonly isOrigin: boolean = false) {
@@ -45,18 +45,18 @@ export class VectorObject extends DrawObject {
 
     this._drawOrigin = new CalcSettings<Vec>(this.getDrawOrigin, this.vecToString, this.stringToVec, c("Draw Origin"));
     this._drawEnd = new CalcSettings<Vec>(this.getDrawEnd, this.vecToString, this.stringToVec, c("Draw End"));
-    this._labelAngle = new CalcSettings<number>(this.getLabelAngle, toString, toNumber, c("Label Angle"));
-    this._labelAngleDegrees = new CalcSettings<number>(this.getLabelAngleDegrees, toString, toNumber, c("Label Angle°"));
-    this._labelPosition = new CalcSettings<Vec>(this.getLabelPosition, this.vecToString, this.stringToVec, c("Label Position"));
-    this._dataLabelPosition = new CalcSettings<Vec>(this.getDataLabelPosition, this.vecToString, this.stringToVec, c("Data Position"));
+    this._textAngle = new CalcSettings<number>(this.getTextAngle, toString, toNumber, c("Text Angle"));
+    this._textAngleDegrees = new CalcSettings<number>(this.getTextAngleDegrees, toString, toNumber, c("Text Angle°"));
+    this._textPosition = new CalcSettings<Vec>(this.getTextPosition, this.vecToString, this.stringToVec, c("Text Position"));
+    this._dataPosition = new CalcSettings<Vec>(this.getDataPosition, this.vecToString, this.stringToVec, c("Data Position"));
 
     this._calcSettings = [
       this._drawOrigin,
       this._drawEnd,
-      this._labelAngle,
-      this._labelAngleDegrees,
-      this._labelPosition,
-      this._dataLabelPosition
+      this._textAngle,
+      this._textAngleDegrees,
+      this._textPosition,
+      this._dataPosition
     ];
 
     this.value = new VectorValue("value", vector);
@@ -76,16 +76,16 @@ export class VectorObject extends DrawObject {
 
     this.drawOrigin = new CalcValue<Vec>("draw_origin", ValueType.vector, Vec.emptyPosition, this._drawOrigin);
     this.drawEnd = new CalcValue<Vec>("draw_end", ValueType.vector, Vec.emptyPosition, this._drawEnd);
-    this.labelAngle = new CalcValue<number>("label_angle", ValueType.number, 0, this._labelAngle);
-    this.labelAngleDegrees = new CalcValue<number>("label_angle_degrees", ValueType.number, 0, this._labelAngleDegrees);
-    this.labelPosition = new CalcValue<Vec>("label_position", ValueType.vector, Vec.emptyPosition, this._labelPosition);
-    this.dataPosition = new CalcValue<Vec>("data_position", ValueType.vector, Vec.emptyPosition, this._dataLabelPosition);
+    this.textAngle = new CalcValue<number>("text_angle", ValueType.number, 0, this._textAngle);
+    this.textAngleDegrees = new CalcValue<number>("text_angle_degrees", ValueType.number, 0, this._textAngleDegrees);
+    this.textPosition = new CalcValue<Vec>("text_position", ValueType.vector, Vec.emptyPosition, this._textPosition);
+    this.dataPosition = new CalcValue<Vec>("data_position", ValueType.vector, Vec.emptyPosition, this._dataPosition);
 
     this.drawOrigin.isGlobal = false;
     this.drawEnd.isGlobal = false;
-    this.labelAngle.isGlobal = false;
-    this.labelAngleDegrees.isGlobal = false;
-    this.labelPosition.isGlobal = false;
+    this.textAngle.isGlobal = false;
+    this.textAngleDegrees.isGlobal = false;
+    this.textPosition.isGlobal = false;
     this.dataPosition.isGlobal = false;
 
     this.angle.displayType = DisplayType.range;
@@ -113,9 +113,9 @@ export class VectorObject extends DrawObject {
       this.visible,
       this.drawOrigin,
       this.drawEnd,
-      this.labelAngle,
-      this.labelAngleDegrees,
-      this.labelPosition,
+      this.textAngle,
+      this.textAngleDegrees,
+      this.textPosition,
       this.dataPosition);
 
     if (!this.isOrigin) {
@@ -129,9 +129,9 @@ export class VectorObject extends DrawObject {
       this.end.isLocal = false;
       this.drawOrigin.isLocal = false;
       this.drawEnd.isLocal = false;
-      this.labelAngle.isLocal = false;
-      this.labelAngleDegrees.isLocal = false;
-      this.labelPosition.isLocal = false;
+      this.textAngle.isLocal = false;
+      this.textAngleDegrees.isLocal = false;
+      this.textPosition.isLocal = false;
       this.dataPosition.isLocal = false;
       this.angle.isLocal = false;
       this.mag.isLocal = false;
@@ -162,9 +162,9 @@ export class VectorObject extends DrawObject {
 
   readonly drawOrigin: CalcValue<Vec>;
   readonly drawEnd: CalcValue<Vec>;
-  readonly labelAngle: CalcValue<number>;
-  readonly labelAngleDegrees: CalcValue<number>;
-  readonly labelPosition: CalcValue<Vec>;
+  readonly textAngle: CalcValue<number>;
+  readonly textAngleDegrees: CalcValue<number>;
+  readonly textPosition: CalcValue<Vec>;
   readonly dataPosition: CalcValue<Vec>;
 
   protected renderCore(ctx: CanvasRenderingContext2D) {
@@ -208,19 +208,21 @@ export class VectorObject extends DrawObject {
   }
 
   private setLabelReferences() {
-    if (!this.label) return;
+    const label = this.label;
+    
+    if (!label) return;
 
-    this.label.angle.mode = ValueMode.vector;
-    this.label.angle.sourceValue = this.labelAngleDegrees;
-    this.label.color.mode = ValueMode.vector;
-    this.label.color.sourceValue = this.color;
-    this.label.opacity.mode = ValueMode.vector;
-    this.label.opacity.sourceValue = this.opacity;
-    this.label.position.mode = ValueMode.vector;
-    this.label.position.sourceValue = this.labelPosition;
-    this.label.align.value = "center";
-    this.label.visible.mode = ValueMode.vector;
-    this.label.visible.sourceValue = this.visible;
+    label.angle.mode = ValueMode.vector;
+    label.angle.sourceValue = this.textAngleDegrees;
+    label.color.mode = ValueMode.vector;
+    label.color.sourceValue = this.color;
+    label.opacity.mode = ValueMode.vector;
+    label.opacity.sourceValue = this.opacity;
+    label.position.mode = ValueMode.vector;
+    label.position.sourceValue = this.textPosition;
+    label.align.value = "center";
+    label.visible.mode = ValueMode.vector;
+    label.visible.sourceValue = this.visible;
   }
 
   private setValue(value: Vec): void;
@@ -299,7 +301,7 @@ export class VectorObject extends DrawObject {
   private getDrawEnd() { return this.drawOrigin.value.addN(this.value.value); }
 
   @D.clog(self => self.name)
-  private getLabelAngleDegrees() {
+  private getTextAngleDegrees() {
     const vector = this.value.value;
 
     if (this.isOrigin) return 0;
@@ -311,12 +313,12 @@ export class VectorObject extends DrawObject {
   }
 
   @D.clog(self => self.name)
-  private getLabelAngle() {
-    const angle = this.getLabelAngleDegrees();
+  private getTextAngle() {
+    const angle = this.getTextAngleDegrees();
     return angle * ONE_DEGREE;
   }
 
-  private getLabelPosition() {
+  private getTextPosition() {
     const vector = this.value.value;
 
     if (!vector) return undefined;
@@ -336,7 +338,7 @@ export class VectorObject extends DrawObject {
   }
 
   @D.clog(self => self.name)
-  private getDataLabelPosition() {
+  private getDataPosition() {
     const vector = this.value.value;
 
     if (!vector) return undefined;
