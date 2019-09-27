@@ -66,7 +66,7 @@ export abstract class ComponentBase extends HTMLElement {
     this.disconnectedCore();
     this._isConnected = false;
 
-    this.hookEvents();
+    this.unhookEvents();
     this.raiseDisconnect();
   }
 
