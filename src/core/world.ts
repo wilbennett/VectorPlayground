@@ -173,19 +173,11 @@ let operations: FilteredList<BaseObject>;
 let calculations: FilteredList<BaseObject>;
 let vectors: FilteredList<BaseObject>;
 let textObjects: FilteredList<BaseObject>;
-let categoryLists: Map<Category, FilteredList<BaseObject>>;
-let propertyLists: Map<BaseObject, HTMLDivElement>;
+let propertyElements: Map<BaseObject, HTMLDivElement>;
 
 function initializeLists() {
   filteredLists = [];
-
-  categoryLists = new Map<Category, FilteredList<BaseObject>>();
-  // @ts-ignore - missing values definition.
-  Object.values(Category)
-    .forEach((v: Category) =>
-      categoryLists.set(v, new FilteredList<BaseObject>((o: BaseObject) => o.category == v && o.isLocal)));
-
-  propertyLists = new Map<BaseObject, HTMLDivElement>();
+  propertyElements = new Map<BaseObject, HTMLDivElement>();
 
   objects = new FilteredList<BaseObject>(() => true);
   updatables = new FilteredList<BaseObject>((obj: BaseObject) => obj instanceof UpdatableObject);
@@ -202,8 +194,7 @@ function initializeLists() {
     operations,
     calculations,
     vectors,
-    textObjects,
-    ...categoryLists.values());
+    textObjects);
 }
 
 function checkSelection(...lists: FilteredList<BaseObject>[]) {
@@ -286,7 +277,7 @@ function update() {
 /*********************************************************************************************/
 function handleSelectedVectorChanged(e: ListEventArgs) {
   if (!(e instanceof ListSelectedItemChangedArgs)) return;
-  console.log("******** SelectedVectorChanged");
+  // console.log("******** SelectedVectorChanged");
 
   const selected = <VectorObject>checkType(VectorObject, vectors.value);
 
@@ -302,7 +293,7 @@ function handleSelectedVectorChanged(e: ListEventArgs) {
 
 function handleSelectedTextObjectChanged(e: ListEventArgs) {
   if (!(e instanceof ListSelectedItemChangedArgs)) return;
-  console.log("******** SelectedTextObjectChanged");
+  // console.log("******** SelectedTextObjectChanged");
 
   const selected = <TextObject>checkType(TextObject, textObjects.value);
 
@@ -315,15 +306,15 @@ function handleSelectedTextObjectChanged(e: ListEventArgs) {
 }
 
 function getObjectProps(obj: BaseObject) {
-  let props = propertyLists.get(obj);
+  let props = propertyElements.get(obj);
 
   if (!props) {
     const propsList = createPropertyList(obj);
     propsList.captionMode = CaptionMode.title;
     addFilteredLists(propsList);
     props = createPropertiesElements(propsList);
-    propertyLists.set(obj, props);
-    obj.addDisposable(Utils.disposable(() => propertyLists.delete(obj)));
+    propertyElements.set(obj, props);
+    obj.addDisposable(Utils.disposable(() => propertyElements.delete(obj)));
   }
 
   return props;
@@ -519,18 +510,14 @@ function initializeEventHandlers() {
 /* Utils
 /*********************************************************************************************/
 function getUniqueText(category: Category, predicate: (obj: BaseObject, text: string) => boolean, text: string) {
+  if (!objects) return text;
+
   let result = text;
-
-  // if (category === Category.utils) return result;
-
-  let list = categoryLists.get(category);
-
-  if (!list) return result;
-
-  let items = list.items;
+  const filter = (obj: BaseObject, txt: string) => obj.category === category && predicate(obj, txt);
+  let items = objects.items;
   let i = 1;
 
-  while (items.find(obj => predicate(obj, result))) {
+  while (items.find(obj => filter(obj, result))) {
     result = `${text}_${i++}`;
   }
 
