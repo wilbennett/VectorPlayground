@@ -87,9 +87,10 @@ export class Value<T> extends BaseObject implements IValue {
 
     includeIf(ValueMode.text, true);
     includeIf(ValueMode.constant, true);
-    includeIf(ValueMode.textObject, true);
-    includeIf(ValueMode.vector, true);
-    includeIf(ValueMode.calculation, true);
+    includeIf(ValueMode.property, true);
+    includeIf(ValueMode.textObject, false);
+    includeIf(ValueMode.vector, false);
+    includeIf(ValueMode.calculation, false);
     includeIf(ValueMode.transform, this.valueType === ValueType.transform);
 
     return <ValueMode>result;
