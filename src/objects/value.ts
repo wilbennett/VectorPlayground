@@ -14,7 +14,7 @@ import * as D from '../decorators';
 import { ChangeArgs, ChangeEventArgs, EventKind } from '../event-args';
 import { Utils } from '../utils';
 
-const { isEmpty } = Utils;
+const { isEmpty, hasValue } = Utils;
 
 @D.dlogged({
   logAllMethods: true,
@@ -197,7 +197,7 @@ export class Value<T> extends BaseObject implements IValue {
     if (isEmpty(this._value))
       this.calcValue();
 
-    return this._value || this._defaultValue;
+    return hasValue(this._value) ? this._value : this._defaultValue;
   }
   set value(value) {
     if (this.mode !== ValueMode.text) return;
@@ -437,12 +437,12 @@ export class Value<T> extends BaseObject implements IValue {
 
     if (!isTextOrList) {
       if (!this.sourceValue) {
-        this._settingsChangeArgs.setValues(this._text, "", this, "text");
-        this._text = "";
-        this.emitSettingsChange(this._settingsChangeArgs);
-
+        const text = this.convertToString(this.defaultValue) || "";
+        this._settingsChangeArgs.setValues(this._text, text, this, "text");
         this._valueChangeArgs.setValues(this._value, this.defaultValue, this);
         this._value = this.defaultValue;
+        this._text = text;
+        this.emitSettingsChange(this._settingsChangeArgs);
         this.emitChange(this._valueChangeArgs);
         return;
       }
