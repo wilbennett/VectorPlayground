@@ -1,5 +1,5 @@
 import { BaseObject } from '.';
-import { Category, ValueType } from '../core';
+import { Category, Tristate, ValueType } from '../core';
 import { Utils } from '../utils';
 
 export abstract class TransformObject<T> extends BaseObject {
@@ -7,8 +7,9 @@ export abstract class TransformObject<T> extends BaseObject {
     super(name, category || Category.transform);
 
     this._valueType = valueType;
+    this.isGlobal = false;
     this.caption = Utils.capitalizeUnder(name);
   }
 
-  abstract transform(value: T): T;
+  abstract transform(value: Tristate<T>): Tristate<T>;
 }

@@ -1,15 +1,10 @@
-import { TransformObject } from '..';
-import { IWorld, promisedWorld, Tristate, ValueType, Vec } from '../../core';
+import { Tristate, Vec } from '../../core';
+import { transform } from '../decorators';
 
-let world!: IWorld;
-const worldAssigned = promisedWorld.then(w => world = w);
+type TriVec = Tristate<Vec>;
 
-export class Midpoint extends TransformObject<Vec> {
-    constructor() {
-        super("midpoint", ValueType.vector);
-    }
-
-    transform(value: Tristate<Vec>) { return value ? value.midPointN() : Vec.emptyDirection; }
+// @ts-ignore - unused param.
+class VectorTransforms {
+  @transform() midpoint = (v: TriVec) => v ? v.midPointN() : Vec.emptyDirection;
+  @transform() negate = (v: TriVec) => v ? v.negateN() : Vec.emptyDirection;
 }
-
-worldAssigned.then(() => world.addObjects(new Midpoint()));
