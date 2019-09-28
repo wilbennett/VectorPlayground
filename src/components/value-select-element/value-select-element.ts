@@ -260,7 +260,7 @@ export class ValueSelectElement extends ComponentBase {
 
   protected updateVisibility() {
     this.hideAll();
-    this._elText.disabled = this.readOnlyText;
+    this._elText.disabled = this.readOnlyText || this.mode !== ValueMode.text;
 
     displayElement(this._elText,
       this.alwaysShowText && (this.allowedModes & ValueMode.text) || this.mode === ValueMode.text);
