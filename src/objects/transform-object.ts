@@ -1,13 +1,14 @@
 import { BaseObject } from '.';
 import { Category, ValueType } from '../core';
+import { Utils } from '../utils';
 
-export class TransformObject<T> extends BaseObject {
-  constructor(name: string, public readonly valueType: ValueType, category?: Category) {
+export abstract class TransformObject<T> extends BaseObject {
+  constructor(name: string, valueType: ValueType, category?: Category) {
     super(name, category || Category.transform);
+
+    this._valueType = valueType;
+    this.caption = Utils.capitalizeUnder(name);
   }
 
-  private _adjustOrigin = false;
-  get adjustOrigin() { return this._adjustOrigin; }
-
-  transform(value?: T | null) { return value; }
+  abstract transform(value: T): T;
 }

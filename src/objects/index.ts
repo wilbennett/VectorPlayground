@@ -13,6 +13,7 @@ export * from "./calculation";
 export * from "./operation";
 
 export * from "./values";
+export * from "./values/transforms";
 export * from "./draw-objects";
 // export * from "./operations";
 // export * from "./transforms";

@@ -433,7 +433,9 @@ export class Value<T> extends BaseObject implements IValue {
   }
 
   protected calcValue() {
-    if (this.mode !== ValueMode.text && this.mode !== ValueMode.list) {
+    const isTextOrList = this.mode === ValueMode.text || this.mode === ValueMode.list;
+
+    if (!isTextOrList) {
       if (!this.sourceValue) return;
 
       this._inputValue = this.sourceValue.value;
@@ -446,11 +448,13 @@ export class Value<T> extends BaseObject implements IValue {
       return;
     }
 
-    if (this.transform)
-      result = this.transform.transform(result);
+    if (!isTextOrList && result !== null && result !== undefined) {
+      if (this.transform && result !== null)
+        result = this.transform.transform(result);
 
-    if (this.modifier)
-      result = this.modifier.transform(result);
+      if (this.modifier)
+        result = this.modifier.transform(result);
+    }
 
     this.setValue(result);
   }
