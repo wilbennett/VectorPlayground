@@ -68,7 +68,7 @@ export class TextObject extends DrawObject {
 
     let value = this.text.value;
 
-    if (this.round) {
+    if (this.round.value) {
       const num = toNumber(value);
 
       if (!isNaN(num)) {
@@ -81,7 +81,7 @@ export class TextObject extends DrawObject {
     return this._textValue;
   }
   set textValue(value) {
-    if (this.round) {
+    if (this.round.value) {
       const num = toNumber(value);
 
       if (!isNaN(num))
