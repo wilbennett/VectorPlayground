@@ -74,7 +74,7 @@ export class FilteredSelectElement extends ComponentBase {
 
   get selectedIndex() { return this._elValue.selectedIndex; }
   set selectedIndex(value) {
-    this._elValue.selectedIndex = -1;
+    // this._elValue.selectedIndex = -1;
     if (value !== this._elValue.selectedIndex)
       this._elValue.selectedIndex = value;
 

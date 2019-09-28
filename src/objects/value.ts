@@ -440,6 +440,10 @@ export class Value<T> extends BaseObject implements IValue {
         this._settingsChangeArgs.setValues(this._text, "", this, "text");
         this._text = "";
         this.emitSettingsChange(this._settingsChangeArgs);
+
+        this._valueChangeArgs.setValues(this._value, this.defaultValue, this);
+        this._value = this.defaultValue;
+        this.emitChange(this._valueChangeArgs);
         return;
       }
 
