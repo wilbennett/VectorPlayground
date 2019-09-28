@@ -68,7 +68,7 @@ export class Value<T> extends BaseObject implements IValue {
   protected _alwaysShowText = false;
   get alwaysShowText() { return this._alwaysShowText; }
   // @ts-ignore - unused param.
-  set alwaysShowText(value) { }
+  set alwaysShowText(value) { this._alwaysShowText = value; }
 
   protected _readOnlyText = false;
   get readOnlyText() { return this._readOnlyText; }
@@ -436,9 +436,7 @@ export class Value<T> extends BaseObject implements IValue {
     const isTextOrList = this.mode === ValueMode.text || this.mode === ValueMode.list;
 
     if (!isTextOrList) {
-      if (!this.sourceValue) return;
-
-      this._inputValue = this.sourceValue.value;
+      this._inputValue = this.sourceValue ? this.sourceValue.value : undefined;
     }
 
     let result = this._inputValue;
