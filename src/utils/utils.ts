@@ -30,7 +30,8 @@ export class Utils {
   static isNull(value: any) { return value === null; }
   static isUndefined(value: any) { return value === undefined; }
   static isEmpty(value: any) { return value === undefined || value === null; }
-  static hasValue(value: any) { return value !== undefined && value !== null; }
+  static hasValue<T>(value: T): value is T { return value !== undefined && value !== null; }
+  static isNumber(v: Tristate<number>): v is number { return v !== undefined && v !== null && !isNaN(v); }
 
   static defaultUndefined<T>(value?: T, defaultValue?: T) {
     return value !== undefined ? value : defaultValue;
