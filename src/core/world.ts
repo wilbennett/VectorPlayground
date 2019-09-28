@@ -579,11 +579,11 @@ function reset() {
   const v = createVectorObject("v", new Vec(-4, 1, 0), false);
   // const v = createVectorObject("v", new Vec(1, 0, 0), false, true);
   me.addObjects(v);
-  /*
   const res = createVectorObject("result", new Vec(0, 0, 0), false);
   res.color.text = "#009900";
   res.visible.value = false;
   me.addObjects(res);
+  /*
   const par = createVectorObject("par", new Vec(0, 0, 0), false);
   par.color.text = "#004000";
   par.lineWidth.value = 5;
