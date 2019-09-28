@@ -12,8 +12,8 @@ export * from "./transform-value";
 export * from "./calculation";
 export * from "./operation";
 
+export * from "./decorators";
+export * from "./transforms";
 export * from "./values";
-export * from "./values/transforms";
 export * from "./draw-objects";
 // export * from "./operations";
-// export * from "./transforms";

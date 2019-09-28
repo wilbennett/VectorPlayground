@@ -1,5 +1,5 @@
-import { TransformObject } from '../..';
-import { IWorld, promisedWorld, Tristate, ValueType, Vec } from '../../../core';
+import { TransformObject } from '..';
+import { IWorld, promisedWorld, Tristate, ValueType, Vec } from '../../core';
 
 let world!: IWorld;
 const worldAssigned = promisedWorld.then(w => world = w);
