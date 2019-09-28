@@ -436,7 +436,14 @@ export class Value<T> extends BaseObject implements IValue {
     const isTextOrList = this.mode === ValueMode.text || this.mode === ValueMode.list;
 
     if (!isTextOrList) {
-      this._inputValue = this.sourceValue ? this.sourceValue.value : undefined;
+      if (!this.sourceValue) {
+        this._settingsChangeArgs.setValues(this._text, "", this, "text");
+        this._text = "";
+        this.emitSettingsChange(this._settingsChangeArgs);
+        return;
+      }
+
+      this._inputValue = this.sourceValue.value;
     }
 
     let result = this._inputValue;
