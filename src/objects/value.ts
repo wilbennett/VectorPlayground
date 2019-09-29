@@ -52,7 +52,7 @@ export class Value<T> extends BaseObject implements IValue {
 
     this._valueType = valueType;
     this._defaultValue = defaultValue;
-    this._inputValue = value || defaultValue;
+    this._inputValue = value;
 
     this._caption = undefined;
   }
@@ -436,7 +436,7 @@ export class Value<T> extends BaseObject implements IValue {
     const text = this.convertToString(this.defaultValue) || "";
     this._settingsChangeArgs.setValues(this._text, text, this, "text");
     this._valueChangeArgs.setValues(this._value, this.defaultValue, this);
-    this._value = this.defaultValue;
+    this._value = undefined;
     this._text = text;
     this.emitSettingsChange(this._settingsChangeArgs);
     this.emitChange(this._valueChangeArgs);

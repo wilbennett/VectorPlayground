@@ -66,6 +66,7 @@ export class BaseObject implements IDisposable, ICaptioned {
 
     this._captionArgs.setValues(this._caption, value);
     this._caption = value ? world.getUniqueCaption(this.category, value) : undefined;
+    this.captionChanged(this._caption);
     this.emitChange(this._captionArgs);
   }
 
@@ -141,6 +142,8 @@ export class BaseObject implements IDisposable, ICaptioned {
     }
   }
 
+  // @ts-ignore - unused param.
+  protected captionChanged(caption?: string) { }
   // @ts-ignore - unused param.
   protected onChildChanged(e: ChangeArgs) { }
 

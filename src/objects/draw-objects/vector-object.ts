@@ -29,6 +29,7 @@ const { ONE_DEGREE, ONE_RADIAN, toNumber, toString } = Utils;
 export class VectorObject extends DrawObject {
   private _settingValue = false;
   private _assigningValues = false;
+  private _captionValue: CalcSettings<string>;
   private _drawOrigin: CalcSettings<Vec>;
   private _drawEnd: CalcSettings<Vec>;
   private _textAngle: CalcSettings<number>;
@@ -43,6 +44,7 @@ export class VectorObject extends DrawObject {
     const nameText = Utils.formatVectorName(this.name);
     const c = (caption: string) => `${nameText} ${caption}`;
 
+    this._captionValue = new CalcSettings<string>(() => this.caption, s => s, s => s, c("Caption"));
     this._drawOrigin = new CalcSettings<Vec>(this.getDrawOrigin, this.vecToString, this.stringToVec, c("Draw Origin"));
     this._drawEnd = new CalcSettings<Vec>(this.getDrawEnd, this.vecToString, this.stringToVec, c("Draw End"));
     this._textAngle = new CalcSettings<number>(this.getTextAngle, toString, toNumber, c("Text Angle"));
@@ -51,6 +53,7 @@ export class VectorObject extends DrawObject {
     this._dataPosition = new CalcSettings<Vec>(this.getDataPosition, this.vecToString, this.stringToVec, c("Data Position"));
 
     this._calcSettings = [
+      this._captionValue,
       this._drawOrigin,
       this._drawEnd,
       this._textAngle,
@@ -74,12 +77,15 @@ export class VectorObject extends DrawObject {
     this.rotateStep = new NumberValue("rotate_step", 1, -90, 90, 0.1);
     this.visible = new BoolValue("visible", true);
 
+    this.captionValue = new CalcValue<string>("caption", ValueType.string, "xxx", this._captionValue);
     this.drawOrigin = new CalcValue<Vec>("draw_origin", ValueType.vector, Vec.emptyPosition, this._drawOrigin);
     this.drawEnd = new CalcValue<Vec>("draw_end", ValueType.vector, Vec.emptyPosition, this._drawEnd);
     this.textAngle = new CalcValue<number>("text_angle", ValueType.number, 0, this._textAngle);
     this.textAngleDegrees = new CalcValue<number>("text_angle_degrees", ValueType.number, 0, this._textAngleDegrees);
     this.textPosition = new CalcValue<Vec>("text_position", ValueType.vector, Vec.emptyPosition, this._textPosition);
     this.dataPosition = new CalcValue<Vec>("data_position", ValueType.vector, Vec.emptyPosition, this._dataPosition);
+
+    this.caption = nameText;
 
     this.drawOrigin.isGlobal = false;
     this.drawEnd.isGlobal = false;
@@ -111,6 +117,7 @@ export class VectorObject extends DrawObject {
       this.rotate,
       this.rotateStep,
       this.visible,
+      this.captionValue,
       this.drawOrigin,
       this.drawEnd,
       this.textAngle,
@@ -127,6 +134,7 @@ export class VectorObject extends DrawObject {
     if (this.isOrigin) {
       this.origin.isLocal = false;
       this.end.isLocal = false;
+      this.captionValue.isLocal = false;
       this.drawOrigin.isLocal = false;
       this.drawEnd.isLocal = false;
       this.textAngle.isLocal = false;
@@ -160,6 +168,7 @@ export class VectorObject extends DrawObject {
   readonly rotateStep: NumberValue;
   readonly visible: BoolValue;
 
+  readonly captionValue: CalcValue<string>;
   readonly drawOrigin: CalcValue<Vec>;
   readonly drawEnd: CalcValue<Vec>;
   readonly textAngle: CalcValue<number>;
@@ -188,6 +197,11 @@ export class VectorObject extends DrawObject {
     this.setValue(vector.rotateN(this.rotateStep.value * ONE_DEGREE));
   }
 
+  // @ts-ignore - unused param.
+  protected captionChanged(caption?: string) {
+    this._captionValue.setValue!.call(this._captionValue.instance, caption);
+  }
+
   @D.setDlog() @D.clog(self => self.name)
   private createPolar() {
     if (this.isOrigin) return;
@@ -212,6 +226,8 @@ export class VectorObject extends DrawObject {
 
     if (!label) return;
 
+    label.text.mode = ValueMode.property;
+    label.text.sourceValue = this.captionValue;
     label.angle.mode = ValueMode.property;
     label.angle.sourceValue = this.textAngleDegrees;
     label.color.mode = ValueMode.property;
@@ -366,7 +382,12 @@ export class VectorObject extends DrawObject {
   }
 
   @D.clog(self => self.name)
-  private clearCalcValues() { this._calcSettings.forEach(cs => cs.setValue!.call(cs.instance, undefined)); }
+  private clearCalcValues() {
+    this._calcSettings.forEach(cs => {
+      if (cs !== this._captionValue)
+        cs.setValue!.call(cs.instance, undefined);
+    });
+  }
 
   @D.clog(self => self.name) @logEvent
   protected onChildChanged(e: ChangeArgs) {
