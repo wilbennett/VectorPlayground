@@ -1,165 +1,361 @@
-#canvas {
-  position: fixed;
-}
+  .andale-mono {
+    font-family: "Andale Mono", AndaleMono, monospace;
+  }
 
-h1, h2 {
-  font-family: Lato;
-}
+  .arial {
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  }
 
-.inline {
-  display: inline;
-}
+  .arial-black {
+    font-family: "Arial Black", "Arial Bold", Gadget, sans-serif;
+  }
 
-.flexhoriz {
-  display: flex;
-  flex-direction: row;
-  flex-flow: wrap;
-  border-style: solid;
-  margin: 5px 0px 0px 0px;
-  padding: 1px;
-}
+  .arial-narrow {
+    font-family: "Arial Narrow", Arial, sans-serif;
+  }
 
-.flexvert {
-  display: flex;
-  flex-direction: column;
-  border-style: solid;
-  border-width: 1px;
-  margin: 1px;
-  padding: 5px;
-}
+  .arial-rounded {
+    font-family: "Arial Rounded MT Bold", "Helvetica Rounded", Arial, sans-serif;
+  }
 
-.border1 {
-  border-style: solid;
-  border-width: 1px;
-  padding: 0px 3px 2px 3px;
-}
+  .avant-garde {
+    font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "Apple Gothic", sans-serif;
+  }
 
-.calculations {
-  display: flex;
-  flex-direction: column;
-  /* border-style: solid;
+  .baskerville {
+    font-family: Baskerville, "Baskerville old face", "Hoefler Text", Garamond, "Times New Roman", serif;
+  }
+
+  .big-caslon {
+    font-family: "Big Caslon", "Book Antiqua", "Palatino Linotype", Georgia, serif;
+  }
+
+  .bodoni-mt {
+    font-family: "Bodoni MT", Didot, "Didot LT STD", "Hoefler Text", Garamond, "Times New Roman", serif;
+  }
+
+  .book-antiqua {
+    font-family: "Book Antiqua", Palatino, "Palatino Linotype", "Palatino LT STD", Georgia, serif;
+  }
+
+  .brush-script-mt {
+    font-family: "Brush Script MT", cursive;
+  }
+
+  .calibri {
+    font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+  }
+
+  .calisto-mt {
+    font-family: "Calisto MT", "Bookman Old Style", Bookman, "Goudy Old Style", Garamond, "Hoefler Text", "Bitstream Charter", Georgia, serif;
+  }
+
+  .cambria {
+    font-family: Cambria, Georgia, serif;
+  }
+
+  .candara {
+    font-family: Candara, Calibri, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+  }
+
+  .century-gothic {
+    font-family: "Century Gothic", CenturyGothic, "Apple Gothic", sans-serif;
+  }
+
+  .consolas {
+    font-family: consolas, monaco, "Lucida Console", monospace;
+  }
+
+  .copperplate {
+    font-family: Copperplate, "Copperplate Gothic Light", fantasy;
+  }
+
+  .courier-new {
+    font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+  }
+
+  .didot {
+    font-family: Didot, "Didot LT STD", "Hoefler Text", Garamond, "Times New Roman", serif;
+  }
+
+  .franklin-gothic-medium {
+    font-family: "Franklin Gothic Medium", Arial, sans-serif;
+  }
+
+  .frutiger {
+    font-family: Frutiger, "Frutiger Linotype", Univers, Calibri, "Gill Sans", "Gill Sans MT", "Myriad Pro", Myriad, "DejaVu Sans Condensed", "Liberation Sans", "Nimbus Sans L", Tahoma, Geneva, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+
+  .futura {
+    font-family: Futura, "Trebuchet MS", Arial, sans-serif;
+  }
+
+  .garamond {
+    font-family: Garamond, Baskerville, "Baskerville Old Face", "Hoefler Text", "Times New Roman", serif;
+  }
+
+  .geneva {
+    font-family: Geneva, Tahoma, Verdana, sans-serif;
+  }
+
+  .georgia {
+    font-family: Georgia, Times, â€œTimes New Romanâ€, serif;
+  }
+
+  .gill-sans {
+    font-family: "Gill Sans", "Gill Sans MT", Calibri, sans-serif;
+  }
+
+  .goudy-old-style {
+    font-family: "Goudy Old Style", Garamond, "Big Caslon", "Times New Roman", serif;
+  }
+
+  .helvetica {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+
+  .hoefler-text {
+    font-family: "Hoefler Text", "Baskerville old face", Garamond, "Times New Roman", serif;
+  }
+
+  .impact {
+    font-family: Impact, Haettenschweiler, "Franklin Gothic Bold", Charcoal, "Helvetica Inserat", "Bitstream Vera Sans Bold", "Arial Black", sans serif;
+  }
+
+  .lucida-bright {
+    font-family: "Lucida Bright", Georgia, serif;
+  }
+
+  .lucida-console {
+    font-family: "Lucida Console", "Lucida Sans Typewriter", Monaco, "Bitstream Vera Sans Mono", monospace;
+  }
+
+  .lucida-grande {
+    font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+  }
+
+  .lucida-sans-typewriter {
+    font-family: "Lucida Sans Typewriter", "Lucida Console", Monaco, "Bitstream Vera Sans Mono", monospace;
+  }
+
+  .monaco {
+    font-family: monaco, consolas, "Lucida Console", monospace;
+  }
+
+  .museo-500 {
+    font-family: "Museo-500", Rockwell, Courier, "Courier New", serif;
+  }
+
+  .optima {
+    font-family: Optima, Segoe, "Segoe UI", Candara, Calibri, Arial, sans-serif;
+  }
+
+  .palatino {
+    font-family: Palatino, "Palatino Linotype", "Palatino LT STD", "Book Antiqua", Georgia, serif;
+  }
+
+  .papyrus {
+    font-family: Papyrus, fantasy;
+  }
+
+  .perpetua {
+    font-family: Perpetua, Baskerville, "Big Caslon", "Palatino Linotype", Palatino, "URW Palladio L", "Nimbus Roman No9 L", serif;
+  }
+
+  .rockwell {
+    font-family: Rockwell, "Courier Bold", Courier, Georgia, Times, "Times New Roman", serif;
+  }
+
+  .rockwell-extra-bold {
+    font-family: "Rockwell Extra Bold", "Rockwell Bold", monospace;
+  }
+
+  .segoe {
+    font-family: Segoe, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  }
+
+  .tahoma {
+    font-family: Tahoma, Verdana, Segoe, sans-serif;
+  }
+
+  .times-new-roman {
+    font-family: TimesNewRoman, "Times New Roman", Times, Baskerville, Georgia, serif;
+  }
+
+  .trebuchet {
+    font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
+  }
+
+  .verdana {
+    font-family: Verdana, Geneva, sans-serif;
+  }
+
+  /* html, body, h1, h2, h3, h4, h5, h6, select {
+    font-family: "Comic Sans MS", cursive, sans-serif;
+  } */
+
+  #canvas {
+    position: fixed;
+  }
+
+  h1, h2 {
+    font-family: Lato;
+  }
+
+  .inline {
+    display: inline;
+  }
+
+  .flexhoriz {
+    display: flex;
+    flex-direction: row;
+    flex-flow: wrap;
+    border-style: solid;
+    margin: 5px 0px 0px 0px;
+    padding: 1px;
+  }
+
+  .flexvert {
+    display: flex;
+    flex-direction: column;
+    border-style: solid;
+    border-width: 1px;
+    margin: 1px;
+    padding: 5px;
+  }
+
+  .border1 {
+    border-style: solid;
+    border-width: 1px;
+    padding: 0px 3px 2px 3px;
+  }
+
+  .calculations {
+    display: flex;
+    flex-direction: column;
+    /* border-style: solid;
   border-width: 1px; */
-  margin: 2px;
-  padding: 5px;
-}
+    margin: 2px;
+    padding: 5px;
+  }
 
-.gridhoriz2 {
-  display: grid;
-  grid-template-columns: auto auto;
-  grid-gap: 5px;
-  margin: 4px 0px 0px 5px;
-}
+  .gridhoriz2 {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-gap: 5px;
+    margin: 4px 0px 0px 5px;
+  }
 
-.scroll {
-  overflow-y: scroll;
-}
+  .scroll {
+    overflow-y: scroll;
+  }
 
-.inputlbl {
-  text-align: right;
-}
+  .inputlbl {
+    text-align: right;
+  }
 
-.col {
-  flex: 1;
-}
+  .col {
+    flex: 1;
+  }
 
-.title {
-  text-align: center;
-  color: cyan;
-  background-color: teal;
-  font-weight: bold;
-  margin: 0px 0px 5px 0px;
-}
+  .title {
+    text-align: center;
+    color: cyan;
+    background-color: teal;
+    font-weight: bold;
+    margin: 0px 0px 5px 0px;
+  }
 
-.calctitle {
-  text-align: center;
-  color: cyan;
-  background-color: teal;
-  text-decoration-line: underline;
-  margin: 0px 0px 0px 0px;
-}
+  .calctitle {
+    text-align: center;
+    color: cyan;
+    background-color: teal;
+    text-decoration-line: underline;
+    margin: 0px 0px 0px 0px;
+  }
 
-.description {
-  text-align: center;
-  color: rgb(178, 224, 218);
-  background-color: teal;
-  text-decoration-line: none;
-  font-size: 0.8em;
-  font-weight: normal;
-  margin: 0px 2px 5px 2px;
-}
+  .description {
+    text-align: center;
+    color: rgb(178, 224, 218);
+    background-color: teal;
+    text-decoration-line: none;
+    font-size: 0.8em;
+    font-weight: normal;
+    margin: 0px 2px 5px 2px;
+  }
 
-.deletebutton {
-  color: lightblue;
-  background-color: transparent;
-  margin: 0px 0px 5px 5px;
-  border-width: 1px;
-}
+  .deletebutton {
+    color: lightblue;
+    background-color: transparent;
+    margin: 0px 0px 5px 5px;
+    border-width: 1px;
+  }
 
-.labelfield {
-  margin: 0px 0px 2px 0px;
-}
+  .labelfield {
+    margin: 0px 0px 2px 0px;
+  }
 
-.negatelabel {
-  border-style: solid;
-  border-width: 1px;
-  margin: 0px 2px 0px 2px;
-  padding: 0px 2px 0px 0px;
-  font-weight: bolder;
-}
+  .negatelabel {
+    border-style: solid;
+    border-width: 1px;
+    margin: 0px 2px 0px 2px;
+    padding: 0px 2px 0px 0px;
+    font-weight: bolder;
+  }
 
-.maincheck {
-  border-style: solid;
-  border-width: 2px;
-  /* margin: 0px 2px 0px 2px;
+  .maincheck {
+    border-style: solid;
+    border-width: 2px;
+    /* margin: 0px 2px 0px 2px;
   padding: 0px 2px 0px 0px; */
-}
+  }
 
-.nameinput {
-  width: 80px;
-}
+  .nameinput {
+    width: 80px;
+  }
 
-.number {
-  width: 50px;
-}
+  .number {
+    width: 50px;
+  }
 
-.textvalue {
-  width: 50px;
-}
+  .textvalue {
+    width: 50px;
+  }
 
-.range {
-  width: 80px;
-}
+  .range {
+    width: 80px;
+  }
 
-#container {
-  display: inline;
-}
+  #container {
+    display: inline;
+  }
 
-.expandbutton {
-  font-size: 10px;
-  padding: 0px 0px 0px 0px;
-  vertical-align: middle;
-}
+  .expandbutton {
+    font-size: 10px;
+    padding: 0px 0px 0px 0px;
+    vertical-align: middle;
+  }
 
-.background {
-  display: none;
-  position: fixed;
-  z-index: 2;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0, 0, 0, 0.4);
-}
+  .background {
+    display: none;
+    position: fixed;
+    z-index: 2;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+  }
 
-.dialog {
-  display: none;
-  z-index: 1;
-  overflow: auto;
-  background-color: rgb(255, 255, 255);
-  border-style: solid;
-  border: 2px;
-  border-width: 2;
-  border-color: rgb(23, 83, 122);
-  padding: 10px;
-}
+  .dialog {
+    display: none;
+    z-index: 1;
+    overflow: auto;
+    background-color: rgb(255, 255, 255);
+    border-style: solid;
+    border: 2px;
+    border-width: 2;
+    border-color: rgb(23, 83, 122);
+    padding: 10px;
+  }

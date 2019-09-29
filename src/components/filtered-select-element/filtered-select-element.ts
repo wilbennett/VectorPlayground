@@ -72,6 +72,16 @@ export class FilteredSelectElement extends ComponentBase {
   // @ts-ignore - decorator implemented.
   @boolAttribute() includeEmptyItem: boolean;
 
+  set font(value: string) {
+    if (!this._options) return;
+
+    this._elValue.className = value;
+
+    for (const option of this._options) {
+      option.className = value;
+    }
+  }
+
   get selectedIndex() { return this._elValue.selectedIndex; }
   set selectedIndex(value) {
     // this._elValue.selectedIndex = -1;
@@ -162,7 +172,7 @@ export class FilteredSelectElement extends ComponentBase {
     const option = document.createElement("option");
     option.text = caption || value;
     option.value = value;
-    D.dlogDetail(`Created option: `, option);
+    option.className = this._elValue.className;
     return option;
   }
 

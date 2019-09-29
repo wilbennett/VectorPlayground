@@ -5,6 +5,7 @@ console.log("ui init start");
 const { ONE_DEGREE } = Utils;
 const { getElement, getInputElement, getDivElement, getCanvasElement } = UiUtils;
 
+export const elFonts = UiUtils.getSelectElement("fonts");
 export const elPause = getInputElement("pause");
 export const backCanvas = getCanvasElement("backcanvas");
 export const canvas = getCanvasElement("canvas");

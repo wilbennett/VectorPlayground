@@ -160,6 +160,7 @@ console.log(`finished setting world: `);
 /*********************************************************************************************/
 /* List handling
 /*********************************************************************************************/
+let selects: FilteredSelectElement[] = [];
 // let selectedOperation: Tristate<Operation>;
 let selectedVector: Tristate<VectorObject>;
 let selectedTextObject: Tristate<TextObject>;
@@ -424,6 +425,7 @@ function createPropertiesElements(properties: FilteredList<BaseObject>) {
 /* Registration/Filtering
 /*********************************************************************************************/
 function createFilterList(property: Value<any>, e: FilteredSelectElement) {
+  selects.push(e);
   if (e.category === Category.list) {
     const list = new FilteredList<Captioned>(o => o instanceof Captioned);
 
@@ -504,6 +506,13 @@ function forceUpdate() {
 }
 
 function initializeEventHandlers() {
+  selects.push(ui.elVectors, ui.elTexts);
+  ui.elFonts.addEventListener("change", () => {
+    for (const select of selects) {
+      select.font = ui.elFonts.value;
+    }
+  });
+
   window.addEventListener("resize", forceUpdate);
   ui.elReset.addEventListener("click", handleReset);
   ui.elTickScale.addEventListener("input", forceUpdate);
