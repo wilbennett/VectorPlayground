@@ -1,25 +1,50 @@
-import { UpdatableObject } from ".";
+import { UpdatableObject } from '.';
+import { Category } from '../core';
 
 export class Calculation extends UpdatableObject {
-  div?: HTMLDivElement;
-  protected content?: HTMLDivElement;
+  protected _alwaysDirty = false;
   protected descriptionElement?: HTMLElement;
   protected deleteButton?: HTMLInputElement;
 
-  // @ts-ignore - unused param.
-  protected addParamElements(content: HTMLDivElement) {}
+  constructor(name: string) {
+    super(name, Category.calculation);
+  }
+
+  private _div?: HTMLDivElement;
+  get div() { return this._div || (this._div = this.createDiv()[0]); }
+
+  protected _content?: HTMLDivElement;
+  get content() { return this._content || (this._content = this.createDiv()[1]); }
+
+  protected _isDirty = false;
+  protected get isDirty() { return this._isDirty; }
+
+
+  protected onChildChanged() { this.dirty(); }
+
+  protected dirty() { this._isDirty = true; }
+  protected clean() { this._isDirty = false; }
+
+  update() {
+    if (!this._isDirty) return;
+
+    try {
+      this.updateCore();
+    } finally {
+      if (!this._alwaysDirty)
+        this.clean();
+    }
+  }
 
   protected createDiv() {
     const titleDiv = document.createElement("div");
     const descDiv = document.createElement("div");
-    this.div = document.createElement("div");
+    const div = document.createElement("div");
     this.descriptionElement = document.createElement("span");
-    this.content = document.createElement("div");
+    const content = document.createElement("div");
     this.deleteButton = document.createElement("input");
     const title = document.createElement("span");
-    const div = this.div;
     const description = this.descriptionElement;
-    const content = this.content;
     const deleteButton = this.deleteButton;
 
     div.className = "flexvert";
@@ -40,6 +65,8 @@ export class Calculation extends UpdatableObject {
     div.appendChild(titleDiv);
     div.appendChild(content);
 
-    this.addParamElements(this.content);
+    this._div = div;
+    this._content = content;
+    return [div, content];
   }
 }

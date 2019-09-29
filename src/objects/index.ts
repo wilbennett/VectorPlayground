@@ -17,4 +17,4 @@ export * from "./constants";
 export * from "./transforms";
 export * from "./values";
 export * from "./draw-objects";
-// export * from "./operations";
+export * from "./operations";

@@ -191,7 +191,7 @@ function updateCanvasSize() {
 
   elOperationsContainer.style.maxHeight = size + "px";
   elCalculationsContainer.style.maxHeight = size - 5 + "px";
-  elOperations.size = Math.max(+elOperationsContainer.clientHeight / 20, 5);
+  elOperations.size = Math.max(+elOperationsContainer.clientHeight / 23, 5);
 
   // elVectorProps.size = elOperations.size;
   elVectorProps.style.maxHeight = size - 5 + "px";

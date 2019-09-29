@@ -10,6 +10,7 @@ import {
   ListEventArgs,
   ListSelectedItemChangedArgs,
   ObjectFilter,
+  Operation,
   TextObject,
   UpdatableObject,
   Value,
@@ -461,6 +462,26 @@ function registerElement(element: ValueSelectElement, property: Value<any>) {
 }
 
 /*********************************************************************************************/
+/* Operations Handling
+/*********************************************************************************************/
+function handleAddCalculationClick() {
+  const selectedOperation = <Operation>ui.elOperations.value;
+
+  if (!selectedOperation) return;
+
+  const calc = selectedOperation.createCalculation();
+  const calcDiv = calc.div;
+  const content = calc.content;
+  addObjects(calc);
+  ui.elCalculations.appendChild(calcDiv);
+  const calcProps = getObjectProps(calc);
+  content.appendChild(calcProps);
+
+  calc.addDisposable(Utils.disposable(() => removeObjects(calc)));
+  calc.addDisposable(Utils.disposable(() => ui.elCalculations.removeChild(calcDiv)));
+}
+
+/*********************************************************************************************/
 /* Animation Loop
 /*********************************************************************************************/
 function animationLoop() {
@@ -529,6 +550,8 @@ function initializeEventHandlers() {
   ui.elDebugVectors.addEventListener("input", () => me.debugVectors = ui.elDebugVectors.checked);
   ui.elDebugTexts.addEventListener("input", () => me.debugTexts = ui.elDebugTexts.checked);
 
+  ui.elOperationAdd.addEventListener("click", handleAddCalculationClick);
+  ui.elOperations.addEventListener("dblclick", handleAddCalculationClick);
   vectors.onListChanged(handleSelectedVectorChanged);
   textObjects.onListChanged(handleSelectedTextObjectChanged);
   console.log(`world: added event listeners`);
@@ -588,11 +611,11 @@ function reset() {
   const v = createVectorObject("v", new Vec(-4, 1, 0), false);
   // const v = createVectorObject("v", new Vec(1, 0, 0), false, true);
   me.addObjects(v);
+  /*
   const res = createVectorObject("result", new Vec(0, 0, 0), false);
   res.color.text = "#009900";
   res.visible.value = false;
   me.addObjects(res);
-  /*
   const par = createVectorObject("par", new Vec(0, 0, 0), false);
   par.color.text = "#004000";
   par.lineWidth.value = 5;
