@@ -53,7 +53,10 @@ export class BaseObject implements IDisposable, ICaptioned {
   protected _owner?: BaseObject;
   get owner() { return this._owner; }
 
-  get isOwned() { return !!this._owner; }
+  get isOwned() {
+    return !!this._owner
+      && (this.category === Category.vectorObject || this.category === Category.textObject);
+  }
 
   protected _children?: BaseObject[];
   get children() { return this._children; }
