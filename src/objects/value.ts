@@ -193,11 +193,11 @@ export class Value<T> extends BaseObject implements IValue {
   protected _valueChangeArgs = new ChangeEventArgs<T>();
   protected _value: Tristate<T>;
   protected _inputValue: Tristate<T>;
-  get value() {
+  get value(): T {
     if (isEmpty(this._value))
       this.calcValue();
 
-    return hasValue(this._value) ? this._value : this._defaultValue;
+    return hasValue(this._value) ? this._value! : this._defaultValue;
   }
   set value(value) {
     if (this.mode !== ValueMode.text) return;
@@ -432,37 +432,40 @@ export class Value<T> extends BaseObject implements IValue {
     this.emitChange(this._valueChangeArgs);
   }
 
+  protected setValueToDefault() {
+    const text = this.convertToString(this.defaultValue) || "";
+    this._settingsChangeArgs.setValues(this._text, text, this, "text");
+    this._valueChangeArgs.setValues(this._value, this.defaultValue, this);
+    this._value = this.defaultValue;
+    this._text = text;
+    this.emitSettingsChange(this._settingsChangeArgs);
+    this.emitChange(this._valueChangeArgs);
+  }
+
   protected calcValue() {
+    const sourceValue = this.sourceValue;
     const isTextOrList = this.mode === ValueMode.text || this.mode === ValueMode.list;
 
     if (!isTextOrList) {
-      if (!this.sourceValue) {
-        const text = this.convertToString(this.defaultValue) || "";
-        this._settingsChangeArgs.setValues(this._text, text, this, "text");
-        this._valueChangeArgs.setValues(this._value, this.defaultValue, this);
-        this._value = this.defaultValue;
-        this._text = text;
-        this.emitSettingsChange(this._settingsChangeArgs);
-        this.emitChange(this._valueChangeArgs);
-        return;
-      }
+      if (!sourceValue) return this.setValueToDefault();
 
-      this._inputValue = this.sourceValue.value;
+      this._inputValue = sourceValue.value;
     }
 
     let result = this._inputValue;
 
-    if (!this.validateValue(result)) {
-      this.setValue(undefined);
-      return;
-    }
+    if (!this.validateValue(result)) return this.setValueToDefault();
 
-    if (!isTextOrList && result !== null && result !== undefined) {
-      if (this.transform && result !== null)
-        result = this.transform.transform(result);
+    if (!isTextOrList && result !== null && result !== undefined && sourceValue) {
+      const transform = this.transform;
+      const modifier = this.modifier;
 
-      if (this.modifier)
-        result = this.modifier.transform(result);
+      if (transform && transform.valueType === sourceValue.valueType) {
+        result = transform.transform(result);
+
+        if (modifier && modifier.valueType === transform.valueType)
+          result = modifier.transform(result);
+      }
     }
 
     this.setValue(result);
