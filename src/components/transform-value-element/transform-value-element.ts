@@ -47,6 +47,15 @@ export class TransformValueElement extends ComponentBase {
     this.modifierElement.userData = value;
   }
 
+  private _path: string = "";
+  get path() { return this._path; }
+  set path(value) {
+    this._path = value;
+    this.sourceValueElement.path = `${value}/sourceValueElement`;
+    this.transformElement.path = `${value}/transformElement`;
+    this.modifierElement.path = `${value}/modifierElement`;
+  }
+
   // @ts-ignore - decorator implemented.
   @autoAttribute(Category.value) category: Category;
   // @ts-ignore - decorator implemented.

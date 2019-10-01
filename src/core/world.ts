@@ -190,6 +190,14 @@ function initializeLists() {
   vectors = new FilteredList<BaseObject>((o: BaseObject) => o instanceof VectorObject && o.isGlobal);
   textObjects = new FilteredList<BaseObject>((o: BaseObject) => o instanceof TextObject && o.isGlobal);
 
+  objects.path = "objects";
+  updatables.path = "updatables";
+  drawObjects.path = "drawObjects";
+  operations.path = "operations";
+  calculations.path = "calculations";
+  vectors.path = "vectors";
+  textObjects.path = "textObjects";
+
   filteredLists.push(
     objects,
     updatables,
@@ -316,6 +324,7 @@ function getObjectProps(obj: BaseObject) {
   if (!props) {
     const propsList = createPropertyList(obj);
     propsList.captionMode = CaptionMode.title;
+    propsList.path = `${obj.name} propsList`;
     addFilteredLists(propsList);
     props = createPropertiesElements(propsList);
     propertyElements.set(obj, props);
@@ -341,10 +350,17 @@ function createPropertyList(obj: BaseObject) {
   return new FilteredList<BaseObject>(o => o instanceof Value && o.owner === obj && o.isGlobal);
 }
 
+function removeDocumentElement(element: HTMLElement) {
+  try {
+    document.removeChild(element);
+  } catch {
+  }
+}
+
 function addPropertyElements(elements: HTMLElement[], property: Value<any>, useTitle: boolean = false) {
   const label = document.createElement("label");
   const select = <ValueSelectElement>document.createElement("value-select");
-  property.addDisposable(Utils.disposable(() => document.removeChild(select)));
+  property.addDisposable(Utils.disposable(() => removeDocumentElement(select)));
 
   label.className = "inputlbl";
   label.innerText = useTitle ? `${property.title}:` : `${property.caption}:`;
@@ -374,6 +390,7 @@ function addPropertyElements(elements: HTMLElement[], property: Value<any>, useT
     //   console.log(`*****Connected ${property.propertyName}`);
 
     if (!registered) {
+      select.path = property.propertyName;
       //assignValueToElement();
       select.mode = property.mode;
       select.allowedModes = property.allowedModes;
@@ -429,6 +446,7 @@ function createFilterList(property: Value<any>, e: FilteredSelectElement) {
   selects.push(e);
   if (e.category === Category.list) {
     const list = new FilteredList<Captioned>(o => o instanceof Captioned);
+    list.path = property.name;
 
     for (const [value, caption] of property.listItems) {
       const captioned = new Captioned(value, caption);
@@ -446,6 +464,7 @@ function createFilterList(property: Value<any>, e: FilteredSelectElement) {
     && (e.allowOwnerAsSource || o.owner != property.owner);
 
   const list = new FilteredList<BaseObject>(filter);
+  list.path = property.name;
   e.includeEmptyItem = true;
   e.filteredList = list;
   return list;

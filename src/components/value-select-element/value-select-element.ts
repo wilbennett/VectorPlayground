@@ -96,6 +96,18 @@ export class ValueSelectElement extends ComponentBase {
 
   calculationTransformFilter: (o: any) => boolean = () => true;
 
+  private _path: string = "";
+  get path() { return this._path; }
+  set path(value) {
+    this._path = value;
+    this._elProperty.path = `${value}/Property`;
+    this._elConstant.path = `${value}/Constant`;
+    this._elTextObject.path = `${value}/TextObject`;
+    this._elVector.path = `${value}/Vector`;
+    this._elCalculation.path = `${value}/Calculation`;
+    this._elTransformation.path = `${value}/Transformation`;
+  }
+
   @wrapElementProperty("value") @hookChange
   private _elText: HTMLInputElement;
   // @ts-ignore - decorator implemented.

@@ -14,7 +14,6 @@ import {
   ListSelectedItemChangedArgs,
   ValueType,
 } from '../../core';
-import * as D from '../../decorators/dlog';
 import {
   autoAttribute,
   boolAttribute,
@@ -28,10 +27,10 @@ import template from './template.html';
 const elTemplate = document.createElement('template');
 elTemplate.innerHTML = template;
 
-@D.dlogged({
-  // logAllProps: true,
-  // logAllMethods: true,
-})
+// @D.dlogged({
+//   // logAllProps: true,
+//   // logAllMethods: true,
+// })
 @component("filtered-select")
 export class FilteredSelectElement extends ComponentBase {
   private _options: HTMLOptionElement[] = [];
@@ -71,6 +70,15 @@ export class FilteredSelectElement extends ComponentBase {
   @autoAttribute() filteredType: FilteredType;
   // @ts-ignore - decorator implemented.
   @boolAttribute() includeEmptyItem: boolean;
+
+  private _path: string = "";
+  get path() { return this._path; }
+  set path(value) {
+    this._path = value;
+
+    if (this.filteredList)
+      this.filteredList.path = value;
+  }
 
   set font(value: string) {
     if (!this._options) return;
