@@ -149,9 +149,8 @@ export class FilteredList<T extends ICaptioned> extends BaseObject implements IF
 
     this._addedArgs.setValues(this.items.length, obj, this);
 
-    if (obj instanceof BaseObject) {
+    if (obj instanceof BaseObject)
       obj.onCaptionChanged(this._handleCaptionChangedBound);
-    }
 
     this.items.push(obj);
     this.emit(this._addedArgs);
@@ -166,9 +165,8 @@ export class FilteredList<T extends ICaptioned> extends BaseObject implements IF
 
     this.items.splice(index, 1);
 
-    if (obj instanceof BaseObject) {
+    if (obj instanceof BaseObject)
       obj.offCaptionChanged(this._handleCaptionChangedBound);
-    }
 
     this._removedArgs.setValues(index, obj, this);
     this.emit(this._removedArgs);
