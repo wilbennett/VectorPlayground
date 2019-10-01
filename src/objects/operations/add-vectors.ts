@@ -1,12 +1,10 @@
-import { Calculation, Operation, TextObject, Value, VectorObject, VectorValue } from '..';
-import { BaseObject, promisedWorld, Utils, ValueMode, Vec } from '../../core';
+import { Calculation, Operation, VectorObject, VectorValue } from '..';
+import { promisedWorld, Vec } from '../../core';
 
 // let world: IWorld;
 const worldAssigned = promisedWorld.then(w => w);
 
 class AddCalculation extends Calculation {
-  protected _resultProps: BaseObject[] = [];
-  protected _captionFormats: [BaseObject, string][] = [];
   constructor() {
     super("Add");
 
@@ -26,55 +24,6 @@ class AddCalculation extends Calculation {
   vector2: VectorValue;
   result: VectorObject;
   resultValue: VectorValue;
-
-  protected addResultProps(...props: Value<any>[]) {
-    this._resultProps.push(...props);
-  }
-
-  protected addCaptionFormat(obj: BaseObject, format: string) {
-    this._captionFormats.push([obj, format]);
-  }
-
-  protected getDescriptionName(obj: BaseObject) {
-    if (obj instanceof VectorObject)
-      return obj.caption;
-
-    if (obj instanceof TextObject)
-      return obj.textValue;
-
-    if (obj instanceof VectorValue)
-      return obj.sourceValue ? obj.sourceValue.caption : Utils.formatVectorName(obj.name);
-
-    if (!(obj instanceof Value)) return "XXX";
-
-    switch (obj.mode) {
-      case ValueMode.text: return obj.text;
-      case ValueMode.constant: return obj.sourceValue ? obj.sourceValue.caption : obj.title;
-      case ValueMode.text: return obj.sourceValue ? obj.sourceValue.caption : obj.title;
-      default: return obj.title;
-    }
-  }
-
-  protected calcCaption(format: string) {
-    if (this._children) {
-      for (let i = 0; i < this._children.length; i++) {
-        const child = this._children[i];
-        format = format.replace(new RegExp(`{p${i + 1}}`, "g"), this.getDescriptionName(child));
-      }
-    }
-    return format;
-  }
-
-  protected updateCaptions() {
-    for (const [obj, format] of this._captionFormats) {
-      obj.caption = this.calcCaption(format);
-    }
-  }
-
-  protected onChildChanged() {
-    super.onChildChanged();
-    this.updateCaptions();
-  }
 
   protected updateCore() {
     if (!this.vector1.sourceValue) return;
