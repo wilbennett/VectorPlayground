@@ -73,8 +73,7 @@ export class Value<T> extends BaseObject implements IValue {
 
   protected _readOnlyText = false;
   get readOnlyText() { return this._readOnlyText; }
-  // @ts-ignore - unused param.
-  set readOnlyText(value) { }
+  set readOnlyText(value) { this._readOnlyText = value; }
 
   protected _allowTransform = false;
   get allowTransform() { return this._allowTransform; }
