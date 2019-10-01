@@ -4,7 +4,11 @@ import { Vec } from '../core';
 export type Calc2VecFunc = (v1: Vec, v2: Vec) => Vec;
 
 export class Calc2Vec extends Calculation {
-  constructor(name: string, public readonly calc: Calc2VecFunc, ...captionFormats: string[]) {
+  constructor(
+    name: string,
+    public readonly calc: Calc2VecFunc,
+    descFormat: string = "",
+    ...captionFormats: string[]) {
     super(name);
 
     this.vector1 = new VectorValue("vector1");
@@ -16,6 +20,10 @@ export class Calc2Vec extends Calculation {
     this.resultValue.captionRoot = this.resultValue.title;
     this.resultValue.sourceValue = this.result.value;
     this.addResultProps(this.resultValue);
+
+    if (descFormat)
+      this._descriptionFormat = descFormat;
+
     const children = this.children!;
 
     for (let i = 0; i < captionFormats.length; i++) {

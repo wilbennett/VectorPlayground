@@ -5,11 +5,11 @@ import { Constructor, promisedWorld } from '../../core';
 
 const worldAssigned = promisedWorld.then(w => w);
 
-function calc2vecClass(calc: Calc2VecFunc, ...captionFormats: string[]) {
+function calc2vecClass(calc: Calc2VecFunc, descFormat?: string, ...captionFormats: string[]) {
   return function <T extends Constructor<{}>>(constructor: T) {
     const descendant = class extends Calc2Vec {
       constructor() {
-        super(constructor.name, calc, ...captionFormats);
+        super(constructor.name, calc, descFormat || "", ...captionFormats);
       }
     }
 
@@ -17,7 +17,7 @@ function calc2vecClass(calc: Calc2VecFunc, ...captionFormats: string[]) {
   }
 }
 
-function calc2vecp(...captionFormats: string[]) {
+function calc2vecp(descFormat?: string, ...captionFormats: string[]) {
   // @ts-ignore - unused param.
   return function <T extends {}>(target: T | Constructor<T>, key: string | symbol, descriptor?: TypedPropertyDescriptor<T>) {
     const constructor = (typeof target === "function" ? target : target.constructor) as Constructor<T>;
@@ -27,7 +27,7 @@ function calc2vecp(...captionFormats: string[]) {
 
     const descendant = class extends Calc2Vec {
       constructor() {
-        super(name, calc, ...captionFormats);
+        super(name, calc, descFormat || "", ...captionFormats);
       }
     }
 
@@ -35,8 +35,8 @@ function calc2vecp(...captionFormats: string[]) {
   }
 }
 
-export function calc2vec(calc: Calc2VecFunc, ...captionFormats: string[]): any;
-export function calc2vec(...captionFormats: string[]): any;
+export function calc2vec(calc: Calc2VecFunc, descFormat?: string, ...captionFormats: string[]): any;
+export function calc2vec(descFormat?: string, ...captionFormats: string[]): any;
 export function calc2vec(param1?: Calc2VecFunc | string, ...args: any[]): any {
   // @ts-ignore - rest parameter count.
   return typeof param1 === "function"

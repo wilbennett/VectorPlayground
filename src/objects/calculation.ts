@@ -3,7 +3,6 @@ import { Category, Utils, ValueMode } from '../core';
 
 export class Calculation extends UpdatableObject {
   protected _alwaysDirty = false;
-  protected descriptionElement?: HTMLElement;
   protected deleteButton?: HTMLInputElement;
   protected _resultProps: BaseObject[] = [];
   protected _captionFormats: [BaseObject, string][] = [];
@@ -12,11 +11,35 @@ export class Calculation extends UpdatableObject {
     super(name, Category.calculation);
   }
 
+  protected _descriptionFormat: string = "";
+  get descriptionFormat() { return this._descriptionFormat; }
+  set descriptionFormat(value) {
+    this._descriptionFormat = value;
+    this._description = undefined;
+
+    if (this.div)
+      this.updateDescription();
+  }
+
+  protected _description?: string;
+  get description() { return this._description || (this._description = this.calcDescription()); }
+  set description(value) {
+    this._description = value;
+
+    if (this.div)
+      this.updateDescription();
+  }
+
   private _div?: HTMLDivElement;
   get div() { return this._div || (this._div = this.createDiv()[0]); }
 
   protected _content?: HTMLDivElement;
   get content() { return this._content || (this._content = this.createDiv()[1]); }
+
+  protected _descriptionElement?: HTMLElement;
+  protected get descriptionElement() {
+    return this._descriptionElement || (this._descriptionElement = this.createDiv()[2]);
+  }
 
   update() {
     if (!this._isDirty) return;
@@ -63,7 +86,7 @@ export class Calculation extends UpdatableObject {
     }
   }
 
-  protected calcCaption(format: string) {
+  protected replaceFormatStrings(format: string) {
     if (this._children) {
       for (let i = 0; i < this._children.length; i++) {
         const child = this._children[i];
@@ -75,32 +98,41 @@ export class Calculation extends UpdatableObject {
 
   protected updateCaptions() {
     for (const [obj, format] of this._captionFormats) {
-      obj.caption = this.calcCaption(format);
+      obj.caption = this.replaceFormatStrings(format);
     }
+  }
+
+  protected calcDescription() {
+    return this.replaceFormatStrings(this.descriptionFormat);
+  }
+
+  protected updateDescription() {
+    this.descriptionElement.innerHTML = this.description;
   }
 
   protected onChildChanged() {
     this.dirty();
+    this._description = undefined;
     this.updateCaptions();
+    this.updateDescription();
   }
 
-  protected createDiv() {
+  protected createDiv(): [HTMLDivElement, HTMLDivElement, HTMLElement] {
     const titleDiv = document.createElement("div");
     const descDiv = document.createElement("div");
     const div = document.createElement("div");
-    this.descriptionElement = document.createElement("span");
+    const description = document.createElement("span");
     const content = document.createElement("div");
     this.deleteButton = document.createElement("input");
     const title = document.createElement("span");
-    const description = this.descriptionElement;
     const deleteButton = this.deleteButton;
 
     div.className = "flexvert";
     titleDiv.className = "title";
     title.className = "calctitle";
     description.className = "description";
+    description.style.wordWrap = "break-word";
     content.className = "gridhoriz2";
-    title.innerText = this.name;
     deleteButton.className = "deletebutton";
     deleteButton.type = "button";
     deleteButton.value = "[X]";
@@ -113,8 +145,12 @@ export class Calculation extends UpdatableObject {
     div.appendChild(titleDiv);
     div.appendChild(content);
 
+    title.innerText = Utils.capitalizeUnder(this.name);
+
     this._div = div;
     this._content = content;
-    return [div, content];
+    this._descriptionElement = description;
+    this.updateDescription();
+    return [div, content, description];
   }
 }

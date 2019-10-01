@@ -585,7 +585,7 @@ function getUniqueText(category: Category, predicate: (obj: BaseObject, text: st
   let result = text;
   const filter = (obj: BaseObject, txt: string) => obj.category === category && predicate(obj, txt);
   let items = objects.items;
-  let i = 1;
+  let i = 2;
 
   while (items.find(obj => filter(obj, result))) {
     result = `${text}_${i++}`;
