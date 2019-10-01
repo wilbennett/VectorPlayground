@@ -11,6 +11,7 @@ export * from "./calc-value";
 export * from "./transform-value";
 export * from "./calculation";
 export * from "./operation";
+export * from "./calc2-vec";
 
 export * from "./decorators";
 export * from "./constants";
