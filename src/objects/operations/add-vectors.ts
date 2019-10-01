@@ -1,13 +1,8 @@
-import { Calc2Vec, Operation } from '..';
-import { promisedWorld } from '../../core';
+import { Calc2VecFunc } from '..';
+import { calc2vec } from '../decorators';
 
-// let world: IWorld;
-const worldAssigned = promisedWorld.then(w => w);
-
-class AddCalculation extends Calc2Vec {
-  constructor() {
-    super("Add", (v1, v2) => v1.addN(v2), "", "", "{p1} + {p2}");
-  }
+// @ts-ignore - decorator implemented.
+class TwoVectorCalculations {
+  @calc2vec("", "", "{p1} + {p2}") Add: Calc2VecFunc = (v1, v2) => v1.addN(v2);
+  @calc2vec("", "", "{p1} - {p2}") Subtract: Calc2VecFunc = (v1, v2) => v1.subN(v2);
 }
-
-worldAssigned.then(world => world.addObjects(new Operation("Add", AddCalculation)));
