@@ -22,6 +22,7 @@ export class TextObject extends DrawObject {
     this.opacity = new NumberValue("opacity", 1, 0, 1);
     this.position = new VectorValue("position");
 
+    this.caption = this.name.replace("_", " ");
     this.text.alwaysShowText = true;
 
     this.angle.displayType = DisplayType.range;
@@ -107,6 +108,10 @@ export class TextObject extends DrawObject {
       this.size.value,
       this.opacity.value,
       this.color.value);
+  }
+
+  protected ownerCaptionChanged(caption?: string) {
+    this.caption = `${caption} ${this.captionRoot}`;
   }
 
   protected onChildChanged() {

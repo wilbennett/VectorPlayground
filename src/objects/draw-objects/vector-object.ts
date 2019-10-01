@@ -14,17 +14,17 @@ promisedWorld.then(w => world = w);
 const { ONE_DEGREE, ONE_RADIAN, toNumber, toString } = Utils;
 // const { checkType } = Utils;
 
-@D.dlogged({
-  // setLogIf: args => args[0] !== "origin",
-  logCtor: false,
-  isDetail: false,
-  logAllProps: true,
-  // propSetLogIf: () => true,
-  propState: self => self.name,
-  logAllMethods: true,
-  // methodSetLogIf: () => true,
-  methodState: self => self.name,
-})
+// @D.dlogged({
+//   // setLogIf: args => args[0] !== "origin",
+//   logCtor: false,
+//   isDetail: false,
+//   logAllProps: true,
+//   // propSetLogIf: () => true,
+//   propState: self => self.name,
+//   logAllMethods: true,
+//   // methodSetLogIf: () => true,
+//   methodState: self => self.name,
+// })
 // @D.dlogged()
 export class VectorObject extends DrawObject {
   private _settingValue = false;
@@ -41,16 +41,13 @@ export class VectorObject extends DrawObject {
   constructor(name: string, vector: Vec, public readonly isOrigin: boolean = false) {
     super(name, Category.vectorObject);
 
-    const nameText = Utils.formatVectorName(this.name);
-    const c = (caption: string) => `${nameText} ${caption}`;
-
-    this._captionValue = new CalcSettings<string>(() => this.caption, s => s, s => s, c("Caption"));
-    this._drawOrigin = new CalcSettings<Vec>(this.getDrawOrigin, this.vecToString, this.stringToVec, c("Draw Origin"));
-    this._drawEnd = new CalcSettings<Vec>(this.getDrawEnd, this.vecToString, this.stringToVec, c("Draw End"));
-    this._textAngle = new CalcSettings<number>(this.getTextAngle, toString, toNumber, c("Text Angle"));
-    this._textAngleDegrees = new CalcSettings<number>(this.getTextAngleDegrees, toString, toNumber, c("Text Angle°"));
-    this._textPosition = new CalcSettings<Vec>(this.getTextPosition, this.vecToString, this.stringToVec, c("Text Position"));
-    this._dataPosition = new CalcSettings<Vec>(this.getDataPosition, this.vecToString, this.stringToVec, c("Data Position"));
+    this._captionValue = new CalcSettings<string>(() => this.caption, s => s, s => s, "Caption");
+    this._drawOrigin = new CalcSettings<Vec>(this.getDrawOrigin, this.vecToString, this.stringToVec, "Draw Origin");
+    this._drawEnd = new CalcSettings<Vec>(this.getDrawEnd, this.vecToString, this.stringToVec, "Draw End");
+    this._textAngle = new CalcSettings<number>(this.getTextAngle, toString, toNumber, "Text Angle");
+    this._textAngleDegrees = new CalcSettings<number>(this.getTextAngleDegrees, toString, toNumber, "Text Angle°");
+    this._textPosition = new CalcSettings<Vec>(this.getTextPosition, this.vecToString, this.stringToVec, "Text Position");
+    this._dataPosition = new CalcSettings<Vec>(this.getDataPosition, this.vecToString, this.stringToVec, "Data Position");
 
     this._calcSettings = [
       this._captionValue,
@@ -85,7 +82,7 @@ export class VectorObject extends DrawObject {
     this.textPosition = new CalcValue<Vec>("text_position", ValueType.vector, Vec.emptyPosition, this._textPosition);
     this.dataPosition = new CalcValue<Vec>("data_position", ValueType.vector, Vec.emptyPosition, this._dataPosition);
 
-    this.caption = nameText;
+    this.caption = Utils.formatVectorName(this.name);
 
     this.drawOrigin.isGlobal = false;
     this.drawEnd.isGlobal = false;
@@ -99,8 +96,8 @@ export class VectorObject extends DrawObject {
     this.lineWidth.displayType = DisplayType.range;
     this.opacity.displayType = DisplayType.range;
 
+    this.value.captionRoot = "";
     this.value.mode = ValueMode.text;
-    this.value.caption = nameText;
 
     this.addChildren(
       this.x,
@@ -197,8 +194,7 @@ export class VectorObject extends DrawObject {
     this.setValue(vector.rotateN(this.rotateStep.value * ONE_DEGREE));
   }
 
-  // @ts-ignore - unused param.
-  protected captionChanged(caption?: string) {
+  protected captionChanged(caption: string) {
     this._captionValue.setValue!.call(this._captionValue.instance, caption);
   }
 
@@ -217,8 +213,9 @@ export class VectorObject extends DrawObject {
   }
 
   private createLabel() {
-    const nameText = Utils.formatVectorName(this.name);
-    return new TextObject(`${nameText}_label`, nameText);
+    const result = new TextObject(`${this.name}_label`, this.caption);
+    result.captionRoot = "label";
+    return result;
   }
 
   private setLabelReferences() {

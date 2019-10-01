@@ -10,23 +10,22 @@ import {
   ValueMode,
   ValueType,
 } from '../core';
-import * as D from '../decorators';
 import { ChangeArgs, ChangeEventArgs, EventKind } from '../event-args';
 import { Utils } from '../utils';
 
 const { isEmpty, hasValue } = Utils;
 
-@D.dlogged({
-  logAllMethods: true,
-  logAllProps: true,
-  methodState: self => self.propertyName,
-  propState: self => self.propertyName,
-  // methodSetLogIf: () => true,
-  // propSetLogIf: () => true,
-  methodSetLogIf: self => self.name === "opacity" || self.name === "angle",
-  propSetLogIf: self => self.name === "opacity",
-  exclude: ["propertyName"]
-})
+// @D.dlogged({
+//   logAllMethods: true,
+//   logAllProps: true,
+//   methodState: self => self.propertyName,
+//   propState: self => self.propertyName,
+//   // methodSetLogIf: () => true,
+//   // propSetLogIf: () => true,
+//   methodSetLogIf: self => self.name === "opacity" || self.name === "angle",
+//   propSetLogIf: self => self.name === "opacity",
+//   exclude: ["propertyName"]
+// })
 export class Value<T> extends BaseObject implements IValue {
   protected _settingsEmitter = new TypedEvent<ChangeArgs>(this);
   protected _settingsChangeArgs = new ChangeArgs();
@@ -57,7 +56,9 @@ export class Value<T> extends BaseObject implements IValue {
     this._caption = undefined;
   }
 
-  get caption() { return this._caption || this.calcCaption(); }
+  get caption() {
+    return this._caption || this.calcCaption();
+  }
   set caption(value) { super.caption = value; }
 
   protected _propertyName?: string;
@@ -318,9 +319,9 @@ export class Value<T> extends BaseObject implements IValue {
   protected calcOwnerText(owner: BaseObject) {
     switch (owner.category) {
       case Category.vectorObject:
-        return `${Utils.formatVectorName(owner.name)}`;
+        return `${owner.caption}`;
       default:
-        return `[${owner.name.replace("_", " ")}]`;
+        return `[${owner.caption}]`;
     }
   }
 
@@ -328,8 +329,8 @@ export class Value<T> extends BaseObject implements IValue {
     const owner = this.owner;
 
     return owner
-      ? `${this.calcOwnerText(owner)} ${Utils.capitalizeUnder(this.name)}`
-      : `${Utils.capitalizeUnder(this.name)}`;
+      ? `${this.calcOwnerText(owner)}${this.captionRoot && ` ${this.captionRoot}`}`
+      : `${this.captionRoot}`;
   }
 
   protected setOwner(owner: BaseObject) {
@@ -338,6 +339,10 @@ export class Value<T> extends BaseObject implements IValue {
 
     if (!this._caption)
       this.caption = this.calcCaption();
+  }
+
+  protected ownerCaptionChanged() {
+    this.caption = this.calcCaption();
   }
 
   protected emitChange(e: ChangeArgs) {

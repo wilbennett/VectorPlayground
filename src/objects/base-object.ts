@@ -1,5 +1,4 @@
-import { Category, ICaptioned, IDisposable, IWorld, logEventEmit, promisedWorld, Utils, ValueType } from '../core';
-import * as D from '../decorators';
+import { Category, ICaptioned, IDisposable, IWorld, promisedWorld, Utils, ValueType } from '../core';
 import { ChangeArgs, EventKind, StringChangeArgs } from '../event-args';
 import { EventFilter, Listener, TypedEvent } from '../events';
 
@@ -7,7 +6,9 @@ console.log("BaseObject init start");
 let world!: IWorld;
 promisedWorld.then(w => world = w);
 
-@D.dlogged()
+const { hasValue } = Utils;
+
+// @D.dlogged()
 export class BaseObject implements IDisposable, ICaptioned {
   protected _changeEmitter = new TypedEvent<ChangeArgs>(this);
   private _handleChildChangedBound = this.handleChildChanged.bind(this);
@@ -31,7 +32,8 @@ export class BaseObject implements IDisposable, ICaptioned {
       this.isLocal = false;
     } else {
       this.name = world.getUniqueName(category, name);
-      this._caption = world.getUniqueName(category, this.name);
+      // this._caption = world.getUniqueName(category, this.name);
+      this._captionRoot = Utils.capitalizeUnder(this.name);
     }
 
     this._title = Utils.capitalizeUnder(this.name);
@@ -61,24 +63,37 @@ export class BaseObject implements IDisposable, ICaptioned {
   protected _children?: BaseObject[];
   get children() { return this._children; }
 
+  protected _captionRoot?: string;
+  get captionRoot() {
+    return this._captionRoot !== undefined ? this._captionRoot : Utils.capitalizeUnder(this.name);
+  }
+  set captionRoot(value) { this._captionRoot = value; }
+
   protected _captionArgs: StringChangeArgs;
   protected _caption?: string;
-  get caption() { return this._caption || Utils.capitalizeUnder(this.name); }
+  get caption() {
+    return this._caption || this.captionRoot;
+  }
   set caption(value) {
     if (value === this._caption) return;
 
-    this._captionArgs.setValues(this._caption, value);
-    this._caption = value ? world.getUniqueCaption(this.category, value) : undefined;
-    this.captionChanged(this._caption);
+    value = world.getUniqueCaption(this.category, hasValue(value) ? value : this.captionRoot);
+    this._captionArgs.setValues(this._caption, value, this);
+    this._caption = value;
+    this.captionChanged(value);
+
+    if (this._children)
+      this._children.forEach(child => child.ownerCaptionChanged(value));
+
     this.emitChange(this._captionArgs);
   }
 
   protected _title?: string;
-  get title() { return this._title; }
+  get title() { return this._title || Utils.capitalizeUnder(this.name); }
   set title(value) {
     if (this._title === this._title) return;
 
-    this._captionArgs.setValues(this._caption, value);
+    this._captionArgs.setValues(this._caption, value, this);
     this._title = value;
     this.emitChange(this._captionArgs);
   }
@@ -99,7 +114,7 @@ export class BaseObject implements IDisposable, ICaptioned {
 
   offCaptionChanged(listener: Listener<ChangeArgs>) { this._changeEmitter.off(listener); }
 
-  @logEventEmit
+  // @logEventEmit
   protected emitChange(e: ChangeArgs) {
     e.sender = e.sender || this;
     this._changeEmitter.emit(e);
@@ -134,6 +149,7 @@ export class BaseObject implements IDisposable, ICaptioned {
     children.forEach(child => child.setOwner(this));
 
     this._children.push(...children);
+    this.disposables.push(...children);
     world.addObjects(...children);
 
     if (!this._changeSubscription) {
@@ -146,7 +162,9 @@ export class BaseObject implements IDisposable, ICaptioned {
   }
 
   // @ts-ignore - unused param.
-  protected captionChanged(caption?: string) { }
+  protected captionChanged(caption: string) { }
+  // @ts-ignore - unused param.
+  protected ownerCaptionChanged(caption: string) { }
   // @ts-ignore - unused param.
   protected onChildChanged(e: ChangeArgs) { }
 
@@ -176,18 +194,13 @@ export class BaseObject implements IDisposable, ICaptioned {
   dispose() {
     this.disposeCore();
 
-    if (this._children) {
-      this._children.forEach(child => child.offChanged(this._handleChildChangedBound));
-      world.removeObjects(...this._children);
-    }
-
-    world.removeObjects(this);
-    this._children = undefined;
-
     if (this._disposables) {
       this._disposables.forEach(d => d.dispose());
       this._disposables = undefined;
     }
+
+    world.removeObjects(this);
+    this._children = undefined;
   }
 }
 console.log("BaseObject init end");

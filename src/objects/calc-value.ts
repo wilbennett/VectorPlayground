@@ -6,49 +6,49 @@ type ConvertToString<T> = (v?: T) => Tristate<string>;
 type ConvertFromoString<T> = (v?: string) => Tristate<T>;
 
 export class CalcSettings<T> {
-    constructor(
-        public readonly getValue: Getter<T>,
-        public readonly convertToString: ConvertToString<T>,
-        public readonly convertFromString: ConvertFromoString<T>,
-        public readonly caption: string) {
-    }
+  constructor(
+    public readonly getValue: Getter<T>,
+    public readonly convertToString: ConvertToString<T>,
+    public readonly convertFromString: ConvertFromoString<T>,
+    public readonly captionRoot: string) {
+  }
 
-    setValue?: (v?: T) => void;
-    instance?: CalcValue<T>;
+  setValue?: (v?: T) => void;
+  instance?: CalcValue<T>;
 }
 
 export class CalcValue<T> extends Value<T> {
-    constructor(
-        name: string,
-        valueType: ValueType,
-        defaultValue: T,
-        protected readonly settings: CalcSettings<T>) {
-        super(name, valueType, defaultValue);
+  constructor(
+    name: string,
+    valueType: ValueType,
+    defaultValue: T,
+    protected readonly settings: CalcSettings<T>) {
+    super(name, valueType, defaultValue);
 
-        settings.instance = this;
-        settings.setValue = this.setValue;
-        this.caption = settings.caption;
+    settings.instance = this;
+    settings.setValue = this.setValue;
+    this.captionRoot = settings.captionRoot;
 
-        this._alwaysShowText = true;
-        this._readOnlyText = true;
-        this._allowTransform = false;
+    this._alwaysShowText = true;
+    this._readOnlyText = true;
+    this._allowTransform = false;
+  }
+
+  get allowedModes() { return ValueMode.text; }
+
+  get value() {
+    if (this._value === undefined) {
+      const newValue = this.settings.getValue.call(this.owner);
+
+      if (newValue !== undefined)
+        this.setValue(newValue);
     }
 
-    get allowedModes() { return ValueMode.text; }
+    return this._value || this._defaultValue;
+  }
+  // @ts-ignore - unused param.
+  set value(value) { }
 
-    get value() {
-        if (this._value === undefined) {
-            const newValue = this.settings.getValue.call(this.owner);
-
-            if (newValue !== undefined)
-                this.setValue(newValue);
-        }
-
-        return this._value || this._defaultValue;
-    }
-    // @ts-ignore - unused param.
-    set value(value) { }
-
-    protected convertToString(value?: T) { return this.settings.convertToString.call(this.owner, value); }
-    protected convertFromString(value?: string) { return this.settings.convertFromString.call(this.owner, value); }
+  protected convertToString(value?: T) { return this.settings.convertToString.call(this.owner, value); }
+  protected convertFromString(value?: string) { return this.settings.convertFromString.call(this.owner, value); }
 }

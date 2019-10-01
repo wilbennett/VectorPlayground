@@ -16,11 +16,10 @@ class AddCalculation extends Calculation {
     this.resultValue = new VectorValue("result");
 
     this.addChildren(this.vector1, this.vector2, this.result, this.resultValue);
-    this.resultValue.caption = Utils.formatVectorName(this.resultValue.name);
+    this.resultValue.captionRoot = this.resultValue.title;
     this.resultValue.sourceValue = this.result.value;
     this.addResultProps(this.resultValue);
     this.addCaptionFormat(this.result, "{p1} + {p2}");
-    this.addCaptionFormat(this.resultValue, "{p1} + {p2}");
   }
 
   vector1: VectorValue;
@@ -60,7 +59,7 @@ class AddCalculation extends Calculation {
     if (this._children) {
       for (let i = 0; i < this._children.length; i++) {
         const child = this._children[i];
-        format = format.replace(new RegExp(`{p${i + 1}}`, "g"), this.getDescriptionName(child)!);
+        format = format.replace(new RegExp(`{p${i + 1}}`, "g"), this.getDescriptionName(child));
       }
     }
     return format;
