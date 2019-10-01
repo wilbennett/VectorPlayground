@@ -30,16 +30,7 @@ class AddCalculation extends Calculation {
     if (!this.vector2.sourceValue) return;
 
     this.result.value.value = this.vector1.value.addN(this.vector2.value);
-    this.clean();
   }
 }
 
-class AddVectors extends Operation {
-  constructor() {
-    super("Add");
-  }
-
-  protected createCalculationCore() { return new AddCalculation(); };
-}
-
-worldAssigned.then(world => world.addObjects(new AddVectors()));
+worldAssigned.then(world => world.addObjects(new Operation("Add", AddCalculation)));

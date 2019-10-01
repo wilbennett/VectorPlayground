@@ -1,15 +1,15 @@
 import { BaseObject, Calculation } from '.';
-import { Category } from '../core';
+import { Category, Constructor } from '../core';
 
 // let world: IWorld;
 // promisedWorld.then(w => world = w);
 
-export abstract class Operation extends BaseObject {
-  constructor(name: string) {
+export class Operation extends BaseObject {
+  constructor(name: string, public readonly calculationConstructor: Constructor<Calculation>) {
     super(name, Category.operation);
   }
 
-  protected abstract createCalculationCore(): Calculation;
+  protected createCalculationCore(): Calculation { return new this.calculationConstructor(); }
 
   createCalculation() {
     const calculation = this.createCalculationCore();
