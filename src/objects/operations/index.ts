@@ -1,1 +1,1 @@
-export * from "./add-vectors";
+export * from "./two-vector-operations";
