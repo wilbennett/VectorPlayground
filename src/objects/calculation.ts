@@ -86,11 +86,36 @@ export class Calculation extends UpdatableObject {
     }
   }
 
+  protected getArgumentName(obj: BaseObject) {
+    if (obj instanceof VectorObject)
+      return obj.name.replace("_", "");
+
+    if (obj instanceof TextObject)
+      return obj.textValue;
+
+    if (obj instanceof VectorValue) {
+      if (obj.sourceValue)
+        return obj.sourceValue.owner ? obj.sourceValue.owner.name.replace("_", "") : obj.name.replace("_", "");
+
+      return obj.name.replace("_", "");
+    }
+
+    if (!(obj instanceof Value)) return "XXX";
+
+    switch (obj.mode) {
+      case ValueMode.text: return obj.text;
+      case ValueMode.constant: return obj.sourceValue ? obj.sourceValue.name.replace("_", "") : obj.name.replace("_", "");
+      case ValueMode.text: return obj.sourceValue ? obj.sourceValue.name.replace("_", "") : obj.name.replace("_", "");
+      default: return obj.name.replace("_", "");
+    }
+  }
+
   protected replaceFormatStrings(format: string) {
     if (this._children) {
       for (let i = 0; i < this._children.length; i++) {
         const child = this._children[i];
         format = format.replace(new RegExp(`{p${i + 1}}`, "g"), this.getDescriptionName(child));
+        format = format.replace(new RegExp(`{a${i + 1}}`, "g"), this.getArgumentName(child));
       }
     }
     return format;
