@@ -23,20 +23,20 @@ export class BaseObject implements IDisposable, ICaptioned {
     this._captionArgs.kind = EventKind.caption;
 
     if (category === Category.value) {
-      this.name = name;
+      this._name = name;
       this._caption = name;
     } else if (name === "__empty__") {
-      this.name = name;
+      this._name = name;
       this._caption = name;
       this.isGlobal = false;
       this.isLocal = false;
     } else {
-      this.name = world.getUniqueName(category, name);
-      // this._caption = world.getUniqueName(category, this.name);
-      this._captionRoot = Utils.capitalizeUnder(this.name);
+      this._name = world.getUniqueName(category, name);
+      // this._caption = world.getUniqueName(category, this._name);
+      this._captionRoot = Utils.capitalizeUnder(this._name);
     }
 
-    this._title = Utils.capitalizeUnder(this.name);
+    this._title = Utils.capitalizeUnder(this._name);
   }
 
   static empty = new BaseObject("__empty__", Category.misc);
@@ -48,7 +48,9 @@ export class BaseObject implements IDisposable, ICaptioned {
 
   static offChanged(listener: Listener<ChangeArgs>) { this.changeEmitter.off(listener); }
 
-  readonly name: string;
+  protected _name: string;
+  get name() { return this._name; }
+
   isGlobal = true;
   isLocal = true;
 
