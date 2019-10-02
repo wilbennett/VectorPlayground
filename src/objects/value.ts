@@ -377,7 +377,8 @@ export class Value<T> extends BaseObject implements IValue {
   offSettingsChanged(listener: Listener<ChangeArgs>) { this._settingsEmitter.off(listener); }
 
   protected convertToString(value: Tristate<T>): Tristate<string> { return "" + value; }
-  protected convertFromString(value: string): Tristate<T> { return <T><any>value; }
+  // @ts-ignore - unused param.
+  protected convertFromString(value: string): Tristate<T> { return undefined; }
   // @ts-ignore - unused param.
   protected validateValue(value?: Tristate<T>) { return true; }
 
