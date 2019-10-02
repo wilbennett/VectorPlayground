@@ -9,6 +9,7 @@ export * from "./value";
 export * from "./constant-value";
 export * from "./calc-value";
 export * from "./transform-value";
+export * from "./transform-ref";
 export * from "./calculation";
 export * from "./operation";
 export * from "./calc2-vec";
