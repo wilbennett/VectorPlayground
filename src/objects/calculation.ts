@@ -1,7 +1,7 @@
-import { BaseObject, TextObject, UpdatableObject, Value, VectorObject, VectorValue } from '.';
+import { BaseObject, DrawObject, TextObject, TransformRef, TransformValue, Value, VectorObject, VectorValue } from '.';
 import { Category, Utils, ValueMode } from '../core';
 
-export class Calculation extends UpdatableObject {
+export class Calculation extends DrawObject {
   protected _alwaysDirty = false;
   protected deleteButton?: HTMLInputElement;
   protected _resultProps: BaseObject[] = [];
@@ -73,6 +73,17 @@ export class Calculation extends UpdatableObject {
     if (obj instanceof TextObject)
       return obj.textValue;
 
+    if (obj instanceof TransformRef)
+      obj = obj.sourceValue;
+
+    if (obj instanceof TransformValue) {
+      if (obj.transform) {
+        return obj.transform.name;
+      }
+
+      return obj.name.replace("_", "");
+    }
+
     if (obj instanceof VectorValue)
       return obj.sourceValue ? obj.sourceValue.caption : Utils.formatVectorName(obj.name);
 
@@ -92,6 +103,17 @@ export class Calculation extends UpdatableObject {
 
     if (obj instanceof TextObject)
       return obj.textValue;
+
+    if (obj instanceof TransformRef)
+      obj = obj.sourceValue;
+
+    if (obj instanceof TransformValue) {
+      if (obj.transform) {
+        return obj.transform.name;
+      }
+
+      return obj.name.replace("_", "");
+    }
 
     if (obj instanceof VectorValue) {
       if (obj.sourceValue)
