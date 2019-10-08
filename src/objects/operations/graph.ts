@@ -37,7 +37,7 @@ export class Graph extends Calculation {
 
     this.graphFunctionRef.captionRoot = this.graphFunctionRef.title;
 
-    this._descriptionFormat = `<b>graph {p1}()</b><br/>Graph {p1}({p3}) to {p1}({p4})`;
+    this._descriptionFormat = `<b>graph {func}</b><br/>Graph {funcstart} to {funcend}`;
   }
 
   graphFunction: TransformValue<number>;
@@ -91,6 +91,14 @@ export class Graph extends Calculation {
       points[i] = new Vec(x * scaleX + offsetX, y * scaleY + offsetY, 1);
       x = Math.min(x + step, endX);
     }
+  }
+
+  protected calcDescription() {
+    let format = this.descriptionFormat;
+    format = format.replace(new RegExp(`{func}`, "g"), this.graphFunctionRef.getMathText());
+    format = format.replace(new RegExp(`{funcstart}`, "g"), this.graphFunctionRef.getMathText(this.startX.getMathText()));
+    format = format.replace(new RegExp(`{funcend}`, "g"), this.graphFunctionRef.getMathText(this.endX.getMathText()));
+    return format;
   }
 }
 

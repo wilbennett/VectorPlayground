@@ -240,6 +240,22 @@ export class Value<T> extends BaseObject implements IValue {
     this.emitSettingsChange(this._settingsChangeArgs);
   }
 
+  getMathText(input?: string): string {
+    if (this.sourceValue)
+      input = this.sourceValue.getMathText(input);
+    else {
+      input = this.stripUnicode ? this.removeUnicode(this.caption) : this.caption;
+    }
+
+    if (this.transform)
+      input = this.transform.getMathText(input);
+
+    if (this.modifier)
+      input = this.modifier.getMathText(input);
+
+    return input;
+  }
+
   assignFrom(source: IValue) {
     if (this._isAssigning) return;
 

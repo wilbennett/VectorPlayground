@@ -9,4 +9,6 @@ export class TransformRef<T> extends TransformObject<T> {
   transform(value: Tristate<T>): Tristate<T> {
     return this.sourceValue.transformValue(value);
   }
+
+  getMathText(input?: string) { return this.sourceValue.getMathText(input); }
 }

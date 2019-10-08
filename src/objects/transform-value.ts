@@ -21,6 +21,18 @@ export class TransformValue<T> extends Value<T> {
     return value;
   }
 
+  getMathText(input?: string): string {
+    input = input || "";
+
+    if (this.transform)
+      input = this.transform.getMathText(input);
+
+    if (this.modifier)
+      input = this.modifier.getMathText(input);
+
+    return input;
+  }
+
   // @ts-ignore - unused param.
   protected convertToString(value: Tristate<T>): Tristate<string> { return ""; }
   // @ts-ignore - unused param.

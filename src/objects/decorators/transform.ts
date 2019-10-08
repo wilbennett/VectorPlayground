@@ -7,12 +7,17 @@ const worldAssigned = promisedWorld.then(w => w);
 
 type CalcValue<T> = (v: Tristate<T>) => Tristate<T>;
 
-function transformClass<TValue>(valueType: ValueType, compute: CalcValue<TValue>) {
+function transformClass<TValue>(valueType: ValueType, compute: CalcValue<TValue>, mathFormat?: string, stripUnicode: boolean = false) {
   return function <T extends Constructor<TransformObject<TValue>>>(constructor: T) {
     const descendant: T = class extends constructor {
       // @ts-ignore - unused param.
       constructor(...args: any[]) {
         super(constructor.name, valueType);
+
+        this.stripUnicode = stripUnicode;
+
+        if (mathFormat !== undefined)
+          this._mathFormat = mathFormat;
       }
 
       transform(value: Tristate<TValue>) { return compute(value); }
@@ -22,7 +27,7 @@ function transformClass<TValue>(valueType: ValueType, compute: CalcValue<TValue>
   }
 }
 
-function transformp<TValue>(valueType: ValueType) {
+function transformp<TValue>(valueType: ValueType, mathFormat?: string, stripUnicode: boolean = false) {
   // @ts-ignore - unused param.
   return function <T extends {}>(target: T | Constructor<T>, key: string | symbol, descriptor?: TypedPropertyDescriptor<T>) {
     const constructor = (typeof target === "function" ? target : target.constructor) as Constructor<T>;
@@ -33,6 +38,11 @@ function transformp<TValue>(valueType: ValueType) {
     const descendant = class extends TransformObject<TValue> {
       constructor() {
         super(name, valueType);
+
+        this.stripUnicode = stripUnicode;
+
+        if (mathFormat !== undefined)
+          this._mathFormat = mathFormat;
       }
 
       transform(value: Tristate<TValue>) { return func(value); }
@@ -42,9 +52,12 @@ function transformp<TValue>(valueType: ValueType) {
   }
 }
 
-export function transform<TValue>(valueType: ValueType, compute: CalcValue<TValue>): any;
-export function transform<TValue>(valueType: ValueType): any;
+export function transform<TValue>(valueType: ValueType, compute: CalcValue<TValue>, mathFormat?: string, stripUnicode?: boolean): any;
+export function transform<TValue>(valueType: ValueType, mathFormat?: string, stripUnicode?: boolean): any;
 export function transform<TValue>(...args: any[]): any {
-  // @ts-ignore - rest parameter count.
-  return args.length === 2 ? transformClass<TValue>(...args) : transformp<TValue>(...args);
+  return args.length > 1 && typeof args[1] !== "string"
+    // @ts-ignore - rest parameter count.
+    ? transformClass<TValue>(...args)
+    // @ts-ignore - rest parameter count.
+    : transformp<TValue>(...args);
 }

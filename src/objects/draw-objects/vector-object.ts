@@ -98,6 +98,16 @@ export class VectorObject extends DrawObject {
 
     this.value.captionRoot = "";
     this.value.mode = ValueMode.text;
+    this.x.mathFormat = "{input}.x";
+    this.y.mathFormat = "{input}.y";
+    this.w.mathFormat = "{input}.w";
+    this.angle.mathFormat = "{input} angle";
+    this.mag.mathFormat = "║{input}║";
+    this.lineWidth.mathFormat = "{input} width";
+    this.opacity.mathFormat = "{input} opacity";
+    this.rotateStep.mathFormat = "{input} rotate step";
+    this.textAngle.mathFormat = "{input} text angle";
+    this.textAngleDegrees.mathFormat = "{input} text°";
 
     this.addChildren(
       this.x,

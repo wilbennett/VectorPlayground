@@ -8,6 +8,8 @@ promisedWorld.then(w => world = w);
 
 const { hasValue } = Utils;
 
+export const CHAR_CODE_Z = "z".charCodeAt(0);
+
 // @D.dlogged()
 export class BaseObject implements IDisposable, ICaptioned {
   protected _changeEmitter = new TypedEvent<ChangeArgs>(this);
@@ -103,6 +105,26 @@ export class BaseObject implements IDisposable, ICaptioned {
   protected _valueType = ValueType.string;
   get valueType() { return this._valueType; }
 
+  protected _stripUnicode: boolean = false;
+  get stripUnicode() { return this._stripUnicode; }
+  set stripUnicode(value) { this._stripUnicode = value; }
+
+  protected _mathFormat: string = `{input}`;
+  get mathFormat() { return this._mathFormat; }
+  set mathFormat(value) { this._mathFormat = value; }
+
+  removeUnicode(text: string): string {
+    return text.replace(/\u0305/ug, "");
+    // return text.split("").filter(s => s.charCodeAt(0) <= CHAR_CODE_Z).join("");
+  }
+
+  getMathText(input?: string): string {
+    if (input && this.stripUnicode)
+      input = this.removeUnicode(input);
+
+    return this.mathFormat.replace(/\{input\}/g, input || "");
+  }
+
   //*
   onChanged(listener: Listener<ChangeArgs>, filter?: EventFilter) {
     return this._changeEmitter.on(listener, filter);
@@ -143,7 +165,29 @@ export class BaseObject implements IDisposable, ICaptioned {
   }
   //*/
 
-  protected setOwner(owner: BaseObject) { this._owner = owner; }
+  protected calcOwnerText(owner: BaseObject) {
+    switch (owner.category) {
+      case Category.vectorObject:
+        return `${owner.caption}`;
+      default:
+        return `[${owner.caption}]`;
+    }
+  }
+
+  protected calcCaption() {
+    const owner = this.owner;
+
+    return owner
+      ? `${this.calcOwnerText(owner)}${this.captionRoot && ` ${this.captionRoot}`}`
+      : `${this.captionRoot}`;
+  }
+
+  protected setOwner(owner: BaseObject) {
+    this._owner = owner;
+
+    if (!this._caption)
+      this.caption = this.calcCaption();
+  }
 
   protected addChildren(...children: BaseObject[]) {
     this._children = this._children || [];
@@ -164,9 +208,9 @@ export class BaseObject implements IDisposable, ICaptioned {
   }
 
   // @ts-ignore - unused param.
-  protected captionChanged(caption: string) { }
+  protected ownerCaptionChanged(caption: string) { this.caption = this.calcCaption(); }
   // @ts-ignore - unused param.
-  protected ownerCaptionChanged(caption: string) { }
+  protected captionChanged(caption: string) { }
   // @ts-ignore - unused param.
   protected onChildChanged(e: ChangeArgs) { }
 

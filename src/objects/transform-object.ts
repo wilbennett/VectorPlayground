@@ -9,35 +9,8 @@ export class TransformObject<T> extends BaseObject {
 
     this._valueType = valueType;
     this.isGlobal = false;
+    this._mathFormat = `${this.name}({input})`;
   }
 
   transform(value: Tristate<T>): Tristate<T> { return value; }
-
-  protected calcOwnerText(owner: BaseObject) {
-    switch (owner.category) {
-      case Category.vectorObject:
-        return `${owner.caption}`;
-      default:
-        return `[${owner.caption}]`;
-    }
-  }
-
-  protected calcCaption() {
-    const owner = this.owner;
-
-    return owner
-      ? `${this.calcOwnerText(owner)}${this.captionRoot && ` ${this.captionRoot}`}`
-      : `${this.captionRoot}`;
-  }
-
-  protected setOwner(owner: BaseObject) {
-    super.setOwner(owner);
-
-    if (!this._caption)
-      this.caption = this.calcCaption();
-  }
-
-  protected ownerCaptionChanged() {
-    this.caption = this.calcCaption();
-  }
 }

@@ -67,6 +67,8 @@ export class Calculation extends DrawObject {
   }
 
   protected getDescriptionName(obj: BaseObject) {
+    return obj.getMathText();
+    /*
     if (obj instanceof VectorObject)
       return obj.caption;
 
@@ -85,7 +87,8 @@ export class Calculation extends DrawObject {
     }
 
     if (obj instanceof VectorValue)
-      return obj.sourceValue ? obj.sourceValue.caption : Utils.formatVectorName(obj.name);
+      return obj.getMathText();
+    // return obj.sourceValue ? obj.sourceValue.caption : Utils.formatVectorName(obj.name);
 
     if (!(obj instanceof Value)) return "XXX";
 
@@ -95,6 +98,7 @@ export class Calculation extends DrawObject {
       case ValueMode.text: return obj.sourceValue ? obj.sourceValue.caption : obj.title;
       default: return obj.title;
     }
+    //*/
   }
 
   protected getArgumentName(obj: BaseObject) {
