@@ -19,7 +19,7 @@ export class Ease extends Calculation {
 
     this.start = new NumberValue("start", 0, undefined, undefined, 0.1);
     this.end = new NumberValue("end", 10, undefined, undefined, 0.1);
-    this.duration = new NumberValue("duration", 1, undefined, undefined, 0.1);
+    this.duration = new NumberValue("duration", 1.5, undefined, undefined, 0.1);
     this.cycle = new BoolValue("cycle", false);
     this.easing = new TransformValue("easing", ValueType.number, 0);
     this.easingRef = new TransformRef("easing", this.easing);
@@ -42,7 +42,7 @@ export class Ease extends Calculation {
 
     this.easingRef.captionRoot = this.easingRef.title;
 
-    this._descriptionFormat = `<b>Ease {func}</b><br/>Ease {funcstart} to {funcend} : {func}`;
+    this._descriptionFormat = `<b>Ease: {func}</b><br/>Ease {funcstart} to {funcend} : {func}`;
     this._alwaysDirty = true;
   }
 
