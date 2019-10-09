@@ -1,5 +1,5 @@
 import { BaseObject, DrawObject, TextObject, TransformRef, TransformValue, Value, VectorObject, VectorValue } from '.';
-import { Category, Utils, ValueMode } from '../core';
+import { Category, ChangeArgs, Utils, ValueMode } from '../core';
 
 export class Calculation extends DrawObject {
   protected _alwaysDirty = false;
@@ -161,7 +161,8 @@ export class Calculation extends DrawObject {
     this.descriptionElement.innerHTML = this.description;
   }
 
-  protected onChildChanged() {
+  // @ts-ignore - unused param.
+  protected onChildChanged(e: ChangeArgs) {
     this.dirty();
     this._description = undefined;
     this.updateCaptions();

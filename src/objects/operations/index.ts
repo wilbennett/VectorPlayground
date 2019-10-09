@@ -4,4 +4,5 @@ export * from "./cross";
 export * from "./scale";
 export * from "./rotate";
 export * from "./split";
+export * from "./ease";
 export * from "./graph";
