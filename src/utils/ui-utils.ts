@@ -24,6 +24,7 @@ export class UiUtils {
   }
 
   static hideElement(element: HTMLElement) { element.style.display = "none"; }
+  static isHidden(element: HTMLElement) { return element.style.display === "none"; }
 
   static displayElement(element: HTMLElement, show: any, showStyle: string = "inline") {
     if (show)

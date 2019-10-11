@@ -14,7 +14,7 @@ import {
 } from '../decorators';
 import template from './template.html';
 
-const { showElement, hideElement, displayElement } = UiUtils;
+const { showElement, hideElement, displayElement, isHidden } = UiUtils;
 
 const elTemplate = document.createElement('template');
 elTemplate.innerHTML = template;
@@ -26,6 +26,7 @@ export class ValueSelectElement extends ComponentBase {
   @hookEvent("dblclick", "acceptDialog")
   private _elSelectMode: HTMLSelectElement;
   private _elBackground: HTMLElement;
+  @hookEvent("keydown", "handleKeydown")
   private _elDialog: HTMLElement;
   @hookEvent("click", "acceptDialog")
   // @ts-ignore - decorator implemented.
@@ -350,6 +351,17 @@ export class ValueSelectElement extends ComponentBase {
   private acceptDialog() { this.hideDialog(true); }
   // @ts-ignore - decorator implemented.
   private cancelDialog() { this.hideDialog(false); }
+
+  // @ts-ignore - decorator implemented.
+  private handleKeydown(e: KeyboardEvent) {
+    if (isHidden(this._elBackground)) return;
+
+    if (e.keyCode === 13)
+      return this.acceptDialog();
+
+    if (e.keyCode === 27)
+      return this.cancelDialog();
+  }
 
   private populateSelectMode() {
     const list = this._elSelectMode;
