@@ -224,6 +224,7 @@ export class VectorObject extends DrawObject {
 
   private createLabel() {
     const result = new TextObject(`${this.name}_label`, this.caption);
+    result.caption = "";
     result.captionRoot = "label";
     return result;
   }
