@@ -25,6 +25,7 @@ export class Ease extends Calculation {
     this.easingRef = new TransformRef("easing", this.easing);
     this.random = new BoolValue("random", false);
     this.perCycle = new BoolValue("per_cycle", false);
+    this.easeOnly = new BoolValue("ease_only", true);
     this.result = new NumberValue("result", 0);
     this.percent = new NumberValue("percent", 0);
 
@@ -37,6 +38,7 @@ export class Ease extends Calculation {
       this.easing,
       this.random,
       this.perCycle,
+      this.easeOnly,
       this.result,
       this.percent);
 
@@ -54,6 +56,7 @@ export class Ease extends Calculation {
   cycle: BoolValue;
   random: BoolValue;
   perCycle: BoolValue;
+  easeOnly: BoolValue;
   result: NumberValue;
   percent: NumberValue;
 
@@ -133,9 +136,11 @@ export class Ease extends Calculation {
   protected assignRandomEasing() {
     if (easings.length === 0) return;
 
+    const easeOnly = this.easeOnly.value;
     let easing: TransformObject<number>;
 
     while (easing = easings.items[Utils.randomInt(0, easings.length - 1)]) {
+      if (easeOnly && !easing.name.startsWith("ease_")) continue;
       if (easing.owner !== this) break;
     }
 
