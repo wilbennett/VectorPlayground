@@ -482,26 +482,6 @@ function registerElement(element: ValueSelectElement, property: Value<any>) {
 }
 
 /*********************************************************************************************/
-/* Operations Handling
-/*********************************************************************************************/
-function handleAddCalculationClick() {
-  const selectedOperation = <Operation>ui.elOperations.value;
-
-  if (!selectedOperation) return;
-
-  const calc = selectedOperation.createCalculation();
-  const calcDiv = calc.div;
-  const content = calc.content;
-  addObjects(calc);
-  ui.elCalculations.appendChild(calcDiv);
-  const calcProps = getObjectProps(calc);
-  content.appendChild(calcProps);
-
-  calc.addDisposable(Utils.disposable(() => removeObjects(calc)));
-  calc.addDisposable(Utils.disposable(() => ui.elCalculations.removeChild(calcDiv)));
-}
-
-/*********************************************************************************************/
 /* Animation Loop
 /*********************************************************************************************/
 function animationLoop() {
@@ -572,6 +552,17 @@ function initializeEventHandlers() {
 
   ui.elOperationAdd.addEventListener("click", handleAddCalculationClick);
   ui.elOperations.addEventListener("dblclick", handleAddCalculationClick);
+
+  ui.elVectorAdd.addEventListener("click", handleAddVectorClick);
+  ui.elVectorDelete.addEventListener("click", handleDeleteVectorClick);
+  ui.elVectorName.addEventListener("keyup", handleVectorNameKeyup);
+  ui.elVectors.addEventListener("dblclick", handleDeleteVectorClick);
+
+  ui.elTextAdd.addEventListener("click", handleAddTextClick);
+  ui.elTextDelete.addEventListener("click", handleDeleteTextClick);
+  ui.elTextName.addEventListener("keyup", handleTextNameKeyup);
+  ui.elTexts.addEventListener("dblclick", handleDeleteTextClick);
+
   vectors.onListChanged(handleSelectedVectorChanged);
   textObjects.onListChanged(handleSelectedTextObjectChanged);
   console.log(`world: added event listeners`);
@@ -608,6 +599,84 @@ function createVectorObject(name: string, v: Vec, hidden: boolean = false, origi
   const vo = new VectorObject(name, v, origin);
   vo.isGlobal = !hidden;
   return vo;
+}
+
+/*********************************************************************************************/
+/* UI User Operations
+/*********************************************************************************************/
+function handleAddCalculationClick() {
+  const selectedOperation = <Operation>ui.elOperations.value;
+
+  if (!selectedOperation) return;
+
+  const calc = selectedOperation.createCalculation();
+  const calcDiv = calc.div;
+  const content = calc.content;
+  addObjects(calc);
+  ui.elCalculations.appendChild(calcDiv);
+  const calcProps = getObjectProps(calc);
+  content.appendChild(calcProps);
+
+  calc.addDisposable(Utils.disposable(() => removeObjects(calc)));
+  calc.addDisposable(Utils.disposable(() => ui.elCalculations.removeChild(calcDiv)));
+}
+
+function handleAddVectorClick() {
+  if (!ui.elVectorName.value) return;
+
+  const v = createVectorObject(ui.elVectorName.value, new Vec(0, 0, 0), false);
+  me.addObjects(v);
+}
+
+function handleVectorNameKeyup(e: KeyboardEvent) {
+  if (e.keyCode !== 13) return;
+
+  handleAddVectorClick();
+}
+
+function handleDeleteVectorClick() {
+  const selectedVector = <VectorObject>ui.elVectors.value;
+
+  if (!selectedVector) return;
+  if (selectedVector.isOwned) return;
+
+  let index = ui.elVectors.selectedIndex;
+  selectedVector.dispose();
+
+  if (index >= ui.elVectors.length)
+    index--;
+
+  ui.elVectors.selectedIndex = index;
+  ui.elVectors.filteredList.selectedIndex = ui.elVectors.filteredList.indexOf(ui.elVectors.value);
+}
+
+function handleAddTextClick() {
+  if (!ui.elTextName.value) return;
+
+  const t = new TextObject(ui.elTextName.value, ui.elTextName.value);
+  me.addObjects(t);
+}
+
+function handleTextNameKeyup(e: KeyboardEvent) {
+  if (e.keyCode !== 13) return;
+
+  handleAddTextClick();
+}
+
+function handleDeleteTextClick() {
+  const selectedText = <TextObject>ui.elTexts.value;
+
+  if (!selectedText) return;
+  if (selectedText.isOwned) return;
+
+  let index = ui.elTexts.selectedIndex;
+  selectedText.dispose();
+
+  if (index >= ui.elTexts.length)
+    index--;
+
+  ui.elTexts.selectedIndex = index;
+  ui.elTexts.filteredList.selectedIndex = ui.elTexts.filteredList.indexOf(ui.elTexts.value);
 }
 
 /*********************************************************************************************/
