@@ -108,10 +108,12 @@ export class Ease extends Calculation {
 
     percent.value = currentPct;
     currentPct = easing.transformValue(currentPct)!;
+    const result = start + currentPct * (end - start);
 
-    if (isNaN(currentPct)) return;
+    if (isNaN(result)) return;
+    if (!Number.isFinite(result)) return;
 
-    this.result.value = start + currentPct * (end - start);
+    this.result.value = result;
   }
 
   protected clearCalculatedVariables() {
