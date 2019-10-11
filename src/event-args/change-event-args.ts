@@ -13,7 +13,7 @@ export class ChangeArgs extends EventArgs {
   newValue: any;
   propName: Tristate<string>;
 
-  setValues(oldValue: any, newValue: any, sender?: any, propName?: string) {
+  setValues(oldValue: any, newValue: any, sender?: any, propName?: string | null) {
     this.oldValue = oldValue;
     this.newValue = newValue;
     this.sender = sender;
@@ -31,7 +31,7 @@ export class ChangeEventArgs<T> extends ChangeArgs {
   oldValue: Tristate<T>;
   newValue: Tristate<T>;
 
-  setValues(oldValue: Tristate<T>, newValue: Tristate<T>, sender?: any, propName?: string) {
+  setValues(oldValue: Tristate<T>, newValue: Tristate<T>, sender?: any, propName?: string | null) {
     super.setValues(oldValue, newValue, sender, propName);
   }
 }

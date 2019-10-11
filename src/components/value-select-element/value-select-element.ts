@@ -3,6 +3,7 @@ import { Category, DisplayType, ValueMode, ValueType } from '../../core';
 import { UiUtils } from '../../utils';
 import {
   attribute,
+  autoAttribute,
   boolAttribute,
   child,
   component,
@@ -71,6 +72,8 @@ export class ValueSelectElement extends ComponentBase {
     this._elTransformation.userData = value;
   }
 
+  // @ts-ignore - decorator implemented.
+  @autoAttribute(Category.value) category: Category;
   // @ts-ignore - decorator implemented.
   @numberAttribute(ValueMode.text) mode: ValueMode;
   // @ts-ignore - decorator implemented.
@@ -232,6 +235,11 @@ export class ValueSelectElement extends ComponentBase {
         this._elText.setAttribute(name, newValue);
         break;
 
+      case "category":
+        if (this.isAllConnected)
+          this._elProperty.setAttribute(name, newValue);
+        break;
+
       case "value-type":
       case "allow-owner-as-source":
       case "allowed-value-types":
@@ -245,7 +253,7 @@ export class ValueSelectElement extends ComponentBase {
     super.allConnected();
 
     this._elList.category = Category.list;
-    this._elProperty.category = Category.value;
+    this._elProperty.category = this.category;
     this._elConstant.category = Category.constant;
     this._elTextObject.category = Category.textObject;
     this._elVector.category = Category.vectorObject;

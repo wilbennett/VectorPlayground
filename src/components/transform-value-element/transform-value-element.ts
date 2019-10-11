@@ -114,6 +114,7 @@ export class TransformValueElement extends ComponentBase {
   }
 
   protected allConnected() {
+    this._elSourceValue.category = this.category;
     this._elTransform.category = Category.transform;
     this._elModifier.category = Category.transform;
   }

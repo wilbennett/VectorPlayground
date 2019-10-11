@@ -13,8 +13,11 @@ export const CHAR_CODE_Z = "z".charCodeAt(0);
 // @D.dlogged()
 export class BaseObject implements IDisposable, ICaptioned {
   protected _changeEmitter = new TypedEvent<ChangeArgs>(this);
+  protected _settingsEmitter = new TypedEvent<ChangeArgs>(this);
   private _handleChildChangedBound = this.handleChildChanged.bind(this);
+  private _handleChildSettingsChangedBound = this.handleChildSettingsChanged.bind(this);
   private _changeSubscription?: IDisposable;
+  private _settingsChangeSubscription?: IDisposable;
   private _processingChange = false;
 
   private _disposables?: IDisposable[];
@@ -43,12 +46,19 @@ export class BaseObject implements IDisposable, ICaptioned {
 
   static empty = new BaseObject("__empty__", Category.misc);
   protected static changeEmitter = new TypedEvent<ChangeArgs>({});
+  protected static settingsEmitter = new TypedEvent<ChangeArgs>({});
 
   static onChanged(listener: Listener<ChangeArgs>, filter?: EventFilter) {
     return this.changeEmitter.on(listener, filter);
   }
 
   static offChanged(listener: Listener<ChangeArgs>) { this.changeEmitter.off(listener); }
+
+  static onSettingsChanged(listener: Listener<ChangeArgs>, filter?: EventFilter) {
+    return this.settingsEmitter.on(listener, filter);
+  }
+
+  static offSettingsChanged(listener: Listener<ChangeArgs>) { this.settingsEmitter.off(listener); }
 
   protected _name: string;
   get name() { return this._name; }
@@ -138,11 +148,25 @@ export class BaseObject implements IDisposable, ICaptioned {
 
   offCaptionChanged(listener: Listener<ChangeArgs>) { this._changeEmitter.off(listener); }
 
+  onSettingsChanged(listener: Listener<ChangeArgs>, filter?: EventFilter) {
+    return this._settingsEmitter.on(listener, filter);
+  }
+
+  offSettingsChanged(listener: Listener<ChangeArgs>) { this._settingsEmitter.off(listener); }
+
   // @logEventEmit
   protected emitChange(e: ChangeArgs) {
     e.sender = e.sender || this;
     this._changeEmitter.emit(e);
     BaseObject.changeEmitter.emit(e);
+    e.sender = undefined;
+  }
+
+  // @logEventEmit
+  protected emitSettingsChange(e: ChangeArgs) {
+    e.sender = e.sender || this;
+    this._settingsEmitter.emit(e);
+    BaseObject.settingsEmitter.emit(e);
     e.sender = undefined;
   }
   /*/
@@ -205,6 +229,14 @@ export class BaseObject implements IDisposable, ICaptioned {
 
       this.disposables.push(this._changeSubscription);
     }
+
+    if (!this._settingsChangeSubscription) {
+      this._settingsChangeSubscription = BaseObject.onSettingsChanged(
+        this._handleChildSettingsChangedBound,
+        e => e.sender && e.sender.owner === this);
+
+      this.disposables.push(this._changeSubscription);
+    }
   }
 
   // @ts-ignore - unused param.
@@ -213,6 +245,8 @@ export class BaseObject implements IDisposable, ICaptioned {
   protected captionChanged(caption: string) { }
   // @ts-ignore - unused param.
   protected onChildChanged(e: ChangeArgs) { }
+  // @ts-ignore - unused param.
+  protected onChildSettingsChanged(e: ChangeArgs) { }
 
   protected handleChildChanged(e: ChangeArgs) {
     if (this._processingChange) return;
@@ -220,6 +254,17 @@ export class BaseObject implements IDisposable, ICaptioned {
 
     try {
       this.onChildChanged(e);
+    } finally {
+      this._processingChange = false;
+    }
+  }
+
+  protected handleChildSettingsChanged(e: ChangeArgs) {
+    if (this._processingChange) return;
+    this._processingChange = true;
+
+    try {
+      this.onChildSettingsChanged(e);
     } finally {
       this._processingChange = false;
     }

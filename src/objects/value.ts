@@ -1,15 +1,5 @@
 import { BaseObject, IValue, TransformObject } from '.';
-import {
-  Category,
-  DisplayType,
-  EventFilter,
-  IDisposable,
-  Listener,
-  Tristate,
-  TypedEvent,
-  ValueMode,
-  ValueType,
-} from '../core';
+import { Category, DisplayType, IDisposable, Tristate, ValueMode, ValueType } from '../core';
 import { ChangeArgs, ChangeEventArgs, EventKind } from '../event-args';
 import { Utils } from '../utils';
 
@@ -27,10 +17,12 @@ const { isEmpty, hasValue } = Utils;
 //   exclude: ["propertyName"]
 // })
 export class Value<T> extends BaseObject implements IValue {
-  protected _settingsEmitter = new TypedEvent<ChangeArgs>(this);
   protected _settingsChangeArgs = new ChangeArgs();
-  private _handleSourceChangedBound = this.handleSourceChanged.bind(this);
-  private _sourceSubscription?: IDisposable;
+  private _handleDependentChangedBound = this.handleDependentChanged.bind(this);
+  private _handleDependentSettingsChangedBound = this.handleDependentSettingsChanged.bind(this);
+  private _sourceSubscriptions: IDisposable[] = [];
+  private _transformSubscriptions: IDisposable[] = [];
+  protected _isEmitting = false;
   protected _isAssigning = false;
   protected _isEmittingSetting = false;
 
@@ -224,7 +216,7 @@ export class Value<T> extends BaseObject implements IValue {
     if (value === this._transform) return;
 
     this._settingsChangeArgs.setValues(this._transform, value, this, "transform");
-    this._transform = value;
+    this.setTransform(value);
     this.calcValue();
     this.emitSettingsChange(this._settingsChangeArgs);
   }
@@ -247,11 +239,12 @@ export class Value<T> extends BaseObject implements IValue {
       input = this.stripUnicode ? this.removeUnicode(this.caption) : this.caption;
     }
 
-    if (this.transform)
+    if (this.transform) {
       input = this.transform.getMathText(input);
 
-    if (this.modifier)
-      input = this.modifier.getMathText(input);
+      if (this.modifier)
+        input = this.modifier.getMathText(input);
+    }
 
     return input;
   }
@@ -303,6 +296,7 @@ export class Value<T> extends BaseObject implements IValue {
         this.calcValue();
       // else D.logd(`${this.propertyName}: NOT EMPTY: ${this._value}`);
 
+      target.category = this.category;
       target.mode = this.mode;
       target.displayType = this.displayType;
       target.allowedModes = this.allowedModes;
@@ -329,6 +323,13 @@ export class Value<T> extends BaseObject implements IValue {
 
     this.emitChange(this._valueChangeArgs);
     this.emitSettingsChange(this._settingsChangeArgs);
+  }
+
+  isCircularTransform(path: BaseObject[]) {
+    if (path.indexOf(this) >= 0) return true;
+
+    path.push(this);
+    return this.transform ? this.transform.isCircularTransform(path) : false;
   }
 
   protected calcOwnerText(owner: BaseObject) {
@@ -363,13 +364,15 @@ export class Value<T> extends BaseObject implements IValue {
   protected emitChange(e: ChangeArgs) {
     if (this._isAssigning) return;
     if (!e.sender) return;
+    if (this._isEmitting) return;
 
-    super.emitChange(e);
-  }
+    this._isEmitting = true;
 
-  protected emitSettingsChangeCore(e: ChangeArgs) {
-    this._settingsEmitter.emit(e);
-    e.sender = undefined;
+    try {
+      super.emitChange(e);
+    } finally {
+      this._isEmitting = false;
+    }
   }
 
   protected emitSettingsChange(e: ChangeArgs) {
@@ -380,17 +383,11 @@ export class Value<T> extends BaseObject implements IValue {
     this._isEmittingSetting = true;
 
     try {
-      this.emitSettingsChangeCore(e);
+      super.emitSettingsChange(e);
     } finally {
       this._isEmittingSetting = false;
     }
   }
-
-  onSettingsChanged(listener: Listener<ChangeArgs>, filter?: EventFilter) {
-    return this._settingsEmitter.on(listener, filter);
-  }
-
-  offSettingsChanged(listener: Listener<ChangeArgs>) { this._settingsEmitter.off(listener); }
 
   protected convertToString(value: Tristate<T>): Tristate<string> { return "" + value; }
   // @ts-ignore - unused param.
@@ -410,15 +407,31 @@ export class Value<T> extends BaseObject implements IValue {
   }
 
   protected setSourceValue(value?: Value<T>) {
-    this._sourceSubscription && this._sourceSubscription.dispose();
-    this._sourceSubscription = undefined;
+    this._sourceSubscriptions.forEach(sub => sub.dispose());
+    this._sourceSubscriptions = [];
     this._sourceValue = value;
 
     if (!value) return;
 
-    this._sourceSubscription = value.onChanged(
-      this._handleSourceChangedBound,
-      e => e instanceof ChangeEventArgs && e.kind == EventKind.value);
+    this._sourceSubscriptions.push(value.onChanged(
+      this._handleDependentChangedBound,
+      e => e instanceof ChangeEventArgs && e.kind == EventKind.value));
+
+    this._sourceSubscriptions.push(value.onSettingsChanged(
+      this._handleDependentSettingsChangedBound,
+      e => e instanceof ChangeArgs));
+  }
+
+  protected setTransform(value?: TransformObject<T>) {
+    this._transformSubscriptions.forEach(sub => sub.dispose());
+    this._transformSubscriptions = [];
+    this._transform = value;
+
+    if (!value) return;
+
+    this._transformSubscriptions.push(value.onSettingsChanged(
+      this._handleDependentSettingsChangedBound,
+      e => e instanceof ChangeArgs));
   }
 
   protected setValue(value: Tristate<T>) {
@@ -492,11 +505,20 @@ export class Value<T> extends BaseObject implements IValue {
     this.setValue(result);
   }
 
-  protected handleSourceChanged(args: ChangeArgs) {
+  protected handleDependentChanged(args: ChangeArgs) {
+    if (this._isEmitting) return;
+
     const e = args as ChangeEventArgs<T>;
 
     if (!(e instanceof ChangeEventArgs)) return;
 
     this.calcValue();
+  }
+
+  protected handleDependentSettingsChanged(e: ChangeArgs) {
+    if (this._isEmitting) return;
+
+    this._settingsChangeArgs.setValues(e.oldValue, e.newValue, this, e.propName);
+    this.emitSettingsChange(this._settingsChangeArgs);
   }
 }

@@ -1,5 +1,5 @@
 import { Calculation, ColorValue, NumberValue, Operation, TransformRef, TransformValue } from '..';
-import { IWorld, promisedWorld, ValueType, Vec } from '../../core';
+import { ChangeArgs, IWorld, promisedWorld, ValueMode, ValueType, Vec } from '../../core';
 
 let world!: IWorld;
 const worldAssigned = promisedWorld.then(w => world = w);
@@ -34,6 +34,8 @@ export class Graph extends Calculation {
       this.offsetY,
       this.color,
       this.thickness);
+
+    this.graphFunction.allowedModes = this.graphFunction.allowedModes | ValueMode.property;
 
     this.graphFunctionRef.captionRoot = this.graphFunctionRef.title;
 
@@ -72,11 +74,12 @@ export class Graph extends Calculation {
   }
 
   protected updateCore() {
-    if (!this.graphFunction.transform) return;
+    if (!this.graphFunction.sourceValue && !this.graphFunction.transform) return;
 
     const count = Math.floor((this.endX.value - this.startX.value) / this.step.value + 1);
 
     this._points = new Array<Vec>(count);
+
     const points = this._points;
     const endX = this.endX.value;
     const scaleX = this.scaleX.value;
@@ -93,9 +96,15 @@ export class Graph extends Calculation {
     }
   }
 
+  protected onChildSettingsChanged(e: ChangeArgs) {
+    if (e.sender !== this.graphFunction) return;
+
+    super.onChildChanged(e);
+  }
+
   protected calcDescription() {
     let format = this.descriptionFormat;
-    format = format.replace(new RegExp(`{func}`, "g"), this.graphFunctionRef.getMathText());
+    format = format.replace(new RegExp(`{func}`, "g"), this.graphFunctionRef.getMathText("x"));
     format = format.replace(new RegExp(`{funcstart}`, "g"), this.graphFunctionRef.getMathText(this.startX.getMathText()));
     format = format.replace(new RegExp(`{funcend}`, "g"), this.graphFunctionRef.getMathText(this.endX.getMathText()));
     return format;

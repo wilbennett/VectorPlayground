@@ -392,6 +392,7 @@ function addPropertyElements(elements: HTMLElement[], property: Value<any>, useT
     if (!registered) {
       select.path = property.propertyName;
       //assignValueToElement();
+      select.category = property.category;
       select.mode = property.mode;
       select.allowedModes = property.allowedModes;
       select.allowedValueTypes = property.allowedValueTypes;
