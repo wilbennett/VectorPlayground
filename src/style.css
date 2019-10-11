@@ -250,6 +250,10 @@
     overflow-y: scroll;
   }
 
+  .calculations {
+    max-width: 500px;
+  }
+
   .inputlbl {
     text-align: right;
   }
