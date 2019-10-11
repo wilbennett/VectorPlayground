@@ -10,9 +10,13 @@ worldAssigned.then(world => {
 });
 
 export class Ease extends Calculation {
+  private _assigningRandom = false;
   private _currentPct: number = NaN;
   private _direction = NaN;
   private _step = NaN;
+  private _stepCount = 0;
+  private _remainSteps = 0;
+  private _cyclesRemain = Infinity;
 
   constructor() {
     super(Ease.name);
@@ -26,6 +30,7 @@ export class Ease extends Calculation {
     this.random = new BoolValue("random", false);
     this.perCycle = new BoolValue("per_cycle", false);
     this.easeOnly = new BoolValue("ease_only", true);
+    this.repeat = new NumberValue("repeat", -1, -1, Infinity, 1);
     this.result = new NumberValue("result", 0);
     this.percent = new NumberValue("percent", 0);
 
@@ -39,6 +44,7 @@ export class Ease extends Calculation {
       this.random,
       this.perCycle,
       this.easeOnly,
+      this.repeat,
       this.result,
       this.percent);
 
@@ -57,13 +63,13 @@ export class Ease extends Calculation {
   random: BoolValue;
   perCycle: BoolValue;
   easeOnly: BoolValue;
+  repeat: NumberValue;
   result: NumberValue;
   percent: NumberValue;
 
   protected updateCore() {
     const start = this.start.value;
     const end = this.end.value;
-    const percent = this.percent;
     const easing = this.easing;
     let step = this._step;
 
@@ -81,37 +87,56 @@ export class Ease extends Calculation {
 
       if (isNaN(duration)) return;
 
-      this._step = 1 / 60 / duration;
+      this._step = 1 / 60 / (duration / (this.cycle.value ? 2 : 1));
+      this._stepCount = Math.round(1 / this._step) + 1;
+      this._remainSteps = this._stepCount;
       step = this._step;
       this._currentPct = -step;
       this._direction = 1;
-    }
-
-    let currentPct = this._currentPct + step * this._direction;
-
-    if (this.cycle.value) {
-      if (currentPct < 0 || currentPct > 1) {
-        this._direction = -this._direction;
-        currentPct += step * this._direction;
-
-        if (this.random.value && (this._direction == 1 || !this.perCycle.value))
-          this.assignRandomEasing();
-      }
+      this._cyclesRemain = this.repeat.value < 0 ? Infinity : this.repeat.value + 1;
     } else {
-      if (currentPct < 0 || currentPct > 1) {
-        this._direction = 1;
-        currentPct = 0;
+      if (this.cycle.value) {
+        if (this._remainSteps <= 0) {
+          this._currentPct += step * this._direction;
+          this._direction = -this._direction;
+          this._remainSteps = this._stepCount;
 
-        if (this.random.value)
-          this.assignRandomEasing();
+          if (this._direction === 1)
+            this._cyclesRemain--;
+
+          if (this.random.value && (this._direction == 1 || !this.perCycle.value))
+            this.assignRandomEasing();
+        }
+      } else {
+        if (this._remainSteps <= 0) {
+          this._direction = 1;
+          this._currentPct = -step;
+          this._cyclesRemain--;
+          this._remainSteps = this._stepCount;
+
+          if (this.random.value)
+            this.assignRandomEasing();
+        }
       }
     }
 
-    this._currentPct = currentPct;
+    if (this._cyclesRemain <= 0) return;
 
-    percent.value = currentPct;
-    currentPct = easing.transformValue(currentPct)!;
-    const result = start + currentPct * (end - start);
+    this._remainSteps--;
+    let percent: number;
+
+    if (this._remainSteps === 0) {
+      percent = this._direction > 0 ? 1 : 0;
+    } else {
+      percent = this._currentPct + step * this._direction;
+    }
+
+    this._currentPct = percent;
+    percent = Math.min(1, Math.max(0, percent));
+
+    this.percent.value = percent * 100;
+    percent = easing.transformValue(percent)!;
+    const result = start + percent * (end - start);
 
     if (isNaN(result)) return;
     if (!Number.isFinite(result)) return;
@@ -129,6 +154,7 @@ export class Ease extends Calculation {
 
     if (e.sender === this.result) return;
     if (e.sender === this.percent) return;
+    if (this._assigningRandom) return;
 
     this.clearCalculatedVariables();
   }
@@ -144,7 +170,13 @@ export class Ease extends Calculation {
       if (easing.owner !== this) break;
     }
 
-    this.easing.transform = easing;
+    this._assigningRandom = true;
+
+    try {
+      this.easing.transform = easing;
+    } finally {
+      this._assigningRandom = false;
+    }
   }
 
   protected calcDescription() {
