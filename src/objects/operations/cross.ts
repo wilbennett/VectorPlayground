@@ -16,8 +16,8 @@ export class Cross extends Calculation {
     this.result.readOnlyText = true;
     this.addResultProps(this.result);
 
-    this._descriptionFormat = "<b>{p1} ꭖ {p2}</b><br/>{p1}.x * {p2}.x + {p1}.y * {p2}.y";
-    this.addCaptionFormat(this.result, "{p1} ꭖ {p2}");
+    this._descriptionFormat = "<b>{p1} X {p2}</b><br/>{p1}.x * {p2}.y - {p1}.y * {p2}.x";
+    this.addCaptionFormat(this.result, "{p1} X {p2}");
   }
 
   vector1: VectorValue;
@@ -28,7 +28,7 @@ export class Cross extends Calculation {
     if (!this.vector1.sourceValue) return;
     if (!this.vector2.sourceValue) return;
 
-    this.result.value = this.vector1.value.dot(this.vector2.value);
+    this.result.value = this.vector1.value.cross(this.vector2.value);
   }
 }
 
