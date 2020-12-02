@@ -358,7 +358,8 @@ export class VectorObject extends DrawObject {
 
     if (vector.isPoint) {
       const result = vector.clone();
-      result.y -= result.normalize().magnitude * 0.6;
+      //result.y -= result.normalize().magnitude * 0.6;
+      //result.withX(result.x + this.lineWidth.value * 1);
       return result;
     }
 
