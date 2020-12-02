@@ -42,6 +42,16 @@ export class Calc2Vec extends Calculation {
     if (!this.vector1.sourceValue) return;
     if (!this.vector2.sourceValue) return;
 
-    this.result.value.value = this.calc(this.vector1.value, this.vector2.value);
+    let value = this.calc(this.vector1.value, this.vector2.value);
+
+    if (this.resultValue.transform) {
+      value = this.resultValue.transform.transform(value) || value;
+
+      if (this.resultValue.modifier) {
+        value = this.resultValue.modifier.transform(value) || value;
+      }
+    }
+
+    this.result.value.value = value;
   }
 }
