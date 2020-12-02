@@ -23,13 +23,14 @@ export class Vec {
   }
 
   cartesianO(result: Vec) {
-    return this.isScaled ? result.withXYW(this.x / this.w, this.y / this.w, 1) : this.cloneO(result);
+    return this.isScaled ? result.withXYW(this.x / this.w, this.y / this.w, 1) : this.withWO(result, 1);
   }
   cartesianN() { return this.cartesianO(new Vec()); }
   cartesian() { return this.cartesianO(this); }
 
   directionO(result: Vec) {
-    let res = this.isScaled ? this.cartesianO(result) : this.cloneO(result);
+    // let res = this.isScaled ? this.cartesianO(result) : this.cloneO(result);
+    let res = this.cloneO(result);
     return res.withW(0);
   }
   directionN() { return this.directionO(new Vec()); }
