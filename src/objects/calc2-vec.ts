@@ -45,10 +45,10 @@ export class Calc2Vec extends Calculation {
     let value = this.calc(this.vector1.value, this.vector2.value);
 
     if (this.resultValue.transform) {
-      value = this.resultValue.transform.transform(value) || value;
+      value = this.resultValue.transform.transform(value) ?? value;
 
       if (this.resultValue.modifier) {
-        value = this.resultValue.modifier.transform(value) || value;
+        value = this.resultValue.modifier.transform(value) ?? value;
       }
     }
 
